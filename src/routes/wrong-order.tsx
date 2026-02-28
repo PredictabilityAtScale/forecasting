@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState, useMemo } from 'react'
 import { computeWrongOrder } from '#/lib/wrong-order-meter'
+import StatCard from '#/components/StatCard'
 
 export const Route = createFileRoute('/wrong-order')({
   component: WrongOrderMeterPage,
@@ -325,18 +326,6 @@ function WrongOrderMeterPage() {
 
 /* ── Sub-components ──────────────────────────────────────────────────────── */
 
-function StatCard({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="rounded-xl border border-[var(--line)] bg-[var(--surface)] p-3 text-center">
-      <p className="m-0 text-lg font-bold tabular-nums text-[var(--sea-ink)]">
-        {value}
-      </p>
-      <p className="m-0 text-[10px] font-semibold uppercase tracking-wider text-[var(--sea-ink-soft)]">
-        {label}
-      </p>
-    </div>
-  )
-}
 
 /* ── Speedometer Gauge (SVG) ─────────────────────────────────────────────── */
 

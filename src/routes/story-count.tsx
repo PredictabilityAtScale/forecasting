@@ -117,7 +117,7 @@ function StoryCountForecasterPage() {
       : null
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+    <main className="mx-auto max-w-7xl px-4 pb-12 pt-8 sm:px-6 lg:px-8">
       <section className="rise-in mb-10">
         <h1 className="display-title text-3xl font-bold tracking-tight text-[var(--sea-ink)] sm:text-4xl">
           Story Count Forecaster
@@ -506,7 +506,7 @@ function StoryCountForecasterPage() {
           </section>
         </>
       )}
-    </div>
+    </main>
   )
 }
 

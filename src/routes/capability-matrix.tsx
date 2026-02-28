@@ -131,7 +131,7 @@ function CapabilityMatrixPage() {
             {people.map((p, i) => (
               <div key={i} className="flex items-center gap-1">
                 <input
-                  className="w-32 rounded-lg border border-[var(--line)] bg-[var(--bg-base)] px-2 py-1 text-sm text-[var(--sea-ink)] outline-none focus:border-[var(--lagoon)]"
+                  className="field-input w-32"
                   value={p}
                   onChange={(e) => renamePerson(i, e.target.value)}
                 />
@@ -161,16 +161,22 @@ function CapabilityMatrixPage() {
             Skills / Technology Expertise
           </h2>
           <div className="space-y-2">
+            <div className="hidden items-center gap-2 text-[10px] font-semibold uppercase tracking-wider text-[var(--sea-ink-soft)] sm:flex">
+              <span className="flex-[3]">Skill</span>
+              <span className="flex-[2]">Future Need</span>
+              <span className="w-20">Onboarding</span>
+              <span className="w-6" />
+            </div>
             {skills.map((sk, si) => (
-              <div key={si} className="flex flex-wrap items-center gap-2">
+              <div key={si} className="flex items-center gap-2">
                 <input
-                  className="w-44 rounded-lg border border-[var(--line)] bg-[var(--bg-base)] px-2 py-1 text-sm text-[var(--sea-ink)] outline-none focus:border-[var(--lagoon)]"
+                  className="field-input min-w-0 flex-[3]"
                   value={sk.name}
                   onChange={(e) => updateSkill(si, { name: e.target.value })}
                   placeholder="Skill name"
                 />
                 <select
-                  className="rounded-lg border border-[var(--line)] bg-[var(--bg-base)] px-2 py-1 text-xs text-[var(--sea-ink)] outline-none focus:border-[var(--lagoon)]"
+                  className="field-input min-w-0 flex-[2] text-xs"
                   value={sk.futureNeed}
                   onChange={(e) =>
                     updateSkill(si, {
@@ -184,12 +190,12 @@ function CapabilityMatrixPage() {
                     </option>
                   ))}
                 </select>
-                <div className="flex items-center gap-1">
+                <div className="flex shrink-0 items-center gap-1">
                   <input
                     type="number"
                     min={0}
                     step={0.5}
-                    className="w-16 rounded-lg border border-[var(--line)] bg-[var(--bg-base)] px-2 py-1 text-xs text-[var(--sea-ink)] outline-none focus:border-[var(--lagoon)]"
+                    className="field-input w-16 text-xs"
                     value={sk.trainingLeadMonths}
                     onChange={(e) =>
                       updateSkill(si, {
@@ -198,13 +204,13 @@ function CapabilityMatrixPage() {
                     }
                   />
                   <span className="text-[10px] text-[var(--sea-ink-soft)]">
-                    mo. lead
+                    mo.
                   </span>
                 </div>
                 <button
                   type="button"
                   onClick={() => removeSkill(si)}
-                  className="text-[var(--sea-ink-soft)] transition hover:text-red-500"
+                  className="shrink-0 text-[var(--sea-ink-soft)] transition hover:text-red-500"
                   title="Remove skill"
                 >
                   <XIcon />

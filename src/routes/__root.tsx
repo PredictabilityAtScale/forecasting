@@ -5,6 +5,7 @@ import {
 } from '@tanstack/react-router'
 import Footer from '../components/Footer'
 import Header from '../components/Header'
+import { SITE_TITLE, SITE_DESCRIPTION } from '../lib/site'
 
 import appCss from '../styles.css?url'
 
@@ -27,12 +28,11 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'Focused Objective — Forecasting Tools',
+        title: SITE_TITLE,
       },
       {
         name: 'description',
-        content:
-          'Monte Carlo forecasting tools for agile teams. Predict throughput, multi-feature cut lines, and story counts with confidence.',
+        content: SITE_DESCRIPTION,
       },
     ],
     links: [

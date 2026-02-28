@@ -2,6 +2,8 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { runThroughputForecaster } from '#/lib/monte-carlo'
 import type { ThroughputForecasterInputs, ThroughputForecasterResults } from '#/lib/monte-carlo'
+import Field from '#/components/Field'
+import NumberInput from '#/components/NumberInput'
 
 export const Route = createFileRoute('/throughput')({
   component: ThroughputForecasterPage,
@@ -575,57 +577,6 @@ function ThroughputForecasterPage() {
 }
 
 /* ── Reusable sub-components ──────────────────────────────────────────────── */
-
-function Field({
-  label,
-  inline,
-  children,
-}: {
-  label: string
-  inline?: boolean
-  children: React.ReactNode
-}) {
-  return (
-    <label
-      className={
-        inline
-          ? 'inline-flex flex-col gap-1'
-          : 'flex flex-col gap-1'
-      }
-    >
-      <span className="text-xs font-medium text-[var(--sea-ink-soft)]">
-        {label}
-      </span>
-      {children}
-    </label>
-  )
-}
-
-function NumberInput({
-  value,
-  onChange,
-  min,
-  max,
-  step,
-}: {
-  value: number
-  onChange: (v: number) => void
-  min?: number
-  max?: number
-  step?: number
-}) {
-  return (
-    <input
-      type="number"
-      className="field-input w-24"
-      value={value}
-      min={min}
-      max={max}
-      step={step ?? 1}
-      onChange={(e) => onChange(Number(e.target.value))}
-    />
-  )
-}
 
 function Histogram({
   data,

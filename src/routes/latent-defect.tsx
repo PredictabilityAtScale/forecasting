@@ -4,6 +4,7 @@ import {
   computeLatentDefects,
   type Defect,
 } from '#/lib/latent-defect'
+import StatCard from '#/components/StatCard'
 
 export const Route = createFileRoute('/latent-defect')({
   component: LatentDefectPage,
@@ -123,7 +124,7 @@ function LatentDefectPage() {
                 >
                   <td className="px-3 py-1.5">
                     <input
-                      className="w-full rounded-lg border border-[var(--line)] bg-[var(--bg-base)] px-2 py-1 text-sm text-[var(--sea-ink)] outline-none focus:border-[var(--lagoon)]"
+                      className="field-input w-full"
                       value={d.name}
                       onChange={(e) =>
                         updateDefect(idx, { name: e.target.value })
@@ -132,7 +133,7 @@ function LatentDefectPage() {
                   </td>
                   <td className="px-3 py-1.5">
                     <input
-                      className="w-full rounded-lg border border-[var(--line)] bg-[var(--bg-base)] px-2 py-1 text-sm text-[var(--sea-ink)] outline-none focus:border-[var(--lagoon)]"
+                      className="field-input w-full"
                       value={d.severity}
                       onChange={(e) =>
                         updateDefect(idx, { severity: e.target.value })
@@ -409,19 +410,6 @@ function LatentDefectPage() {
 }
 
 /* ── Sub-components ──────────────────────────────────────────────────── */
-
-function StatCard({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="rounded-xl border border-[var(--line)] bg-[var(--surface)] p-3 text-center">
-      <p className="m-0 text-lg font-bold tabular-nums text-[var(--sea-ink)]">
-        {value}
-      </p>
-      <p className="m-0 text-[10px] font-semibold uppercase tracking-wider text-[var(--sea-ink-soft)]">
-        {label}
-      </p>
-    </div>
-  )
-}
 
 function BucketBadge({ bucket }: { bucket: string }) {
   const styles: Record<string, string> = {

@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
+import { TRAINING_URL } from '#/lib/site'
 
 export const Route = createFileRoute('/')({ component: App })
 
@@ -32,6 +33,14 @@ function App() {
             >
               Get Started
             </Link>
+            <a
+              href={TRAINING_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-full border border-[var(--line)] bg-[var(--surface)] px-6 py-2.5 text-sm font-semibold text-[var(--sea-ink)] no-underline transition hover:-translate-y-0.5 hover:bg-[var(--surface-strong)]"
+            >
+              Training on Forecasting &amp; Metrics ↗
+            </a>
           </div>
         </div>
       </section>
@@ -162,6 +171,40 @@ function App() {
               All simulations run client-side. Your data never leaves
               your machine.
             </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Training CTA */}
+      <section className="island-shell mt-10 rounded-2xl p-6 sm:p-8">
+        <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start sm:gap-8">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-[var(--line)] bg-[var(--surface-strong)]">
+            <svg className="h-7 w-7 text-[var(--lagoon)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+              <path d="M6 12v5c0 1.66 2.69 3 6 3s6-1.34 6-3v-5" />
+            </svg>
+          </div>
+          <div className="flex-1 text-center sm:text-left">
+            <p className="island-kicker mb-2">Level Up Your Team</p>
+            <h2 className="mb-2 text-xl font-bold text-[var(--sea-ink)] sm:text-2xl">
+              Training on Forecasting &amp; Metrics
+            </h2>
+            <p className="mb-4 max-w-xl text-sm leading-relaxed text-[var(--sea-ink-soft)]">
+              Learn how to apply Monte Carlo simulation, flow metrics, and
+              probabilistic forecasting in your organisation. Workshops and
+              coaching from the team behind these tools.
+            </p>
+            <a
+              href={TRAINING_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-full border border-[rgba(50,143,151,0.3)] bg-[rgba(79,184,178,0.14)] px-6 py-2.5 text-sm font-semibold text-[var(--lagoon-deep)] no-underline transition hover:-translate-y-0.5 hover:bg-[rgba(79,184,178,0.24)]"
+            >
+              Visit focusedobjective.com
+              <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M4.5 2a.5.5 0 0 0 0 1h6.793L2.146 12.146a.5.5 0 0 0 .708.708L12 3.707V10.5a.5.5 0 0 0 1 0v-9a.5.5 0 0 0-.5-.5h-8Z" />
+              </svg>
+            </a>
           </div>
         </div>
       </section>
