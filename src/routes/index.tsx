@@ -27,7 +27,7 @@ function App() {
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link
-              to="/forecaster/throughput"
+              to="/throughput"
               className="rounded-full border border-[rgba(50,143,151,0.3)] bg-[rgba(79,184,178,0.14)] px-6 py-2.5 text-sm font-semibold text-[var(--lagoon-deep)] no-underline transition hover:-translate-y-0.5 hover:bg-[rgba(79,184,178,0.24)]"
             >
               Get Started
@@ -41,7 +41,7 @@ function App() {
         <ToolCard
           title="Throughput Forecaster"
           description="Given historical throughput data, forecast how many items a team can deliver in a time window — with percentile-based confidence levels."
-          href="/forecaster/throughput"
+          href="/throughput"
           delay={0}
           icon={
             <svg className="h-7 w-7 text-[var(--lagoon)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -53,7 +53,7 @@ function App() {
         <ToolCard
           title="Multi-Feature Cut Line"
           description="Prioritize a backlog of features and see which ones are likely to ship by a target date, with a clear probabilistic cut line."
-          href="/forecaster/multi-feature"
+          href="/multi-feature"
           delay={90}
           icon={
             <svg className="h-7 w-7 text-[var(--lagoon)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -67,13 +67,66 @@ function App() {
         <ToolCard
           title="Story Count Forecaster"
           description="Estimate total story count from a partially-estimated backlog using reference-class forecasting and Monte Carlo simulation."
-          href="/forecaster/story-count"
+          href="/story-count"
           delay={180}
           icon={
             <svg className="h-7 w-7 text-[var(--lagoon)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
               <rect x="9" y="3" width="6" height="4" rx="1" />
               <path d="M9 14l2 2 4-4" />
+            </svg>
+          }
+        />
+        <ToolCard
+          title="Wrong Order-O-Meter"
+          description="Measure how far actual delivery order diverged from the plan. Accounts for re-ordering, unplanned work, and undelivered items."
+          href="/wrong-order"
+          delay={270}
+          icon={
+            <svg className="h-7 w-7 text-[var(--lagoon)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 6v6l4 2" />
+            </svg>
+          }
+        />
+        <ToolCard
+          title="Latent Defect Estimation"
+          description="Estimate how many defects remain undiscovered using the Lincoln-Petersen capture-recapture method with two independent test groups."
+          href="/latent-defect"
+          delay={360}
+          icon={
+            <svg className="h-7 w-7 text-[var(--lagoon)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2" />
+              <path d="M12 8v4" />
+              <circle cx="12" cy="16" r="0.5" fill="currentColor" />
+            </svg>
+          }
+        />
+        <ToolCard
+          title="Capability Matrix"
+          description="Assess your team's skill levels across technologies, identify capability gaps, risk areas, and plan training investments with urgency matrices."
+          href="/capability-matrix"
+          delay={450}
+          icon={
+            <svg className="h-7 w-7 text-[var(--lagoon)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="7" height="7" rx="1" />
+              <rect x="14" y="3" width="7" height="7" rx="1" />
+              <rect x="3" y="14" width="7" height="7" rx="1" />
+              <rect x="14" y="14" width="7" height="7" rx="1" />
+            </svg>
+          }
+        />
+        <ToolCard
+          title="Team Dashboard"
+          description="Visualize flow metrics across six dimensions: throughput, cycle time, WIP, defect rate, cumulative flow, and predictability."
+          href="/team-dashboard"
+          delay={540}
+          icon={
+            <svg className="h-7 w-7 text-[var(--lagoon)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <path d="M3 9h18" />
+              <path d="M9 21V9" />
+              <path d="M13 15l2-2 2 2" />
             </svg>
           }
         />

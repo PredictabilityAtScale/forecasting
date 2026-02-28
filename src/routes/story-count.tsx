@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { runStoryCountForecaster } from '#/lib/monte-carlo'
 import type {
   FeatureEstimate,
@@ -7,7 +7,7 @@ import type {
   StoryCountResults,
 } from '#/lib/monte-carlo'
 
-export const Route = createFileRoute('/forecaster/story-count')({
+export const Route = createFileRoute('/story-count')({
   component: StoryCountForecasterPage,
 })
 
@@ -54,7 +54,32 @@ function StoryCountForecasterPage() {
     totalFeatureCount < 1 ? 'Must forecast at least 1 feature.' : ''
   const canRun = !splitError && !estimateError && !featureCountError
 
-  // ── Feature table handlers ────────────────────────────────────────────
+  /* ── Auto-run simulation on input change ───────────────────── */
+  useEffect(() => {
+    if (!canRun) {
+      setResults(null)
+      return
+    }
+    setRunning(true)
+    const timer = setTimeout(() => {
+      requestAnimationFrame(() => {
+        const input: StoryCountInputs = {
+          totalFeatureCount,
+          splitRateLow: splitLow,
+          splitRateHigh: splitHigh,
+          features,
+          numTrials,
+        }
+        const res = runStoryCountForecaster(input)
+        setResults(res)
+        setRunning(false)
+      })
+    }, 300)
+    return () => clearTimeout(timer)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canRun, totalFeatureCount, splitLow, splitHigh, features, numTrials])
+
+  // ── Feature table handlers ────────────────────────────────────────
   const updateFeature = useCallback(
     (idx: number, patch: Partial<FeatureEstimate>) => {
       setFeatures((prev) =>
@@ -75,25 +100,6 @@ function StoryCountForecasterPage() {
   const removeRow = useCallback((idx: number) => {
     setFeatures((prev) => prev.filter((_, i) => i !== idx))
   }, [])
-
-  // ── Run simulation ────────────────────────────────────────────────────
-  const run = useCallback(() => {
-    if (!canRun) return
-    setRunning(true)
-    // Defer to allow UI to update
-    requestAnimationFrame(() => {
-      const input: StoryCountInputs = {
-        totalFeatureCount,
-        splitRateLow: splitLow,
-        splitRateHigh: splitHigh,
-        features,
-        numTrials,
-      }
-      const res = runStoryCountForecaster(input)
-      setResults(res)
-      setRunning(false)
-    })
-  }, [canRun, totalFeatureCount, splitLow, splitHigh, features, numTrials])
 
   // ── Actual split range from data ──────────────────────────────────────
   const splitRates = features
@@ -327,19 +333,25 @@ function StoryCountForecasterPage() {
         </p>
       </section>
 
-      {/* ── Run button ───────────────────────────────────────────────── */}
-      <div className="mb-10 flex items-center gap-4">
-        <button
-          disabled={!canRun || running}
-          onClick={run}
-          className="rounded-xl bg-[var(--lagoon-deep)] px-6 py-2.5 text-sm font-bold text-white shadow-md transition hover:brightness-110 disabled:opacity-40"
-        >
-          {running ? 'Simulating…' : 'Run Simulation'}
-        </button>
-        {estimateError && (
-          <span className="text-xs text-red-600">{estimateError}</span>
-        )}
-      </div>
+      {/* ── Status ─────────────────────────────────────────────────────── */}
+      {!canRun && (
+        <div className="mb-10 flex items-center gap-3 rounded-2xl border-2 border-dashed border-amber-400/50 bg-amber-50/60 p-4 dark:border-amber-500/30 dark:bg-amber-950/30">
+          <svg className="h-5 w-5 flex-shrink-0 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+            <line x1="12" y1="9" x2="12" y2="13" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+          </svg>
+          <div>
+            <p className="text-sm font-semibold text-amber-800 dark:text-amber-200">Missing required inputs</p>
+            <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">
+              {estimateError || splitError || featureCountError}
+            </p>
+          </div>
+        </div>
+      )}
+      {running && (
+        <p className="mb-10 text-sm font-medium text-[var(--lagoon-deep)] animate-pulse">Simulating…</p>
+      )}
 
       {/* ── Results ──────────────────────────────────────────────────── */}
       {results && (

@@ -25,14 +25,26 @@ export default function Footer() {
 
         {/* Quick links */}
         <div className="flex items-center gap-4 text-xs font-medium text-[var(--sea-ink-soft)]">
-          <Link to="/forecaster/throughput" className="transition hover:text-[var(--sea-ink)]">
+          <Link to="/throughput" className="transition hover:text-[var(--sea-ink)]">
             Throughput
           </Link>
-          <Link to="/forecaster/multi-feature" className="transition hover:text-[var(--sea-ink)]">
+          <Link to="/multi-feature" className="transition hover:text-[var(--sea-ink)]">
             Multi-Feature
           </Link>
-          <Link to="/forecaster/story-count" className="transition hover:text-[var(--sea-ink)]">
+          <Link to="/story-count" className="transition hover:text-[var(--sea-ink)]">
             Story Count
+          </Link>
+          <Link to="/wrong-order" className="transition hover:text-[var(--sea-ink)]">
+            Wrong Order
+          </Link>
+          <Link to="/latent-defect" className="transition hover:text-[var(--sea-ink)]">
+            Latent Defect
+          </Link>
+          <Link to="/capability-matrix" className="transition hover:text-[var(--sea-ink)]">
+            Capability
+          </Link>
+          <Link to="/team-dashboard" className="transition hover:text-[var(--sea-ink)]">
+            Dashboard
           </Link>
         </div>
       </div>

@@ -1,9 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { runMultiFeatureForecaster } from '#/lib/monte-carlo'
 import type { MultiFeatureInputs, MultiFeatureResults, Feature } from '#/lib/monte-carlo'
 
-export const Route = createFileRoute('/forecaster/multi-feature')({
+export const Route = createFileRoute('/multi-feature')({
   component: MultiFeatureForecasterPage,
 })
 
@@ -99,7 +99,6 @@ function MultiFeatureForecasterPage() {
   const [running, setRunning] = useState(false)
 
   const dur = DURATION_OPTIONS[durationIdx]
-  const focus = FOCUS_OPTIONS[focusIdx]
 
   const splitError =
     splitLow > splitHigh ? 'Low split must be ≤ high split.' : ''
@@ -107,53 +106,63 @@ function MultiFeatureForecasterPage() {
     throughputMode === 'estimate' && tpLow > tpHigh
       ? 'Low must be ≤ high.'
       : ''
-  const canRun = !splitError && !tpError && startDate && targetDate
+  const hasActiveFeatures = features.some((f) => f.storyLow > 0 || f.storyHigh > 0)
+  const canRun = !splitError && !tpError && startDate && targetDate && hasActiveFeatures
 
-  const handleRun = useCallback(() => {
-    if (!canRun) return
-    setRunning(true)
-
-    const samples = samplesText
-      .split(/[\n,]+/)
-      .map((s) => Number(s.trim()))
-      .filter((n) => !isNaN(n) && n > 0)
-
-    const activeFeatures: Feature[] = features
-      .filter((f) => f.storyLow > 0 || f.storyHigh > 0)
-      .map((f) => {
-        const c = COMPLEXITY_OPTIONS[f.complexityIdx]
-        return {
-          name: f.name,
-          storyCountLow: f.storyLow,
-          storyCountHigh: f.storyHigh,
-          complexityLowMultiplier: c.lowMult,
-          complexityHighMultiplier: c.highMult,
-        }
-      })
-
-    const input: MultiFeatureInputs = {
-      startDate,
-      targetDate,
-      targetLikelihood,
-      splitRateLow: splitLow,
-      splitRateHigh: splitHigh,
-      throughputMode,
-      throughputLow: tpLow,
-      throughputHigh: tpHigh,
-      samples,
-      focusPercentage: focus.value,
-      daysPerUnit: dur.days,
-      monthlyAdjustments: monthMultipliers,
-      features: activeFeatures,
-      numTrials,
-      maxPeriods: 104,
+  /* ── Auto-run simulation on input change ───────────────────── */
+  useEffect(() => {
+    if (!canRun) {
+      setResults(null)
+      return
     }
+    setRunning(true)
+    const timer = setTimeout(() => {
+      const dur = DURATION_OPTIONS[durationIdx]
+      const focus = FOCUS_OPTIONS[focusIdx]
+      const samples = samplesText
+        .split(/[\n,]+/)
+        .map((s) => Number(s.trim()))
+        .filter((n) => !isNaN(n) && n > 0)
 
-    requestAnimationFrame(() => {
-      const res = runMultiFeatureForecaster(input)
-      setResults(res)
-      setRunning(false)
-    })
+      const activeFeatures: Feature[] = features
+        .filter((f) => f.storyLow > 0 || f.storyHigh > 0)
+        .map((f) => {
+          const c = COMPLEXITY_OPTIONS[f.complexityIdx]
+          return {
+            name: f.name,
+            storyCountLow: f.storyLow,
+            storyCountHigh: f.storyHigh,
+            complexityLowMultiplier: c.lowMult,
+            complexityHighMultiplier: c.highMult,
+          }
+        })
+
+      const input: MultiFeatureInputs = {
+        startDate,
+        targetDate,
+        targetLikelihood,
+        splitRateLow: splitLow,
+        splitRateHigh: splitHigh,
+        throughputMode,
+        throughputLow: tpLow,
+        throughputHigh: tpHigh,
+        samples,
+        focusPercentage: focus.value,
+        daysPerUnit: dur.days,
+        monthlyAdjustments: monthMultipliers,
+        features: activeFeatures,
+        numTrials,
+        maxPeriods: 104,
+      }
+
+      requestAnimationFrame(() => {
+        const res = runMultiFeatureForecaster(input)
+        setResults(res)
+        setRunning(false)
+      })
+    }, 300)
+    return () => clearTimeout(timer)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     canRun,
     startDate,
@@ -165,8 +174,8 @@ function MultiFeatureForecasterPage() {
     tpLow,
     tpHigh,
     samplesText,
-    focus,
-    dur,
+    focusIdx,
+    durationIdx,
     monthMultipliers,
     features,
     numTrials,
@@ -504,15 +513,25 @@ function MultiFeatureForecasterPage() {
             </div>
           </details>
 
-          {/* ── Run button ─────────────────────────────────────────────── */}
-          <button
-            type="button"
-            disabled={!canRun || running}
-            className="rounded-full border border-[rgba(50,143,151,0.3)] bg-[rgba(79,184,178,0.14)] px-6 py-2.5 text-sm font-semibold text-[var(--lagoon-deep)] transition hover:-translate-y-0.5 hover:bg-[rgba(79,184,178,0.24)] disabled:opacity-50 disabled:hover:translate-y-0"
-            onClick={handleRun}
-          >
-            {running ? 'Running…' : 'Run Simulation'}
-          </button>
+          {/* ── Status ───────────────────────────────────────────────── */}
+          {!canRun && (
+            <div className="flex items-center gap-3 rounded-2xl border-2 border-dashed border-amber-400/50 bg-amber-50/60 p-4 dark:border-amber-500/30 dark:bg-amber-950/30">
+              <svg className="h-5 w-5 flex-shrink-0 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                <line x1="12" y1="9" x2="12" y2="13" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
+              <div>
+                <p className="text-sm font-semibold text-amber-800 dark:text-amber-200">Missing required inputs</p>
+                <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">
+                  {splitError || tpError || (!startDate && 'Start date is required.') || (!targetDate && 'Target date is required.') || (!hasActiveFeatures && 'At least one feature needs story counts > 0.')}
+                </p>
+              </div>
+            </div>
+          )}
+          {running && (
+            <p className="text-sm font-medium text-[var(--lagoon-deep)] animate-pulse">Simulating…</p>
+          )}
 
           {/* ── Results legend ──────────────────────────────────────────── */}
           {results && (

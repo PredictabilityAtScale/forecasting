@@ -1,9 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { runThroughputForecaster } from '#/lib/monte-carlo'
 import type { ThroughputForecasterInputs, ThroughputForecasterResults } from '#/lib/monte-carlo'
 
-export const Route = createFileRoute('/forecaster/throughput')({
+export const Route = createFileRoute('/throughput')({
   component: ThroughputForecasterPage,
 })
 
@@ -80,7 +80,6 @@ function ThroughputForecasterPage() {
   const [running, setRunning] = useState(false)
 
   const comp = COMPLEXITY_OPTIONS[complexity]
-  const focus = FOCUS_OPTIONS[focusIdx]
   const dur = DURATION_OPTIONS[durationIdx]
 
   // Validation
@@ -99,49 +98,59 @@ function ThroughputForecasterPage() {
 
   const canRun = !storyError && !splitError && !tpError
 
-  const handleRun = useCallback(() => {
-    if (!canRun) return
-    setRunning(true)
-
-    // Parse samples
-    const samples = samplesText
-      .split(/[\n,]+/)
-      .map((s) => Number(s.trim()))
-      .filter((n) => !isNaN(n) && n > 0)
-
-    const input: ThroughputForecasterInputs = {
-      startDate: startDate || undefined,
-      storyCountLow: storyLow,
-      storyCountHigh: storyHigh,
-      complexityLowMultiplier: comp.lowMult,
-      complexityHighMultiplier: comp.highMult,
-      splitRateLow: splitLow,
-      splitRateHigh: splitHigh,
-      throughputMode,
-      throughputLow: tpLow,
-      throughputHigh: tpHigh,
-      throughputMostLikely: tpMostLikely === '' ? null : tpMostLikely,
-      samples,
-      focusPercentage: focus.value,
-      daysPerUnit: dur.days,
-      risks: risks.filter((r) => r.likelihood > 0),
-      numTrials,
-      maxPeriods: 104,
-      weeksToForecast,
+  /* ── Auto-run simulation on input change ───────────────────── */
+  useEffect(() => {
+    if (!canRun) {
+      setResults(null)
+      return
     }
+    setRunning(true)
+    const timer = setTimeout(() => {
+      const comp = COMPLEXITY_OPTIONS[complexity]
+      const focus = FOCUS_OPTIONS[focusIdx]
+      const dur = DURATION_OPTIONS[durationIdx]
 
-    // Run in a microtask to allow UI update
-    requestAnimationFrame(() => {
-      const res = runThroughputForecaster(input)
-      setResults(res)
-      setRunning(false)
-    })
+      // Parse samples
+      const samples = samplesText
+        .split(/[\n,]+/)
+        .map((s) => Number(s.trim()))
+        .filter((n) => !isNaN(n) && n > 0)
+
+      const input: ThroughputForecasterInputs = {
+        startDate: startDate || undefined,
+        storyCountLow: storyLow,
+        storyCountHigh: storyHigh,
+        complexityLowMultiplier: comp.lowMult,
+        complexityHighMultiplier: comp.highMult,
+        splitRateLow: splitLow,
+        splitRateHigh: splitHigh,
+        throughputMode,
+        throughputLow: tpLow,
+        throughputHigh: tpHigh,
+        throughputMostLikely: tpMostLikely === '' ? null : tpMostLikely,
+        samples,
+        focusPercentage: focus.value,
+        daysPerUnit: dur.days,
+        risks: risks.filter((r) => r.likelihood > 0),
+        numTrials,
+        maxPeriods: 104,
+        weeksToForecast,
+      }
+
+      requestAnimationFrame(() => {
+        const res = runThroughputForecaster(input)
+        setResults(res)
+        setRunning(false)
+      })
+    }, 300)
+    return () => clearTimeout(timer)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     canRun,
     startDate,
     storyLow,
     storyHigh,
-    comp,
+    complexity,
     splitLow,
     splitHigh,
     throughputMode,
@@ -149,8 +158,8 @@ function ThroughputForecasterPage() {
     tpHigh,
     tpMostLikely,
     samplesText,
-    focus,
-    dur,
+    focusIdx,
+    durationIdx,
     risks,
     numTrials,
     weeksToForecast,
@@ -428,15 +437,25 @@ function ThroughputForecasterPage() {
               />
             </Field>
 
-            {/* Run */}
-            <button
-              type="button"
-              disabled={!canRun || running}
-              className="rounded-full border border-[rgba(50,143,151,0.3)] bg-[rgba(79,184,178,0.14)] px-6 py-2.5 text-sm font-semibold text-[var(--lagoon-deep)] transition hover:-translate-y-0.5 hover:bg-[rgba(79,184,178,0.24)] disabled:opacity-50 disabled:hover:translate-y-0"
-              onClick={handleRun}
-            >
-              {running ? 'Running…' : 'Run Simulation'}
-            </button>
+            {/* Status */}
+            {!canRun && (
+              <div className="flex items-center gap-3 rounded-2xl border-2 border-dashed border-amber-400/50 bg-amber-50/60 p-4 dark:border-amber-500/30 dark:bg-amber-950/30">
+                <svg className="h-5 w-5 flex-shrink-0 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                  <line x1="12" y1="9" x2="12" y2="13" />
+                  <line x1="12" y1="17" x2="12.01" y2="17" />
+                </svg>
+                <div>
+                  <p className="text-sm font-semibold text-amber-800 dark:text-amber-200">Missing required inputs</p>
+                  <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">
+                    {storyError || splitError || tpError}
+                  </p>
+                </div>
+              </div>
+            )}
+            {running && (
+              <p className="text-sm font-medium text-[var(--lagoon-deep)] animate-pulse">Simulating…</p>
+            )}
           </div>
 
           {/* ── RIGHT – Results ───────────────────────────────────────── */}
@@ -534,8 +553,18 @@ function ThroughputForecasterPage() {
                 </div>
               </>
             ) : (
-              <div className="flex h-full items-center justify-center rounded-2xl border-2 border-dashed border-[var(--line)] p-10 text-sm text-[var(--sea-ink-soft)]">
-                Configure inputs and click "Run Simulation" to see results.
+              <div className="flex h-full items-center gap-3 rounded-2xl border-2 border-dashed border-amber-400/50 bg-amber-50/60 p-6 dark:border-amber-500/30 dark:bg-amber-950/30">
+                <svg className="h-6 w-6 flex-shrink-0 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                  <line x1="12" y1="9" x2="12" y2="13" />
+                  <line x1="12" y1="17" x2="12.01" y2="17" />
+                </svg>
+                <div>
+                  <p className="text-sm font-semibold text-amber-800 dark:text-amber-200">Waiting for valid inputs</p>
+                  <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">
+                    Configure the inputs on the left. Results will appear here automatically.
+                  </p>
+                </div>
               </div>
             )}
           </div>

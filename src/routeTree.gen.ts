@@ -9,81 +9,182 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WrongOrderRouteImport } from './routes/wrong-order'
+import { Route as ThroughputRouteImport } from './routes/throughput'
+import { Route as TeamDashboardRouteImport } from './routes/team-dashboard'
+import { Route as StoryCountRouteImport } from './routes/story-count'
+import { Route as MultiFeatureRouteImport } from './routes/multi-feature'
+import { Route as LatentDefectRouteImport } from './routes/latent-defect'
+import { Route as CapabilityMatrixRouteImport } from './routes/capability-matrix'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ForecasterThroughputRouteImport } from './routes/forecaster/throughput'
-import { Route as ForecasterStoryCountRouteImport } from './routes/forecaster/story-count'
-import { Route as ForecasterMultiFeatureRouteImport } from './routes/forecaster/multi-feature'
 
+const WrongOrderRoute = WrongOrderRouteImport.update({
+  id: '/wrong-order',
+  path: '/wrong-order',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ThroughputRoute = ThroughputRouteImport.update({
+  id: '/throughput',
+  path: '/throughput',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeamDashboardRoute = TeamDashboardRouteImport.update({
+  id: '/team-dashboard',
+  path: '/team-dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StoryCountRoute = StoryCountRouteImport.update({
+  id: '/story-count',
+  path: '/story-count',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MultiFeatureRoute = MultiFeatureRouteImport.update({
+  id: '/multi-feature',
+  path: '/multi-feature',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LatentDefectRoute = LatentDefectRouteImport.update({
+  id: '/latent-defect',
+  path: '/latent-defect',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CapabilityMatrixRoute = CapabilityMatrixRouteImport.update({
+  id: '/capability-matrix',
+  path: '/capability-matrix',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ForecasterThroughputRoute = ForecasterThroughputRouteImport.update({
-  id: '/forecaster/throughput',
-  path: '/forecaster/throughput',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ForecasterStoryCountRoute = ForecasterStoryCountRouteImport.update({
-  id: '/forecaster/story-count',
-  path: '/forecaster/story-count',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ForecasterMultiFeatureRoute = ForecasterMultiFeatureRouteImport.update({
-  id: '/forecaster/multi-feature',
-  path: '/forecaster/multi-feature',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/forecaster/multi-feature': typeof ForecasterMultiFeatureRoute
-  '/forecaster/story-count': typeof ForecasterStoryCountRoute
-  '/forecaster/throughput': typeof ForecasterThroughputRoute
+  '/capability-matrix': typeof CapabilityMatrixRoute
+  '/latent-defect': typeof LatentDefectRoute
+  '/multi-feature': typeof MultiFeatureRoute
+  '/story-count': typeof StoryCountRoute
+  '/team-dashboard': typeof TeamDashboardRoute
+  '/throughput': typeof ThroughputRoute
+  '/wrong-order': typeof WrongOrderRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/forecaster/multi-feature': typeof ForecasterMultiFeatureRoute
-  '/forecaster/story-count': typeof ForecasterStoryCountRoute
-  '/forecaster/throughput': typeof ForecasterThroughputRoute
+  '/capability-matrix': typeof CapabilityMatrixRoute
+  '/latent-defect': typeof LatentDefectRoute
+  '/multi-feature': typeof MultiFeatureRoute
+  '/story-count': typeof StoryCountRoute
+  '/team-dashboard': typeof TeamDashboardRoute
+  '/throughput': typeof ThroughputRoute
+  '/wrong-order': typeof WrongOrderRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/forecaster/multi-feature': typeof ForecasterMultiFeatureRoute
-  '/forecaster/story-count': typeof ForecasterStoryCountRoute
-  '/forecaster/throughput': typeof ForecasterThroughputRoute
+  '/capability-matrix': typeof CapabilityMatrixRoute
+  '/latent-defect': typeof LatentDefectRoute
+  '/multi-feature': typeof MultiFeatureRoute
+  '/story-count': typeof StoryCountRoute
+  '/team-dashboard': typeof TeamDashboardRoute
+  '/throughput': typeof ThroughputRoute
+  '/wrong-order': typeof WrongOrderRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/forecaster/multi-feature'
-    | '/forecaster/story-count'
-    | '/forecaster/throughput'
+    | '/capability-matrix'
+    | '/latent-defect'
+    | '/multi-feature'
+    | '/story-count'
+    | '/team-dashboard'
+    | '/throughput'
+    | '/wrong-order'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/forecaster/multi-feature'
-    | '/forecaster/story-count'
-    | '/forecaster/throughput'
+    | '/capability-matrix'
+    | '/latent-defect'
+    | '/multi-feature'
+    | '/story-count'
+    | '/team-dashboard'
+    | '/throughput'
+    | '/wrong-order'
   id:
     | '__root__'
     | '/'
-    | '/forecaster/multi-feature'
-    | '/forecaster/story-count'
-    | '/forecaster/throughput'
+    | '/capability-matrix'
+    | '/latent-defect'
+    | '/multi-feature'
+    | '/story-count'
+    | '/team-dashboard'
+    | '/throughput'
+    | '/wrong-order'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  ForecasterMultiFeatureRoute: typeof ForecasterMultiFeatureRoute
-  ForecasterStoryCountRoute: typeof ForecasterStoryCountRoute
-  ForecasterThroughputRoute: typeof ForecasterThroughputRoute
+  CapabilityMatrixRoute: typeof CapabilityMatrixRoute
+  LatentDefectRoute: typeof LatentDefectRoute
+  MultiFeatureRoute: typeof MultiFeatureRoute
+  StoryCountRoute: typeof StoryCountRoute
+  TeamDashboardRoute: typeof TeamDashboardRoute
+  ThroughputRoute: typeof ThroughputRoute
+  WrongOrderRoute: typeof WrongOrderRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/wrong-order': {
+      id: '/wrong-order'
+      path: '/wrong-order'
+      fullPath: '/wrong-order'
+      preLoaderRoute: typeof WrongOrderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/throughput': {
+      id: '/throughput'
+      path: '/throughput'
+      fullPath: '/throughput'
+      preLoaderRoute: typeof ThroughputRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/team-dashboard': {
+      id: '/team-dashboard'
+      path: '/team-dashboard'
+      fullPath: '/team-dashboard'
+      preLoaderRoute: typeof TeamDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/story-count': {
+      id: '/story-count'
+      path: '/story-count'
+      fullPath: '/story-count'
+      preLoaderRoute: typeof StoryCountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/multi-feature': {
+      id: '/multi-feature'
+      path: '/multi-feature'
+      fullPath: '/multi-feature'
+      preLoaderRoute: typeof MultiFeatureRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/latent-defect': {
+      id: '/latent-defect'
+      path: '/latent-defect'
+      fullPath: '/latent-defect'
+      preLoaderRoute: typeof LatentDefectRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/capability-matrix': {
+      id: '/capability-matrix'
+      path: '/capability-matrix'
+      fullPath: '/capability-matrix'
+      preLoaderRoute: typeof CapabilityMatrixRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -91,35 +192,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/forecaster/throughput': {
-      id: '/forecaster/throughput'
-      path: '/forecaster/throughput'
-      fullPath: '/forecaster/throughput'
-      preLoaderRoute: typeof ForecasterThroughputRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/forecaster/story-count': {
-      id: '/forecaster/story-count'
-      path: '/forecaster/story-count'
-      fullPath: '/forecaster/story-count'
-      preLoaderRoute: typeof ForecasterStoryCountRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/forecaster/multi-feature': {
-      id: '/forecaster/multi-feature'
-      path: '/forecaster/multi-feature'
-      fullPath: '/forecaster/multi-feature'
-      preLoaderRoute: typeof ForecasterMultiFeatureRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  ForecasterMultiFeatureRoute: ForecasterMultiFeatureRoute,
-  ForecasterStoryCountRoute: ForecasterStoryCountRoute,
-  ForecasterThroughputRoute: ForecasterThroughputRoute,
+  CapabilityMatrixRoute: CapabilityMatrixRoute,
+  LatentDefectRoute: LatentDefectRoute,
+  MultiFeatureRoute: MultiFeatureRoute,
+  StoryCountRoute: StoryCountRoute,
+  TeamDashboardRoute: TeamDashboardRoute,
+  ThroughputRoute: ThroughputRoute,
+  WrongOrderRoute: WrongOrderRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -28,25 +28,53 @@ export default function Header() {
         {/* Desktop nav */}
         <div className="hidden items-center gap-1 md:flex">
           <Link
-            to="/forecaster/throughput"
+            to="/throughput"
             className="nav-link rounded-lg px-3 py-2 text-sm font-semibold"
             activeProps={{ className: 'nav-link is-active rounded-lg px-3 py-2 text-sm font-semibold' }}
           >
             Throughput
           </Link>
           <Link
-            to="/forecaster/multi-feature"
+            to="/multi-feature"
             className="nav-link rounded-lg px-3 py-2 text-sm font-semibold"
             activeProps={{ className: 'nav-link is-active rounded-lg px-3 py-2 text-sm font-semibold' }}
           >
             Multi-Feature Cut Line
           </Link>
           <Link
-            to="/forecaster/story-count"
+            to="/story-count"
             className="nav-link rounded-lg px-3 py-2 text-sm font-semibold"
             activeProps={{ className: 'nav-link is-active rounded-lg px-3 py-2 text-sm font-semibold' }}
           >
             Story Count
+          </Link>
+          <Link
+            to="/wrong-order"
+            className="nav-link rounded-lg px-3 py-2 text-sm font-semibold"
+            activeProps={{ className: 'nav-link is-active rounded-lg px-3 py-2 text-sm font-semibold' }}
+          >
+            Wrong Order
+          </Link>
+          <Link
+            to="/latent-defect"
+            className="nav-link rounded-lg px-3 py-2 text-sm font-semibold"
+            activeProps={{ className: 'nav-link is-active rounded-lg px-3 py-2 text-sm font-semibold' }}
+          >
+            Latent Defect
+          </Link>
+          <Link
+            to="/capability-matrix"
+            className="nav-link rounded-lg px-3 py-2 text-sm font-semibold"
+            activeProps={{ className: 'nav-link is-active rounded-lg px-3 py-2 text-sm font-semibold' }}
+          >
+            Capability
+          </Link>
+          <Link
+            to="/team-dashboard"
+            className="nav-link rounded-lg px-3 py-2 text-sm font-semibold"
+            activeProps={{ className: 'nav-link is-active rounded-lg px-3 py-2 text-sm font-semibold' }}
+          >
+            Dashboard
           </Link>
           <div className="mx-2 h-5 w-px bg-[var(--line)]" />
           <ColorThemePicker />
@@ -82,7 +110,7 @@ export default function Header() {
       {mobileOpen && (
         <div className="border-t border-[var(--line)] bg-[var(--header-bg)] px-4 pb-4 pt-2 md:hidden">
           <Link
-            to="/forecaster/throughput"
+            to="/throughput"
             className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-[var(--sea-ink-soft)] no-underline transition hover:bg-[var(--link-bg-hover)] hover:text-[var(--sea-ink)]"
             activeProps={{ className: 'block rounded-lg px-3 py-2.5 text-sm font-semibold text-[var(--sea-ink)] no-underline bg-[var(--link-bg-hover)]' }}
             onClick={() => setMobileOpen(false)}
@@ -90,7 +118,7 @@ export default function Header() {
             Throughput Forecaster
           </Link>
           <Link
-            to="/forecaster/multi-feature"
+            to="/multi-feature"
             className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-[var(--sea-ink-soft)] no-underline transition hover:bg-[var(--link-bg-hover)] hover:text-[var(--sea-ink)]"
             activeProps={{ className: 'block rounded-lg px-3 py-2.5 text-sm font-semibold text-[var(--sea-ink)] no-underline bg-[var(--link-bg-hover)]' }}
             onClick={() => setMobileOpen(false)}
@@ -98,12 +126,44 @@ export default function Header() {
             Multi-Feature Cut Line
           </Link>
           <Link
-            to="/forecaster/story-count"
+            to="/story-count"
             className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-[var(--sea-ink-soft)] no-underline transition hover:bg-[var(--link-bg-hover)] hover:text-[var(--sea-ink)]"
             activeProps={{ className: 'block rounded-lg px-3 py-2.5 text-sm font-semibold text-[var(--sea-ink)] no-underline bg-[var(--link-bg-hover)]' }}
             onClick={() => setMobileOpen(false)}
           >
             Story Count Forecaster
+          </Link>
+          <Link
+            to="/wrong-order"
+            className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-[var(--sea-ink-soft)] no-underline transition hover:bg-[var(--link-bg-hover)] hover:text-[var(--sea-ink)]"
+            activeProps={{ className: 'block rounded-lg px-3 py-2.5 text-sm font-semibold text-[var(--sea-ink)] no-underline bg-[var(--link-bg-hover)]' }}
+            onClick={() => setMobileOpen(false)}
+          >
+            Wrong Order-O-Meter
+          </Link>
+          <Link
+            to="/latent-defect"
+            className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-[var(--sea-ink-soft)] no-underline transition hover:bg-[var(--link-bg-hover)] hover:text-[var(--sea-ink)]"
+            activeProps={{ className: 'block rounded-lg px-3 py-2.5 text-sm font-semibold text-[var(--sea-ink)] no-underline bg-[var(--link-bg-hover)]' }}
+            onClick={() => setMobileOpen(false)}
+          >
+            Latent Defect Estimation
+          </Link>
+          <Link
+            to="/capability-matrix"
+            className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-[var(--sea-ink-soft)] no-underline transition hover:bg-[var(--link-bg-hover)] hover:text-[var(--sea-ink)]"
+            activeProps={{ className: 'block rounded-lg px-3 py-2.5 text-sm font-semibold text-[var(--sea-ink)] no-underline bg-[var(--link-bg-hover)]' }}
+            onClick={() => setMobileOpen(false)}
+          >
+            Capability Matrix
+          </Link>
+          <Link
+            to="/team-dashboard"
+            className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-[var(--sea-ink-soft)] no-underline transition hover:bg-[var(--link-bg-hover)] hover:text-[var(--sea-ink)]"
+            activeProps={{ className: 'block rounded-lg px-3 py-2.5 text-sm font-semibold text-[var(--sea-ink)] no-underline bg-[var(--link-bg-hover)]' }}
+            onClick={() => setMobileOpen(false)}
+          >
+            Team Dashboard
           </Link>
         </div>
       )}
