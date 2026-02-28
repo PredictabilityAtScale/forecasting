@@ -1,0 +1,27 @@
+{
+  "projectName": "forecasting",
+  "mode": "file-router",
+  "typescript": true,
+  "packageManager": "npm",
+  "includeExamples": true,
+  "tailwind": true,
+  "addOnOptions": {},
+  "envVarValues": {
+    "CONVEX_DEPLOYMENT": "vibrant-turtle-142",
+    "VITE_CONVEX_URL": "https://vibrant-turtle-142.convex.cloud"
+  },
+  "git": true,
+  "routerOnly": false,
+  "version": 1,
+  "framework": "react",
+  "chosenAddOns": [
+    "eslint",
+    "nitro",
+    "convex",
+    "form",
+    "mcp",
+    "shadcn",
+    "table",
+    "tanstack-query"
+  ]
+}
