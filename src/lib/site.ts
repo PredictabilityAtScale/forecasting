@@ -1,4 +1,4 @@
-export const SITE_TITLE = 'TanStack Start'
+export const SITE_TITLE = 'Focused Objective — Forecasting Tools'
 export const SITE_DESCRIPTION =
-  'A tropical, breathable app starter with full-document SSR, server functions, streaming, and type-safe routing.'
+  'Monte Carlo forecasting tools for agile teams. Predict throughput, multi-feature cut lines, and story counts with confidence.'
 export const SITE_URL = 'https://example.com'

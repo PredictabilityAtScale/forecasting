@@ -117,6 +117,194 @@
   --sidebar-ring: oklch(0.442 0.017 285.786);
 }
 
+/* ── Color theme: Blue (brand) ─────────────────────────────────────────── */
+
+[data-color='blue'] {
+  --sea-ink: #1a2e4a;
+  --sea-ink-soft: #4a6180;
+  --lagoon: #3b82f6;
+  --lagoon-deep: #2563eb;
+  --palm: #1e40af;
+  --sand: #e8eef6;
+  --foam: #f0f5fa;
+  --surface: rgba(255, 255, 255, 0.76);
+  --surface-strong: rgba(255, 255, 255, 0.92);
+  --line: rgba(30, 64, 175, 0.13);
+  --inset-glint: rgba(255, 255, 255, 0.84);
+  --kicker: rgba(37, 99, 235, 0.9);
+  --bg-base: #e8eff8;
+  --header-bg: rgba(248, 250, 255, 0.84);
+  --chip-bg: rgba(255, 255, 255, 0.82);
+  --chip-line: rgba(37, 99, 235, 0.18);
+  --link-bg-hover: rgba(255, 255, 255, 0.9);
+  --hero-a: rgba(59, 130, 246, 0.28);
+  --hero-b: rgba(30, 64, 175, 0.16);
+}
+
+[data-color='blue'].dark,
+.dark[data-color='blue'] {
+  --sea-ink: #d4e3f5;
+  --sea-ink-soft: #93b4d8;
+  --lagoon: #60a5fa;
+  --lagoon-deep: #93c5fd;
+  --palm: #6da1e0;
+  --sand: #0d1520;
+  --foam: #0f1924;
+  --surface: rgba(15, 25, 36, 0.82);
+  --surface-strong: rgba(13, 21, 32, 0.92);
+  --line: rgba(96, 165, 250, 0.18);
+  --inset-glint: rgba(147, 197, 253, 0.12);
+  --kicker: #93c5fd;
+  --bg-base: #0a1220;
+  --header-bg: rgba(10, 18, 32, 0.82);
+  --chip-bg: rgba(13, 22, 36, 0.9);
+  --chip-line: rgba(96, 165, 250, 0.22);
+  --link-bg-hover: rgba(20, 35, 55, 0.8);
+  --hero-a: rgba(96, 165, 250, 0.16);
+  --hero-b: rgba(109, 161, 224, 0.1);
+}
+
+/* ── Color theme: Indigo ──────────────────────────────────────────────── */
+
+[data-color='indigo'] {
+  --sea-ink: #272150;
+  --sea-ink-soft: #554f80;
+  --lagoon: #8b5cf6;
+  --lagoon-deep: #7c3aed;
+  --palm: #5b21b6;
+  --sand: #eee8f8;
+  --foam: #f5f0fc;
+  --surface: rgba(255, 255, 255, 0.76);
+  --surface-strong: rgba(255, 255, 255, 0.92);
+  --line: rgba(91, 33, 182, 0.12);
+  --inset-glint: rgba(255, 255, 255, 0.84);
+  --kicker: rgba(124, 58, 237, 0.9);
+  --bg-base: #ede6f5;
+  --header-bg: rgba(252, 248, 255, 0.84);
+  --chip-bg: rgba(255, 255, 255, 0.82);
+  --chip-line: rgba(124, 58, 237, 0.18);
+  --link-bg-hover: rgba(255, 255, 255, 0.9);
+  --hero-a: rgba(139, 92, 246, 0.26);
+  --hero-b: rgba(91, 33, 182, 0.14);
+}
+
+[data-color='indigo'].dark,
+.dark[data-color='indigo'] {
+  --sea-ink: #e0d4f5;
+  --sea-ink-soft: #b0a0d0;
+  --lagoon: #a78bfa;
+  --lagoon-deep: #c4b5fd;
+  --palm: #a788e0;
+  --sand: #140f22;
+  --foam: #171028;
+  --surface: rgba(20, 15, 34, 0.82);
+  --surface-strong: rgba(17, 12, 30, 0.92);
+  --line: rgba(167, 139, 250, 0.18);
+  --inset-glint: rgba(196, 181, 253, 0.12);
+  --kicker: #c4b5fd;
+  --bg-base: #0f0a1e;
+  --header-bg: rgba(15, 10, 30, 0.82);
+  --chip-bg: rgba(18, 13, 34, 0.9);
+  --chip-line: rgba(167, 139, 250, 0.22);
+  --link-bg-hover: rgba(30, 22, 52, 0.8);
+  --hero-a: rgba(167, 139, 250, 0.16);
+  --hero-b: rgba(167, 136, 224, 0.1);
+}
+
+/* ── Color theme: Amber ───────────────────────────────────────────────── */
+
+[data-color='amber'] {
+  --sea-ink: #42320a;
+  --sea-ink-soft: #6d5a28;
+  --lagoon: #f59e0b;
+  --lagoon-deep: #d97706;
+  --palm: #92400e;
+  --sand: #f5f0e0;
+  --foam: #faf7ef;
+  --surface: rgba(255, 255, 255, 0.76);
+  --surface-strong: rgba(255, 255, 255, 0.92);
+  --line: rgba(146, 64, 14, 0.12);
+  --inset-glint: rgba(255, 255, 255, 0.84);
+  --kicker: rgba(217, 119, 6, 0.9);
+  --bg-base: #f3eddf;
+  --header-bg: rgba(255, 252, 245, 0.84);
+  --chip-bg: rgba(255, 255, 255, 0.82);
+  --chip-line: rgba(217, 119, 6, 0.18);
+  --link-bg-hover: rgba(255, 255, 255, 0.9);
+  --hero-a: rgba(245, 158, 11, 0.26);
+  --hero-b: rgba(146, 64, 14, 0.14);
+}
+
+[data-color='amber'].dark,
+.dark[data-color='amber'] {
+  --sea-ink: #f5e6c4;
+  --sea-ink-soft: #c8b080;
+  --lagoon: #fbbf24;
+  --lagoon-deep: #fcd34d;
+  --palm: #d4a752;
+  --sand: #1a1408;
+  --foam: #1e180a;
+  --surface: rgba(26, 20, 8, 0.82);
+  --surface-strong: rgba(22, 17, 6, 0.92);
+  --line: rgba(251, 191, 36, 0.18);
+  --inset-glint: rgba(252, 211, 77, 0.12);
+  --kicker: #fcd34d;
+  --bg-base: #141008;
+  --header-bg: rgba(20, 16, 8, 0.82);
+  --chip-bg: rgba(24, 20, 10, 0.9);
+  --chip-line: rgba(251, 191, 36, 0.22);
+  --link-bg-hover: rgba(38, 30, 14, 0.8);
+  --hero-a: rgba(251, 191, 36, 0.16);
+  --hero-b: rgba(212, 167, 82, 0.1);
+}
+
+/* ── Color theme: Rose ────────────────────────────────────────────────── */
+
+[data-color='rose'] {
+  --sea-ink: #4a1d2e;
+  --sea-ink-soft: #7d4460;
+  --lagoon: #f43f5e;
+  --lagoon-deep: #e11d48;
+  --palm: #9f1239;
+  --sand: #f8e8ed;
+  --foam: #fcf0f3;
+  --surface: rgba(255, 255, 255, 0.76);
+  --surface-strong: rgba(255, 255, 255, 0.92);
+  --line: rgba(159, 18, 57, 0.12);
+  --inset-glint: rgba(255, 255, 255, 0.84);
+  --kicker: rgba(225, 29, 72, 0.9);
+  --bg-base: #f5e6eb;
+  --header-bg: rgba(255, 248, 250, 0.84);
+  --chip-bg: rgba(255, 255, 255, 0.82);
+  --chip-line: rgba(225, 29, 72, 0.18);
+  --link-bg-hover: rgba(255, 255, 255, 0.9);
+  --hero-a: rgba(244, 63, 94, 0.26);
+  --hero-b: rgba(159, 18, 57, 0.14);
+}
+
+[data-color='rose'].dark,
+.dark[data-color='rose'] {
+  --sea-ink: #f5d0da;
+  --sea-ink-soft: #d498ad;
+  --lagoon: #fb7185;
+  --lagoon-deep: #fda4af;
+  --palm: #e07a95;
+  --sand: #1e0d14;
+  --foam: #220f17;
+  --surface: rgba(30, 13, 20, 0.82);
+  --surface-strong: rgba(26, 10, 17, 0.92);
+  --line: rgba(251, 113, 133, 0.18);
+  --inset-glint: rgba(253, 164, 175, 0.12);
+  --kicker: #fda4af;
+  --bg-base: #18080f;
+  --header-bg: rgba(24, 8, 15, 0.82);
+  --chip-bg: rgba(28, 12, 18, 0.9);
+  --chip-line: rgba(251, 113, 133, 0.22);
+  --link-bg-hover: rgba(42, 20, 28, 0.8);
+  --hero-a: rgba(251, 113, 133, 0.16);
+  --hero-b: rgba(224, 122, 149, 0.1);
+}
+
 @theme inline {
   --font-sans: 'Manrope', ui-sans-serif, system-ui, sans-serif;
   --color-background: var(--background);
@@ -241,7 +429,7 @@ pre code {
 }
 
 .page-wrap {
-  width: min(1080px, calc(100% - 2rem));
+  width: min(1400px, calc(100% - 2rem));
   margin-inline: auto;
 }
 
@@ -336,12 +524,43 @@ a {
   background: color-mix(in oklab, var(--header-bg) 84%, transparent 16%);
 }
 
+/* ── Forecaster form styling ──────────────────────────────────────────── */
+
+.field-legend {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+  color: var(--sea-ink-soft);
+}
+
+.field-input {
+  display: block;
+  width: 100%;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: var(--sea-ink);
+  background: var(--surface-strong);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.field-input:focus {
+  border-color: var(--lagoon);
+  box-shadow: 0 0 0 3px rgba(79, 184, 178, 0.18);
+}
+
+.field-input::placeholder {
+  color: var(--sea-ink-soft);
+  opacity: 0.55;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
-  }
-  body {
-    background-color: var(--background);
-    color: var(--foreground);
   }
 }
