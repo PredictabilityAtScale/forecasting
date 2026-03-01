@@ -1,6 +1,57 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { TRAINING_URL } from '#/lib/site'
 
+const MAIN_COURSES = [
+  {
+    title: 'Agile Physics - The Math of Flow',
+    description:
+      'Short explanations of how and why to apply math, probability, and statistics in Agile development.',
+    price: '$495',
+    href: 'https://learn.focusedobjective.com/courses/agile-physics-the-math-of-flow',
+    image: '/images/iFKveizWTQKaD8If0uAm_Scientific-Formulas.jpg',
+  },
+  {
+    title: 'Dependency Management - capture, fix, and avoid',
+    description:
+      'A deep-dive workshop teaching practical ways to capture, plan, and eliminate cross-team dependencies.',
+    price: '$495',
+    href: 'https://learn.focusedobjective.com/courses/dependency-management',
+    image: '/images/71RnNqTuQByHazE9WxXl_gotdependencies_fo.png',
+  },
+  {
+    title: 'Self-paced: Data-Driven Improvement and Outcomes',
+    description:
+      'Learn to optimize team performance and achieve targeted outcomes with practical, data-driven techniques.',
+    price: '$495',
+    href: 'https://learn.focusedobjective.com/courses/data-driven-improvement',
+    image: '/images/FtjU4y5eRke8yzY5nxCD_course%20image.jpg',
+  },
+  {
+    title: 'All Power Sessions (current & future)',
+    description:
+      'Access all Power Session courses with actionable lessons to get up and running quickly.',
+    price: '$99',
+    href: 'https://learn.focusedobjective.com/bundles/all-power-sessions',
+    image: '/images/OUiq9cx6RSuMJqhvbZzM_all%20power%20sessions.png',
+  },
+  {
+    title: 'Using the Monte Carlo Forecasting Spreadsheets',
+    description:
+      'Learn how to use the forecasting spreadsheets to improve planning confidence and delivery predictability.',
+    price: '$75',
+    href: 'https://learn.focusedobjective.com/courses/using-the-monte-carlo-forecasting-spreadsheets',
+    image: '/images/lDj2J2QSqmc4VM8cze9w_six.png',
+  },
+  {
+    title: 'Using the Team Dashboard Spreadsheet',
+    description:
+      'Use the Team Dashboard spreadsheet to track flow metrics without maintenance overhead.',
+    price: '$75',
+    href: 'https://learn.focusedobjective.com/courses/using-the-team-dashboard-spreadsheet',
+    image: '/images/vyrZfbZSaqpLjLCwN85b_course%20image.png',
+  },
+] as const
+
 export const Route = createFileRoute('/')({ component: App })
 
 function App() {
@@ -11,42 +62,63 @@ function App() {
         <div className="pointer-events-none absolute -left-24 -top-28 h-64 w-64 rounded-full bg-[radial-gradient(circle,rgba(79,184,178,0.30),transparent_66%)]" />
         <div className="pointer-events-none absolute -bottom-24 -right-24 h-64 w-64 rounded-full bg-[radial-gradient(circle,rgba(47,106,74,0.16),transparent_66%)]" />
 
-        <div className="relative flex flex-col items-center text-center">
-          <img
-            src="/fo_transparent.png"
-            alt="Focused Objective"
-            className="mb-6 h-20 w-20 rounded-2xl object-contain sm:h-24 sm:w-24"
-          />
-          <p className="island-kicker mb-3">Monte Carlo Forecasting</p>
-          <h1 className="display-title mb-5 max-w-3xl text-3xl leading-tight font-bold tracking-tight text-[var(--sea-ink)] sm:text-5xl lg:text-6xl">
-            Predict delivery with confidence, not guesswork.
-          </h1>
-          <p className="mb-8 max-w-2xl text-base text-[var(--sea-ink-soft)] sm:text-lg">
-            Focused Objective's probabilistic forecasting tools help agile teams
-            answer "when will it be done?" using Monte Carlo simulation —
-            no story points required.
-          </p>
-          <div className="flex flex-wrap justify-center gap-3">
-            <Link
-              to="/throughput"
-              className="rounded-full border border-[rgba(50,143,151,0.3)] bg-[rgba(79,184,178,0.14)] px-6 py-2.5 text-sm font-semibold text-[var(--lagoon-deep)] no-underline transition hover:-translate-y-0.5 hover:bg-[rgba(79,184,178,0.24)]"
-            >
-              Get Started
-            </Link>
+        <div className="relative">
+          <div className="mb-8 text-center">
+            <h1 className="display-title mb-3 text-3xl leading-tight font-semibold tracking-tight text-[var(--sea-ink)] sm:text-5xl">
+              Workshops
+            </h1>
+            <p className="mx-auto max-w-3xl text-base text-[var(--sea-ink-soft)] sm:text-lg">
+              Self-paced and Instructor-led Masterclass Public Online Workshops
+            </p>
+          </div>
+
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {MAIN_COURSES.map((course) => (
+              <a
+                key={course.href}
+                href={course.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="feature-card group flex h-full flex-col overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--surface)] no-underline transition hover:-translate-y-0.5"
+              >
+                <img
+                  src={course.image}
+                  alt={course.title}
+                  className="h-40 w-full object-cover"
+                  loading="lazy"
+                />
+                <div className="flex flex-1 flex-col p-5">
+                  <h2 className="mb-2 text-2xl font-semibold text-[var(--sea-ink)] group-hover:text-[var(--lagoon-deep)]">
+                    {course.title}
+                  </h2>
+                  <p className="m-0 flex-1 text-sm leading-relaxed text-[var(--sea-ink-soft)]">
+                    {course.description}
+                  </p>
+                  <p className="mt-4 text-3xl font-semibold text-[var(--sea-ink)]">
+                    {course.price}
+                  </p>
+                </div>
+              </a>
+            ))}
+          </div>
+
+          <div className="mt-8 flex justify-start">
             <a
-              href={TRAINING_URL}
+              href="https://learn.focusedobjective.com/collections"
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-full border border-[var(--line)] bg-[var(--surface)] px-6 py-2.5 text-sm font-semibold text-[var(--sea-ink)] no-underline transition hover:-translate-y-0.5 hover:bg-[var(--surface-strong)]"
+              className="rounded-full border border-[rgba(50,143,151,0.3)] bg-[rgba(79,184,178,0.14)] px-6 py-2.5 text-sm font-semibold text-[var(--lagoon-deep)] no-underline transition hover:-translate-y-0.5 hover:bg-[rgba(79,184,178,0.24)]"
             >
-              Training on Forecasting &amp; Metrics ↗
+              View more courses
             </a>
           </div>
         </div>
       </section>
 
       {/* Tool cards */}
-      <section className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <section className="mt-10">
+        <h2 className="mb-4 text-2xl font-semibold text-[var(--sea-ink)] sm:text-3xl">Tools</h2>
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         <ToolCard
           title="Throughput Forecaster"
           description="Given historical throughput data, forecast how many items a team can deliver in a time window — with percentile-based confidence levels."
@@ -139,6 +211,7 @@ function App() {
             </svg>
           }
         />
+        </div>
       </section>
 
       {/* Value prop */}
