@@ -117,7 +117,7 @@ export default function Header() {
           </div>
 
           <a
-            href="https://focusedobjective.com"
+            href="https://learn.focusedobjective.com"
             target="_blank"
             rel="noopener noreferrer"
             className="nav-link rounded-lg px-3 py-2 text-sm font-semibold no-underline"
@@ -142,7 +142,7 @@ export default function Header() {
         <div className="flex items-center gap-2 md:hidden">
 
           <a
-            href="https://focusedobjective.com"
+            href="https://learn.focusedobjective.com"
             target="_blank"
             rel="noopener noreferrer"
             className="mt-2 block rounded-lg px-3 py-2.5 text-sm font-semibold text-[var(--sea-ink-soft)] no-underline transition hover:bg-[var(--link-bg-hover)] hover:text-[var(--sea-ink)]"
@@ -244,7 +244,7 @@ export default function Header() {
             Capability Matrix
           </Link>
           <a
-            href="https://focusedobjective.com"
+            href="https://learn.focusedobjective.com"
             target="_blank"
             rel="noopener noreferrer"
             className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-[var(--sea-ink-soft)] no-underline transition hover:bg-[var(--link-bg-hover)] hover:text-[var(--sea-ink)]"
