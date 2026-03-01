@@ -1,0 +1,51 @@
+0 verbose cli C:\Program Files\nodejs\node.exe C:\Users\troym\AppData\Roaming\npm\node_modules\npm\bin\npm-cli.js
+1 info using npm@11.7.0
+2 info using node@v22.16.0
+3 silly config load:file:C:\Users\troym\AppData\Roaming\npm\node_modules\npm\npmrc
+4 silly config load:file:C:\Users\troym\Git\forecasting\.npmrc
+5 silly config load:file:C:\Users\troym\.npmrc
+6 silly config load:file:C:\Users\troym\AppData\Roaming\npm\etc\npmrc
+7 verbose title npm ci
+8 verbose argv "ci" "--cache" ".npm" "--prefer-offline"
+9 verbose logfile logs-max:10 dir:C:\Users\troym\Git\forecasting\.npm\_logs\2026-03-01T01_47_11_098Z-
+10 verbose logfile C:\Users\troym\Git\forecasting\.npm\_logs\2026-03-01T01_47_11_098Z-debug-0.log
+11 silly logfile done cleaning log files
+12 silly packumentCache heap:2197815296 maxSize:549453824 maxEntrySize:274726912
+13 silly idealTree buildDeps
+14 silly fetch manifest lru-cache@^11.2.6
+15 silly packumentCache full:https://registry.npmjs.org/lru-cache cache-miss
+16 http fetch GET 200 https://registry.npmjs.org/npm 667ms
+17 http fetch GET 200 https://registry.npmjs.org/lru-cache 171ms (cache miss)
+18 silly packumentCache full:https://registry.npmjs.org/lru-cache set size:undefined disposed:false
+19 silly placeDep node_modules/nitro lru-cache@11.2.6 OK for: unstorage@2.0.0-alpha.6 want: ^11.2.6
+20 verbose stack Error: EPERM: operation not permitted, unlink 'C:\Users\troym\Git\forecasting\node_modules\lightningcss-win32-x64-msvc\lightningcss.win32-x64-msvc.node'
+21 error code EPERM
+22 error syscall unlink
+23 error path C:\Users\troym\Git\forecasting\node_modules\lightningcss-win32-x64-msvc\lightningcss.win32-x64-msvc.node
+24 error errno -4048
+25 error [Error: EPERM: operation not permitted, unlink 'C:\Users\troym\Git\forecasting\node_modules\lightningcss-win32-x64-msvc\lightningcss.win32-x64-msvc.node'] {
+25 error   errno: -4048,
+25 error   code: 'EPERM',
+25 error   syscall: 'unlink',
+25 error   path: 'C:\\Users\\troym\\Git\\forecasting\\node_modules\\lightningcss-win32-x64-msvc\\lightningcss.win32-x64-msvc.node'
+25 error }
+26 error
+26 error The operation was rejected by your operating system.
+26 error It's possible that the file was already in use (by a text editor or antivirus),
+26 error or that you lack permissions to access it.
+26 error
+26 error If you believe this might be a permissions issue, please double-check the
+26 error permissions of the file and its containing directories, or try running
+26 error the command again as root/Administrator.
+27 verbose cwd C:\Users\troym\Git\forecasting
+28 verbose os Windows_NT 10.0.26200
+29 verbose node v22.16.0
+30 verbose npm  v11.7.0
+31 notice
+31 notice New [33mminor[39m version of npm available! [33m11.7.0[39m -> [34m11.11.0[39m
+31 notice Changelog: [34mhttps://github.com/npm/cli/releases/tag/v11.11.0[39m
+31 notice To update run: [4mnpm install -g npm@11.11.0[24m
+31 notice  { force: true, [Symbol(proc-log.meta)]: true }
+32 verbose exit -4048
+33 verbose code -4048
+34 error A complete log of this run can be found in: C:\Users\troym\Git\forecasting\.npm\_logs\2026-03-01T01_47_11_098Z-debug-0.log
