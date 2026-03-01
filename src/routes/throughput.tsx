@@ -4,6 +4,7 @@ import { runThroughputForecaster } from '#/lib/monte-carlo'
 import type { ThroughputForecasterInputs, ThroughputForecasterResults } from '#/lib/monte-carlo'
 import Field from '#/components/Field'
 import NumberInput from '#/components/NumberInput'
+import { Slider } from '#/components/ui/slider'
 
 export const Route = createFileRoute('/throughput')({
   component: ThroughputForecasterPage,
@@ -204,27 +205,27 @@ function ThroughputForecasterPage() {
               <legend className="field-legend">
                 2. How many stories remaining?
               </legend>
-              <div className="flex flex-wrap gap-4">
+              <div className="grid gap-4 md:grid-cols-3">
                 <Field label="Low guess" inline>
                   <NumberInput value={storyLow} onChange={setStoryLow} min={1} />
                 </Field>
                 <Field label="High guess" inline>
                   <NumberInput value={storyHigh} onChange={setStoryHigh} min={1} />
                 </Field>
+                <Field label="Scope complexity" inline>
+                  <select
+                    className="field-input w-full"
+                    value={complexity}
+                    onChange={(e) => setComplexity(Number(e.target.value))}
+                  >
+                    {COMPLEXITY_OPTIONS.map((c, i) => (
+                      <option key={c.label} value={i}>
+                        {c.label}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
               </div>
-              <Field label="Scope complexity">
-                <select
-                  className="field-input"
-                  value={complexity}
-                  onChange={(e) => setComplexity(Number(e.target.value))}
-                >
-                  {COMPLEXITY_OPTIONS.map((c, i) => (
-                    <option key={c.label} value={i}>
-                      {c.label}
-                    </option>
-                  ))}
-                </select>
-              </Field>
               {storyError && <p className="text-xs text-red-600">{storyError}</p>}
               <p className="text-xs text-[var(--sea-ink-soft)]">
                 Adjusted range: {Math.round(storyLow * comp.lowMult)} –{' '}
@@ -288,14 +289,14 @@ function ThroughputForecasterPage() {
               </div>
 
               {throughputMode === 'estimate' ? (
-                <div className="flex flex-wrap gap-4">
+                <div className="grid gap-4 md:grid-cols-3">
                   <Field label="Worst case" inline>
                     <NumberInput value={tpLow} onChange={setTpLow} min={0} />
                   </Field>
                   <Field label="Most likely (optional)" inline>
                     <input
                       type="number"
-                      className="field-input w-24"
+                      className="field-input w-full"
                       value={tpMostLikely}
                       onChange={(e) =>
                         setTpMostLikely(
@@ -415,30 +416,6 @@ function ThroughputForecasterPage() {
               </button>
             </fieldset>
 
-            {/* 6. Story count forecast horizon */}
-            <fieldset className="space-y-2">
-              <legend className="field-legend">
-                6. Story count forecast – how many {dur.label}s?
-              </legend>
-              <NumberInput
-                value={weeksToForecast}
-                onChange={setWeeksToForecast}
-                min={1}
-                max={52}
-              />
-            </fieldset>
-
-            {/* Simulation settings */}
-            <Field label="Simulation trials">
-              <NumberInput
-                value={numTrials}
-                onChange={setNumTrials}
-                min={100}
-                max={10000}
-                step={100}
-              />
-            </Field>
-
             {/* Status */}
             {!canRun && (
               <div className="flex items-center gap-3 rounded-2xl border-2 border-dashed border-amber-400/50 bg-amber-50/60 p-4 dark:border-amber-500/30 dark:bg-amber-950/30">
@@ -518,12 +495,53 @@ function ThroughputForecasterPage() {
                   />
                 </div>
 
+                {/* Simulation settings */}
+                <div className="island-shell rounded-2xl p-5">
+                  <div className="mb-3 flex items-center justify-between gap-4">
+                    <h2 className="text-base font-semibold text-[var(--sea-ink)]">
+                      Simulation Trials
+                    </h2>
+                    <span className="text-xs font-mono text-[var(--sea-ink-soft)]">
+                      {numTrials}
+                    </span>
+                  </div>
+                  <Slider
+                    value={[numTrials]}
+                    min={1}
+                    max={1000}
+                    step={1}
+                    onValueChange={(value) => setNumTrials(value[0] ?? 500)}
+                  />
+                  <p className="mt-2 text-xs text-[var(--sea-ink-soft)]">
+                    1–1000 trials (default 500)
+                  </p>
+                </div>
+
+                <div className="h-px w-full bg-[var(--line)]" />
+
                 {/* Story count forecast */}
                 <div className="island-shell rounded-2xl p-5">
                   <h2 className="mb-3 text-base font-semibold text-[var(--sea-ink)]">
+                    Story Count Forecast (separate from completion forecast)
+                  </h2>
+                  <div className="mb-4 grid gap-4 md:grid-cols-[auto_1fr] md:items-end">
+                    <Field label={`How many ${dur.label} intervals?`} inline>
+                      <NumberInput
+                        value={weeksToForecast}
+                        onChange={setWeeksToForecast}
+                        min={1}
+                        max={52}
+                      />
+                    </Field>
+                    <p className="text-sm font-medium text-[var(--sea-ink)] md:text-right">
+                      Story count in {weeksToForecast} {dur.label}
+                      {weeksToForecast > 1 ? 's' : ''}
+                    </p>
+                  </div>
+                  <h3 className="mb-3 text-sm font-semibold text-[var(--sea-ink)]">
                     Story Count in {weeksToForecast} {dur.label}
                     {weeksToForecast > 1 ? 's' : ''}
-                  </h2>
+                  </h3>
                   <p className="mb-2 text-xs text-[var(--sea-ink-soft)]">
                     Pre-split story count (splitting IS accounted for)
                   </p>

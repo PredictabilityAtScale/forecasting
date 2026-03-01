@@ -119,7 +119,7 @@ export function computeCapabilityMatrix(
 /* ── Helpers ───────────────────────────────────────────────────────────── */
 
 /** Returns a color class for a risk score within [min, max] range.
- *  Lower risk = redder (worse). Higher = greener (better). */
+ *  Lower risk = redder (worse). Higher = bluer (better). */
 export function riskColor(
   score: number,
   min: number,
@@ -135,7 +135,7 @@ export function riskColor(
     return 'bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300'
   if (pct < 0.75)
     return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300'
-  return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300'
+  return 'bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-300'
 }
 
 /** Returns a color class for a skill level cell (0-4). */
@@ -148,9 +148,9 @@ export function levelColor(level: number): string {
     case 2:
       return 'bg-yellow-50 text-yellow-700 dark:bg-yellow-950/30 dark:text-yellow-400'
     case 3:
-      return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400'
+      return 'bg-sky-50 text-sky-700 dark:bg-sky-950/30 dark:text-sky-400'
     case 4:
-      return 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300'
+      return 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300'
     default:
       return ''
   }

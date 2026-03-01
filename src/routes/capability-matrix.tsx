@@ -176,7 +176,7 @@ function CapabilityMatrixPage() {
                   placeholder="Skill name"
                 />
                 <select
-                  className="field-input min-w-0 flex-[2] text-xs"
+                  className="field-input min-w-0 flex-[2] text-xs text-black dark:text-black"
                   value={sk.futureNeed}
                   onChange={(e) =>
                     updateSkill(si, {
@@ -266,7 +266,7 @@ function CapabilityMatrixPage() {
                     {people.map((_, pi) => (
                       <td key={pi} className="px-1 py-1 text-center">
                         <select
-                          className={`w-full max-w-[90px] rounded border border-[var(--line)] px-1 py-0.5 text-[11px] font-medium outline-none focus:border-[var(--lagoon)] ${levelColor(matrix[si]?.[pi] ?? 0)}`}
+                          className={`w-full max-w-[90px] rounded border border-[var(--line)] px-1 py-0.5 text-[11px] font-medium outline-none focus:border-[var(--lagoon)] ${levelColor(matrix[si]?.[pi] ?? 0)} text-black dark:text-black [&>option]:bg-white [&>option]:text-black`}
                           value={matrix[si]?.[pi] ?? 0}
                           onChange={(e) =>
                             setLevel(si, pi, parseInt(e.target.value))
@@ -386,7 +386,7 @@ function ResultsSection({ result }: { result: CapabilityResult }) {
                       </span>
                     </td>
                   ))}
-                  <td className="border-l-2 border-[var(--line)] px-2 py-2 text-center tabular-nums font-semibold text-emerald-700 dark:text-emerald-400">
+                  <td className="border-l-2 border-[var(--line)] px-2 py-2 text-center tabular-nums font-semibold text-sky-700 dark:text-sky-400">
                     {sk.teachAndCreate}
                   </td>
                   <td className="px-2 py-2 text-center tabular-nums font-semibold text-yellow-700 dark:text-yellow-400">
@@ -441,7 +441,7 @@ function ResultsSection({ result }: { result: CapabilityResult }) {
             Moderate
           </span>
           <span className="flex items-center gap-1">
-            <span className="inline-block h-3 w-6 rounded bg-emerald-100 dark:bg-emerald-900/40" />
+            <span className="inline-block h-3 w-6 rounded bg-sky-100 dark:bg-sky-900/40" />
             Healthy
           </span>
         </div>
@@ -648,7 +648,7 @@ function EducationalSection() {
             <p className="m-0 text-sm leading-relaxed text-[var(--sea-ink-soft)]">
               The risk score is the sum of all people's levels for a skill.
               Lower scores mean fewer capable people — higher organizational
-              risk. The heatmap colors range from red (highest risk) to green
+              risk. The heatmap colors range from red (highest risk) to blue
               (healthy).
             </p>
           </div>
@@ -693,8 +693,8 @@ function UrgencyTable({
     if (v >= 8) return 'bg-red-200 text-red-900 dark:bg-red-900/50 dark:text-red-200'
     if (v >= 6) return 'bg-orange-200 text-orange-900 dark:bg-orange-900/50 dark:text-orange-200'
     if (v >= 4) return 'bg-yellow-200 text-yellow-900 dark:bg-yellow-900/40 dark:text-yellow-200'
-    if (v >= 2) return 'bg-lime-200 text-lime-900 dark:bg-lime-900/40 dark:text-lime-200'
-    return 'bg-emerald-200 text-emerald-900 dark:bg-emerald-900/40 dark:text-emerald-200'
+    if (v >= 2) return 'bg-sky-200 text-sky-900 dark:bg-sky-900/40 dark:text-sky-200'
+    return 'bg-blue-200 text-blue-900 dark:bg-blue-900/40 dark:text-blue-200'
   }
 
   return (

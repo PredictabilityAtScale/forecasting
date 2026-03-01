@@ -7,8 +7,6 @@ import Footer from '../components/Footer'
 import Header from '../components/Header'
 import { SITE_TITLE, SITE_DESCRIPTION } from '../lib/site'
 
-import appCss from '../styles.css?url'
-
 import type { QueryClient } from '@tanstack/react-query'
 
 interface MyRouterContext {
@@ -40,10 +38,6 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         rel: 'icon',
         href: '/fo.jpg',
         type: 'image/jpeg',
-      },
-      {
-        rel: 'stylesheet',
-        href: appCss,
       },
     ],
   }),
