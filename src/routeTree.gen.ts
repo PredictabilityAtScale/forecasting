@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WrongOrderRouteImport } from './routes/wrong-order'
+import { Route as VotingRouteImport } from './routes/voting'
 import { Route as ThroughputRouteImport } from './routes/throughput'
 import { Route as TeamDashboardRouteImport } from './routes/team-dashboard'
 import { Route as StoryCountRouteImport } from './routes/story-count'
@@ -21,6 +22,11 @@ import { Route as IndexRouteImport } from './routes/index'
 const WrongOrderRoute = WrongOrderRouteImport.update({
   id: '/wrong-order',
   path: '/wrong-order',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VotingRoute = VotingRouteImport.update({
+  id: '/voting',
+  path: '/voting',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ThroughputRoute = ThroughputRouteImport.update({
@@ -67,6 +73,7 @@ export interface FileRoutesByFullPath {
   '/story-count': typeof StoryCountRoute
   '/team-dashboard': typeof TeamDashboardRoute
   '/throughput': typeof ThroughputRoute
+  '/voting': typeof VotingRoute
   '/wrong-order': typeof WrongOrderRoute
 }
 export interface FileRoutesByTo {
@@ -77,6 +84,7 @@ export interface FileRoutesByTo {
   '/story-count': typeof StoryCountRoute
   '/team-dashboard': typeof TeamDashboardRoute
   '/throughput': typeof ThroughputRoute
+  '/voting': typeof VotingRoute
   '/wrong-order': typeof WrongOrderRoute
 }
 export interface FileRoutesById {
@@ -88,6 +96,7 @@ export interface FileRoutesById {
   '/story-count': typeof StoryCountRoute
   '/team-dashboard': typeof TeamDashboardRoute
   '/throughput': typeof ThroughputRoute
+  '/voting': typeof VotingRoute
   '/wrong-order': typeof WrongOrderRoute
 }
 export interface FileRouteTypes {
@@ -100,6 +109,7 @@ export interface FileRouteTypes {
     | '/story-count'
     | '/team-dashboard'
     | '/throughput'
+    | '/voting'
     | '/wrong-order'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -110,6 +120,7 @@ export interface FileRouteTypes {
     | '/story-count'
     | '/team-dashboard'
     | '/throughput'
+    | '/voting'
     | '/wrong-order'
   id:
     | '__root__'
@@ -120,6 +131,7 @@ export interface FileRouteTypes {
     | '/story-count'
     | '/team-dashboard'
     | '/throughput'
+    | '/voting'
     | '/wrong-order'
   fileRoutesById: FileRoutesById
 }
@@ -131,6 +143,7 @@ export interface RootRouteChildren {
   StoryCountRoute: typeof StoryCountRoute
   TeamDashboardRoute: typeof TeamDashboardRoute
   ThroughputRoute: typeof ThroughputRoute
+  VotingRoute: typeof VotingRoute
   WrongOrderRoute: typeof WrongOrderRoute
 }
 
@@ -141,6 +154,13 @@ declare module '@tanstack/react-router' {
       path: '/wrong-order'
       fullPath: '/wrong-order'
       preLoaderRoute: typeof WrongOrderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/voting': {
+      id: '/voting'
+      path: '/voting'
+      fullPath: '/voting'
+      preLoaderRoute: typeof VotingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/throughput': {
@@ -203,6 +223,7 @@ const rootRouteChildren: RootRouteChildren = {
   StoryCountRoute: StoryCountRoute,
   TeamDashboardRoute: TeamDashboardRoute,
   ThroughputRoute: ThroughputRoute,
+  VotingRoute: VotingRoute,
   WrongOrderRoute: WrongOrderRoute,
 }
 export const routeTree = rootRouteImport

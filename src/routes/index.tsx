@@ -244,6 +244,18 @@ function App() {
           }
         />
         <ToolCard
+          title="Voting Scorer"
+          description="Enter ranked ballots and compare plurality, Borda count, and Schulze outcomes with live pairwise matrices and validation."
+          href="/voting"
+          delay={315}
+          icon={
+            <svg className="h-7 w-7 text-[var(--lagoon)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 11l3 3L22 4" />
+              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+            </svg>
+          }
+        />
+        <ToolCard
           title="Latent Defect Estimation"
           description="Estimate how many defects remain undiscovered using the Lincoln-Petersen capture-recapture method with two independent test groups."
           href="/latent-defect"
