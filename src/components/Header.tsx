@@ -74,7 +74,7 @@ export default function Header() {
               className="nav-link inline-flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-semibold"
               aria-haspopup="menu"
             >
-              Metrics
+              Metric Tools
               <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
                 <path d="M3.22 5.97a.75.75 0 0 1 1.06 0L8 9.69l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L3.22 7.03a.75.75 0 0 1 0-1.06Z" />
               </svg>
@@ -86,21 +86,6 @@ export default function Header() {
               >
                 Team Dashboard
               </Link>
-            </div>
-          </div>
-
-          <div className="group relative">
-            <button
-              type="button"
-              className="nav-link inline-flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-semibold"
-              aria-haspopup="menu"
-            >
-              Others
-              <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-                <path d="M3.22 5.97a.75.75 0 0 1 1.06 0L8 9.69l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L3.22 7.03a.75.75 0 0 1 0-1.06Z" />
-              </svg>
-            </button>
-            <div className="invisible absolute left-0 top-full z-50 mt-1 min-w-56 rounded-xl border border-[var(--line)] bg-[var(--surface)] p-2 opacity-0 shadow-sm transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
               <Link
                 to="/wrong-order"
                 className="block rounded-lg px-3 py-2 text-sm font-semibold text-[var(--sea-ink-soft)] no-underline transition hover:bg-[var(--link-bg-hover)] hover:text-[var(--sea-ink)]"
@@ -213,7 +198,7 @@ export default function Header() {
           </Link>
 
           <p className="px-3 pb-1 pt-3 text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--sea-ink-soft)]">
-            Metrics
+            Metric Tools
           </p>
           <Link
             to="/team-dashboard"
@@ -223,10 +208,6 @@ export default function Header() {
           >
             Team Dashboard
           </Link>
-
-          <p className="px-3 pb-1 pt-3 text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--sea-ink-soft)]">
-            Others
-          </p>
           <Link
             to="/wrong-order"
             className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-[var(--sea-ink-soft)] no-underline transition hover:bg-[var(--link-bg-hover)] hover:text-[var(--sea-ink)]"

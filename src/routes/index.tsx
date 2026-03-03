@@ -115,6 +115,79 @@ function App() {
         </div>
       </section>
 
+      {/* About */}
+      <section className="island-shell mt-10 overflow-hidden rounded-3xl px-6 py-8 sm:px-8 sm:py-10 lg:px-10">
+        <div className="grid gap-8 lg:grid-cols-[320px_minmax(0,1fr)] lg:items-center">
+          <div className="relative mx-auto w-full max-w-xs lg:mx-0">
+            <div className="pointer-events-none absolute -left-6 -top-6 h-28 w-28 rounded-full bg-[radial-gradient(circle,rgba(79,184,178,0.26),transparent_70%)]" />
+            <div className="pointer-events-none absolute -bottom-8 -right-4 h-32 w-32 rounded-full bg-[radial-gradient(circle,rgba(47,106,74,0.18),transparent_70%)]" />
+            <img
+              src="/images/022-XFXZjGLDxjk.jpeg"
+              alt="Troy Magennis"
+              className="relative aspect-[4/5] w-full rounded-[2rem] border border-[var(--line)] object-cover shadow-[0_24px_50px_rgba(23,58,64,0.16)]"
+            />
+          </div>
+
+          <div>
+            <p className="island-kicker mb-3">About Troy Magennis</p>
+            <h2 className="display-title mb-4 max-w-3xl text-3xl leading-tight font-semibold tracking-tight text-[var(--sea-ink)] sm:text-4xl">
+              Quantitative forecasting for software leaders who need better decisions, not better guesses.
+            </h2>
+            <div className="grid gap-3 text-sm text-[var(--sea-ink-soft)] sm:grid-cols-3">
+              <div className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] px-4 py-3">
+                <p className="text-2xl font-semibold text-[var(--sea-ink)]">30+ years</p>
+                <p className="mt-1 m-0">Across engineering, leadership, and delivery at scale.</p>
+              </div>
+              <div className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] px-4 py-3">
+                <p className="text-2xl font-semibold text-[var(--sea-ink)]">Founder</p>
+                <p className="mt-1 m-0">Focused Objective, specializing in metrics and probabilistic forecasting.</p>
+              </div>
+              <div className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] px-4 py-3">
+                <p className="text-2xl font-semibold text-[var(--sea-ink)]">Trusted advisor</p>
+                <p className="mt-1 m-0">Helping teams replace opinion-driven planning with evidence-driven decisions.</p>
+              </div>
+            </div>
+
+            <div className="mt-6 space-y-4 text-sm leading-7 text-[var(--sea-ink-soft)] sm:text-base">
+              <p className="m-0">
+                Troy Magennis is the founder of Focused Objective and one of the most recognized voices in
+                quantitative agile forecasting. He helps software organizations make better delivery, planning,
+                and investment decisions by using historical data, flow metrics, and probabilistic thinking in
+                place of intuition-heavy forecasting.
+              </p>
+              <p className="m-0">
+                His career spans more than three decades, from hands-on technical roles to executive leadership
+                in large technology organizations. That range matters: Troy understands both the mechanics of
+                delivery and the commercial pressure behind portfolio choices, deadlines, dependencies, and risk.
+              </p>
+              <p className="m-0">
+                Through consulting, training, and conference speaking, he has helped leaders and teams build more
+                predictable systems of work, cut through misleading metrics, and create practical forecasting
+                approaches that executives can actually trust. His work is grounded, mathematically rigorous, and
+                relentlessly focused on better outcomes.
+              </p>
+            </div>
+
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <a
+                href="https://www.linkedin.com/in/troymagennis/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-[rgba(50,143,151,0.3)] bg-[rgba(79,184,178,0.14)] px-6 py-3 text-sm font-semibold text-[var(--lagoon-deep)] no-underline transition hover:-translate-y-0.5 hover:bg-[rgba(79,184,178,0.24)]"
+              >
+                Connect on LinkedIn
+                <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M4.5 2a.5.5 0 0 0 0 1h6.793L2.146 12.146a.5.5 0 0 0 .708.708L12 3.707V10.5a.5.5 0 0 0 1 0v-9a.5.5 0 0 0-.5-.5h-8Z" />
+                </svg>
+              </a>
+              <p className="m-0 text-sm text-[var(--sea-ink-soft)]">
+                Available for workshops, advisory work, and practical forecasting training.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Tool cards */}
       <section className="mt-10">
         <h2 className="mb-4 text-2xl font-semibold text-[var(--sea-ink)] sm:text-3xl">Tools</h2>
