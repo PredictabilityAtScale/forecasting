@@ -1,0 +1,58 @@
+<simulation name="Event Targeting for Events" locale="en-US">
+
+  <example>This example shows how events can be defined that are only active during certain phases.
+These can be used to model different occurrence rates at different times during a project. E.g. more defects reported later in the project.
+See the resources ribbon tab for documentation, exercises and tutorials.</example>
+
+  <execute intervalUnit="days">
+    	<visual />
+  </execute>
+  
+  <setup>
+  	
+  	<!-- Define three project phases where defects can target different occurrence rates and cycle-times
+  	
+  	Exercises -
+  		1. Look at the Kanban board columns over the project timeline. Observe no defects until in Alpha and Beta
+  		2. Notice that the column cycle-time for each defect card is smaller during the Final Release phase (because we overrided the default cycle-times.)
+  	
+  	Tip -
+  		1. If no phase is specified, the defect, added scope or blocking event applies to EVERY phase and when NO phase is defined.
+  		2. Multiple phases can be targeted. Separate their names using the pipe | character
+  		3. Although we show defects here, the same format works for Added Scope and Blocking Events.
+    	-->
+ 	<phases>
+ 		
+ 		<phase startPercentage="30" endPercentage="50">Alpha Live</phase>
+ 		<phase startPercentage="51" endPercentage="79">Beta Live</phase>
+ 		<phase startPercentage="80" endPercentage="100">Final Release</phase>
+		
+ 	</phases>
+ 
+ 	<defects>
+ 		
+ 		<!-- early defects reported during alpha and beta -->
+		<defect columnId="3" startsInColumnId="1" phases="Alpha Live|Beta Live"
+			occurrenceLowBound="3" occurrenceHighBound="6">Early Bugs {0}</defect>
+		
+		<!-- near the end, LOTS of small defects found and fixed -->
+		<defect columnId="3" startsInColumnId="1" phases="Final Release"
+			occurrenceLowBound="2" occurrenceHighBound="3">Final Bugs {0}
+			<column id="1" estimateLowBound="0.5" estimateHighBound="1" />	
+			<column id="2" estimateLowBound="0.5" estimateHighBound="1" />	
+			<column id="3" estimateLowBound="0.5" estimateHighBound="1" />	
+		</defect>
+
+	</defects>
+ 
+ 
+    	<columns>
+       		<column id="1" estimateLowBound="1" estimateHighBound="2" wipLimit="2">Design</column>
+       		<column id="2" estimateLowBound="2" estimateHighBound="5" wipLimit="4" displayWidth="2">Development</column>
+       		<column id="3" estimateLowBound="1" estimateHighBound="3" wipLimit="2">Test</column>
+   	</columns>
+  	
+  	<backlog type="simple" simpleCount="100" />
+  	
+  </setup>
+</simulation>

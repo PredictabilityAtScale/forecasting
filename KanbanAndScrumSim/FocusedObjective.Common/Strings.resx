@@ -1,0 +1,370 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Error1" xml:space="preserve">
+    <value>{0} feature not implement at this time.</value>
+    <comment>Message when a SimML file is trying to execute a feature that is not implemented yet.</comment>
+  </data>
+  <data name="Error11" xml:space="preserve">
+    <value>Failed to read license. Please check the license entry and contact FocusedObjective.com support if you believe you have a valid license file. Remove the '&lt;?xml...' declaration line from the top of your file if it exists.</value>
+    <comment>x</comment>
+  </data>
+  <data name="Error12" xml:space="preserve">
+    <value>License signature match fail. The license text doesn't match the signature. This occurs if the license text has been modified from its original content.</value>
+    <comment>x</comment>
+  </data>
+  <data name="Error13" xml:space="preserve">
+    <value>No license element found.</value>
+    <comment>not used</comment>
+  </data>
+  <data name="Error14" xml:space="preserve">
+    <value>No license element. Using free license which is limited in functionality. Go to focusedobjective.com to request a trial or buy a fully featured license.</value>
+    <comment>x</comment>
+  </data>
+  <data name="Error15" xml:space="preserve">
+    <value>License limits the number of simulation cycles to {0}. Go to focusedobjective.com and request a trial license or purchase a full license.</value>
+    <comment>x</comment>
+  </data>
+  <data name="Error16" xml:space="preserve">
+    <value>License doesn't have the {0} feature enabled. Go to focusedobjective.com and request a trial license or purchase a full license.</value>
+    <comment>x</comment>
+  </data>
+  <data name="Error17" xml:space="preserve">
+    <value>License has expired.  Go to focusedobjective.com and request a trial license or purchase a full license.</value>
+    <comment>x</comment>
+  </data>
+  <data name="Error18" xml:space="preserve">
+    <value>Attribute value for 'occurrenceHighBound' must be greater than the value for 'occurrenceLowBound' for the added scope section named {0}.</value>
+    <comment>x</comment>
+  </data>
+  <data name="Error19" xml:space="preserve">
+    <value>Attribute value for 'estimateHighBound' must be greater than the value for 'estimateLowBound' for the blocking event section named {0}.</value>
+    <comment>x</comment>
+  </data>
+  <data name="Error2" xml:space="preserve">
+    <value>Simulation did not complete within {0} simulation intervals. This is either due to a model error, or due to the 'limitIntervalsTo' attribute value of the 'execute' section being too low.</value>
+    <comment>Simulation didn't complete within the limit of intervals defined.</comment>
+  </data>
+  <data name="Error20" xml:space="preserve">
+    <value>Attribute value for 'occurrenceHighBound' must be greater than the value for 'occurrenceLowBound' for the blocking event section named {0}.</value>
+    <comment>x</comment>
+  </data>
+  <data name="Error21" xml:space="preserve">
+    <value>No setup/columns/column Id found that matches the specified columnId for the blocking event section named {0}.</value>
+    <comment>x</comment>
+  </data>
+  <data name="Error22" xml:space="preserve">
+    <value>No setup/columns/column Id or startsInColumnId found that matches the specified columnId for the defect section named {0}.</value>
+    <comment>x</comment>
+  </data>
+  <data name="Error23" xml:space="preserve">
+    <value>Attribute value for 'occurrenceHighBound' must be greater than (or equal) the value for 'occurrenceLowBound' for the defect section named {0}.</value>
+    <comment>x</comment>
+  </data>
+  <data name="Error24" xml:space="preserve">
+    <value>No setup/columns/column Id found that matches the specified columnId in the setup/defects/defect/column section with id={0}.</value>
+    <comment>x</comment>
+  </data>
+  <data name="Error25" xml:space="preserve">
+    <value>Attribute value for 'estimateHighBound' must be greater than the value for 'estimateLowBound' in the setup/defects/defect/column section with id={0}.</value>
+    <comment>x</comment>
+  </data>
+  <data name="Error26" xml:space="preserve">
+    <value>Attribute value for 'estimateHighBound' must be greater than the value for 'estimateLowBound' for the custom backlog section entry named {0}.</value>
+    <comment>x</comment>
+  </data>
+  <data name="Error27" xml:space="preserve">
+    <value>Attribute value for 'percentageHighBound' must be greater than the value for 'percentageLowBound' for the custom backlog section entry named {0}.</value>
+    <comment>x</comment>
+  </data>
+  <data name="Error28" xml:space="preserve">
+    <value>Attribute value for 'estimateHighBound' must be greater than the value for 'estimateLowBound' for the setup/backlog/custom/column section entry with id={0}.</value>
+    <comment>x</comment>
+  </data>
+  <data name="Error29" xml:space="preserve">
+    <value>No setup/columns/column Id found that matches the specified columnId for the setup/backlog/custom/column section entry with id={0}.</value>
+    <comment>x</comment>
+  </data>
+  <data name="Error3" xml:space="preserve">
+    <value>Missing mandatory element: '{0}'</value>
+    <comment>Missing element.</comment>
+  </data>
+  <data name="Error30" xml:space="preserve">
+    <value>Invalid Date format specified in '{0}' section. Please format dates to be in the YYYYMMDD format or the format specifiec in the 'dateFormat' attribute of the 'execute' section.</value>
+    <comment>x</comment>
+  </data>
+  <data name="Error31" xml:space="preserve">
+    <value>The 'workdays' attribute cannot be an empty string for the execute/forecastDate section. This value is a comma-separated list of days of the week that work will occur. For example "monday,tuesday,wednesday,thursday,friday".</value>
+    <comment>x</comment>
+  </data>
+  <data name="Error32" xml:space="preserve">
+    <value>The 'workdays' attribute is invalid for the execute/forecastDate section. This value is a comma-separated list of days of the week that work will occur. For example "monday,tuesday,wednesday,thursday,friday".</value>
+    <comment>x</comment>
+  </data>
+  <data name="Error33" xml:space="preserve">
+    <value>Attribute value for 'estimateHighBound' must be greater than the value for 'estimateLowBound' for the defect section named {0}.</value>
+    <comment>x</comment>
+  </data>
+  <data name="Error34" xml:space="preserve">
+    <value>Attribute value for 'estimateHighBound' must be greater than the value for 'estimateLowBound' for the Added Scope section named {0}.</value>
+    <comment>x</comment>
+  </data>
+  <data name="Error35" xml:space="preserve">
+    <value>Unable to save video file to location {0}. Save failed with the error message: {1}</value>
+    <comment>x</comment>
+  </data>
+  <data name="Error36" xml:space="preserve">
+    <value>Sensitivity type must be iterations when simulating Scrum. Simulation type set to Iterations. </value>
+    <comment>x</comment>
+  </data>
+  <data name="Error37" xml:space="preserve">
+    <value>Not enough distribution arguments specified for distribution. This distribution requires at least {0} arguments.</value>
+    <comment>x</comment>
+  </data>
+  <data name="Error38" xml:space="preserve">
+    <value>Invalid distribution argument. Argument number {0} in the argument string {1} could not be converted to a number.</value>
+    <comment>x</comment>
+  </data>
+  <data name="Error39" xml:space="preserve">
+    <value>Invalid distribution argument. Argument number {0} is an invalid value for the distribution.</value>
+    <comment>x</comment>
+  </data>
+  <data name="Error4" xml:space="preserve">
+    <value>Missing mandatory attribute '{0}' for element '{1}'</value>
+    <comment>Missing mandatory attribute.</comment>
+  </data>
+  <data name="Error40" xml:space="preserve">
+    <value>Parameters for the '{0}' distribution are: {1}. See {2} for more information.</value>
+  </data>
+  <data name="Error41" xml:space="preserve">
+    <value>Missing optional attribute '{0}' for element '{1}'. Default used '{2}'</value>
+    <comment>General informational message for list attributes vales that are omitted.</comment>
+  </data>
+  <data name="Error42" xml:space="preserve">
+    <value>Invalid value for attribute '{0}' for element '{1}'. '{2}' is not recognized or valid.</value>
+    <comment>Invalid attribute value.</comment>
+  </data>
+  <data name="Error43" xml:space="preserve">
+    <value>Attribute '{0}' for element '{1}' must have a value greater than {2}.</value>
+    <comment>x</comment>
+  </data>
+  <data name="Error44" xml:space="preserve">
+    <value>Attribute value for 'estimateHighBound' must be greater than the value for 'estimateLowBound' for the column named '{0}' with an id={1} .</value>
+    <comment>x</comment>
+  </data>
+  <data name="Error45" xml:space="preserve">
+    <value>Attribute value for 'maxWip' must be greater than the value for 'minWip' for the execute/addStaff/column with an id={0}.</value>
+    <comment>x</comment>
+  </data>
+  <data name="Error46" xml:space="preserve">
+    <value>No setup/columns/column Id found that matched the specified Id in the execute/addStaff/column with an id={0}.</value>
+    <comment>x</comment>
+  </data>
+  <data name="Error47" xml:space="preserve">
+    <value>No distribution with the name '{0}' is defined in the setup/distributions section for the {1} section named {2}.</value>
+    <comment>x</comment>
+  </data>
+  <data name="Error48" xml:space="preserve">
+    <value>Attribute value for 'endPercentage' must be greater than the value for 'startPercentage' for the phase section entry named {0}.</value>
+  </data>
+  <data name="Error49" xml:space="preserve">
+    <value>Attribute '{0}' for element '{1}' must have a value less than {2}.</value>
+  </data>
+  <data name="Error5" xml:space="preserve">
+    <value>At least one '{0}' sub-element is needed</value>
+    <comment>Sub elements necessary.</comment>
+  </data>
+  <data name="Error50" xml:space="preserve">
+    <value>It is recommended that all {0} sections have a name.</value>
+  </data>
+  <data name="Error51" xml:space="preserve">
+    <value>The phase named '{0}' overlaps with the phase named '{1}'. There can be no overlap in start and end attribute values between phases.</value>
+  </data>
+  <data name="Error52" xml:space="preserve">
+    <value>Invalid Date format specified in '{0}' section named '{1}'. Please format dates to be in the YYYYMMDD format or the format specifiec in the 'dateFormat' attribute of the 'execute' section.</value>
+  </data>
+  <data name="Error53" xml:space="preserve">
+    <value>No default class of service specified in 'setup/classOfServices'. Add a default="true" to one of the defined classes of services that will be used if no class of service is specified.</value>
+  </data>
+  <data name="Error54" xml:space="preserve">
+    <value>No class of service named '{0}' can be found in the section '{1}' named '{2}'.</value>
+  </data>
+  <data name="Error55" xml:space="preserve">
+    <value>Invalid numeric value for attribute '{0}' in element '{1}'. '{2}' is not recognized as a numerical value.</value>
+  </data>
+  <data name="Error56" xml:space="preserve">
+    <value>Unable to create '{0}' distribution named '{1}'. No valid samples, or a non-numeric sample were found or the supplied 'Count' attribute was less than zero. Count must be greater than 0 and samples must be numeric and  separated by '|' or a new-line character, or a ',' for locales that do not use that symbol as a decimal separator.</value>
+  </data>
+  <data name="Error57" xml:space="preserve">
+    <value>'{0}' is an invalid variable name. Variable can only contain upper and lowercase letters (a-Z) and underscore (_)characters.</value>
+  </data>
+  <data name="Error58" xml:space="preserve">
+    <value>Attribute value for 'end' must be greater than the value for 'start' for the phase section entry named {0}.</value>
+  </data>
+  <data name="Error59" xml:space="preserve">
+    <value>Formula error '{3}' returned for attribute value for '{0}' in element '{1}'. Formula was: '{2}'</value>
+  </data>
+  <data name="Error6" xml:space="preserve">
+    <value>For Kanban simulation, at least one 'column' entry in the 'columns' section needs to be defined</value>
+    <comment>columns necessary for Kanban</comment>
+  </data>
+  <data name="Error60" xml:space="preserve">
+    <value>No setup/columns/column Id found that matches the specified 'initialColumn' for the setup/backlog/custom section entry initialColumn={0}.</value>
+  </data>
+  <data name="Error61" xml:space="preserve">
+    <value>One or more deliverables '{0}' cannot be found in setup/backlog/deliverable section for the {1} section named {2}.</value>
+  </data>
+  <data name="Error62" xml:space="preserve">
+    <value>No custom backlog named '{0}' can be found in the section '{1}' for the addedScope named '{2}'.</value>
+  </data>
+  <data name="Error63" xml:space="preserve">
+    <value>No backlog deliverable named '{0}' can be found in the section '{1}' for the addedScope named '{2}'.</value>
+  </data>
+  <data name="Error64" xml:space="preserve">
+    <value>No custom backlog named '{0}' can be found in the section '{1}' for the defect named '{2}'.</value>
+  </data>
+  <data name="Error65" xml:space="preserve">
+    <value>No backlog deliverable named '{0}' can be found in the section '{1}' for the defect named '{2}'.</value>
+  </data>
+  <data name="Error66" xml:space="preserve">
+    <value>No custom backlog named '{0}' can be found in the section '{1}' for the blockingEvent named '{2}'.</value>
+  </data>
+  <data name="Error67" xml:space="preserve">
+    <value>No backlog deliverable named '{0}' can be found in the section '{1}' for the blockingEvent named '{2}'.</value>
+  </data>
+  <data name="Error68" xml:space="preserve">
+    <value>Attribute '{0}' for element '{1}' must have a value greater than or equal {2}.</value>
+  </data>
+  <data name="Error7" xml:space="preserve">
+    <value>One or more phases '{0}' cannot be found in setup/phases section for the {1} section named {2}.</value>
+  </data>
+  <data name="Error8" xml:space="preserve">
+    <value>Column 'id' values must be unique. Duplicate column id values are not allowed. Column id values can be any integer value, with columns being ordered left to right from lowest to highest id value. They are used as references when defining events.</value>
+    <comment>duplicate id values</comment>
+  </data>
+  <data name="Info1" xml:space="preserve">
+    <value>Attribute value for '{0}' in element '{1}' changed from '{2}' to '{3}'</value>
+  </data>
+  <data name="Info2" xml:space="preserve">
+    <value>Value for variable '{0}' changed from '{1}' to '{2}'</value>
+  </data>
+  <data name="Message1" xml:space="preserve">
+    <value>No column could be adjusted to achieve goal. Add more movable wip limit columns to the addStaff command, or increase the maxWip attribute for a column.</value>
+  </data>
+</root>

@@ -1,0 +1,113 @@
+﻿<UserControl x:Class="FocusedObjective.KanbanSim.ChartsUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:FocusedObjective.KanbanSim"
+             xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
+             mc:Ignorable="d" 
+             d:DesignHeight="400" d:DesignWidth="600" xmlns:my="clr-namespace:FocusedObjective.KanbanSim" d:DataContext="{d:DesignInstance Type=local:StatisticData}">
+
+    <UserControl.Resources>
+        <HierarchicalDataTemplate x:Key="treeViewDataTemplate" ItemsSource="{Binding Children}">
+            <TextBlock Text="{Binding Name}" />
+        </HierarchicalDataTemplate>
+    </UserControl.Resources>
+
+    <Grid>
+        <TabControl Name="tabControlCharts">
+
+            <TabItem Header="Statistics" Name="tabItemStatistics">
+
+                <Grid x:Name="StatsTabGrid" Margin="0">
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid x:Name="LayoutRootStats" Grid.Row="0">
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Orientation="Vertical" Grid.Row="0">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Choose a measurement: " Margin="5"/>
+                                <ComboBox HorizontalAlignment="Left" Margin="5" Width="250" Name="HistogramCombo" SelectionChanged="HistogramCombo_SelectionChanged" />
+                                <ComboBox HorizontalAlignment="Left" Margin="5" Width="250" Name="HistogramSubCombo" SelectionChanged="HistogramSubCombo_SelectionChanged" Visibility="Hidden"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Vertical" HorizontalAlignment="Left">
+                                <TextBlock Name="descriptionTextBlock" TextWrapping="Wrap" HorizontalAlignment="Left" MaxWidth="600">Choose a measurement from the list above to see the current data.</TextBlock>
+                            </StackPanel>
+                            <StackPanel Orientation="Vertical" HorizontalAlignment="Left">
+                                <WrapPanel Name="currentDataPanel" Orientation="Horizontal" DataContext="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=my:ChartsUserControl, AncestorLevel=1}, Path=CurrentStatisticsData}">
+                                    <TextBlock Margin="5" Text="Sample Count:" FontWeight="Bold"/>
+                                    <TextBlock Margin="5" Text="{Binding SampleCount}" />
+                                    <TextBlock Margin="5" Text="Min:" FontWeight="Bold"/>
+                                    <TextBlock Margin="5" Text="{Binding Minimum}" />
+                                    <TextBlock Margin="5" Text="Avg:" FontWeight="Bold" />
+                                    <TextBlock Margin="5" Text="{Binding Average}" />
+                                    <TextBlock Margin="5" Text="Median:" FontWeight="Bold" />
+                                    <TextBlock Margin="5" Text="{Binding Median}" />
+                                    <TextBlock Margin="5" Text="Max:" FontWeight="Bold" />
+                                    <TextBlock Margin="5" Text="{Binding Maximum}" />
+                                    <TextBlock Margin="5" Text="Std Dev:" FontWeight="Bold"/>
+                                    <TextBlock Margin="5" Text="{Binding StandardDeviation}" />
+                                    <TextBlock Margin="5" Text="5th%:" FontWeight="Bold" />
+                                    <TextBlock Margin="5" Text="{Binding FifthPercentile}" />
+                                    <TextBlock Margin="5" Text="25th%:" FontWeight="Bold" />
+                                    <TextBlock Margin="5" Text="{Binding TwentyFifthPercentile}" />
+                                    <TextBlock Margin="5" Text="75th%:" FontWeight="Bold" />
+                                    <TextBlock Margin="5" Text="{Binding SeventyFifthPercentile}" />
+                                    <TextBlock Margin="5" Text="95th%:" FontWeight="Bold" />
+                                    <TextBlock Margin="5" Text="{Binding NinetyFifthPercentile}" />
+                                </WrapPanel>
+                            </StackPanel>
+
+
+                        </StackPanel>
+                    </Grid>
+                    <Grid Grid.Row="1">
+                        <lvc:CartesianChart d:DataContext="{d:DesignInstance Type=local:ChartsUserControl}" Series="{Binding SeriesCollection}" LegendLocation="Bottom" VerticalAlignment="Stretch">
+                            <lvc:CartesianChart.AxisX>
+                                <lvc:Axis Title="Bin" Labels="{Binding Labels}"></lvc:Axis>
+                            </lvc:CartesianChart.AxisX>
+                            <lvc:CartesianChart.AxisY>
+                                <lvc:Axis Title="Frequency" LabelFormatter="{Binding Formatter}"></lvc:Axis>
+                                <lvc:Axis Title="Cumulative Prob" Position="RightTop" LabelFormatter="{Binding SecondaryFormatter}" ></lvc:Axis>
+                            </lvc:CartesianChart.AxisY>
+
+                        </lvc:CartesianChart>
+                    </Grid>
+
+
+
+
+                </Grid>
+            </TabItem>
+
+            
+            <TabItem Header="Cumulative Flow (Single Run)" Name="tabItemCumulativeFlow" IsSelected="False">
+                
+                
+                <lvc:CartesianChart Grid.Row="2" Series="{Binding SeriesCollectionCumulativeFlow}"  LegendLocation="Right">
+                    <lvc:CartesianChart.AxisX>
+                        <lvc:Axis Title="interval" LabelFormatter="{Binding XFormatterCumulativeFlow}"></lvc:Axis>
+                    </lvc:CartesianChart.AxisX>
+                    <lvc:CartesianChart.AxisY>
+                        <lvc:Axis Title="count" LabelFormatter="{Binding YFormatterCumulativeFlow}"></lvc:Axis>
+                    </lvc:CartesianChart.AxisY>
+                </lvc:CartesianChart>
+            </TabItem>
+<!--
+            <TabItem Header="By Interval (Single Run)" Name="tabItemIntervals" IsSelected="False">
+             
+            </TabItem>
+            -->
+
+        </TabControl>
+    </Grid>
+</UserControl>

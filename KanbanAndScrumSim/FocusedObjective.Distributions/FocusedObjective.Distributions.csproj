@@ -1,0 +1,191 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{3C2F4020-10F9-4138-BC04-F6FE1EDE9A11}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>FocusedObjective.Distributions</RootNamespace>
+    <AssemblyName>FocusedObjective.Distributions</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release Siemens|AnyCPU'">
+    <OutputPath>bin\Release Siemens\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Siemens|AnyCPU'">
+    <OutputPath>bin\Siemens\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\FocusedObjective.Simulation\Extensions\StatisticExtensions.cs">
+      <Link>Extensions\StatisticExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\FocusedObjective.Simulation\GoogleChartHelpers.cs">
+      <Link>GoogleChartHelpers.cs</Link>
+    </Compile>
+    <Compile Include="..\FocusedObjective.Simulation\StatisticResults.cs">
+      <Link>StatisticResults.cs</Link>
+    </Compile>
+    <Compile Include="..\GlobalVersionInformation.cs">
+      <Link>Properties\GlobalVersionInformation.cs</Link>
+    </Compile>
+    <Compile Include="Distributions\ModelDistribution.cs" />
+    <Compile Include="Distributions\SIPDistribution.cs" />
+    <Compile Include="Distributions\FromSamplesDistribution.cs" />
+    <Compile Include="Distributions\CustomRangeDistribution.cs" />
+    <Compile Include="Distributions\CryptoRandomGenerator.cs" />
+    <Compile Include="Distributions\CustomDiscreteDistribution.cs" />
+    <Compile Include="Distributions\DistributionHelper.cs" />
+    <Compile Include="Distributions\MarkovChainDistribution.cs" />
+    <Compile Include="Enums\DistributionRangeProcessing.cs" />
+    <Compile Include="Enums\DistributionNumberType.cs" />
+    <Compile Include="Enums\ZeroHandlingEnum.cs" />
+    <Compile Include="Markov\Chain.cs" />
+    <Compile Include="Markov\Link.cs" />
+    <Compile Include="Markov\MarkovChain.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Distribution.cs" />
+    <Compile Include="Random\ContinuousRNDs\BetaDistribution.cs" />
+    <Compile Include="Random\ContinuousRNDs\BetaPrimeDistribution.cs" />
+    <Compile Include="Random\ContinuousRNDs\CauchyDistribution.cs" />
+    <Compile Include="Random\ContinuousRNDs\ChiDistribution.cs" />
+    <Compile Include="Random\ContinuousRNDs\ChiSquareDistribution.cs" />
+    <Compile Include="Random\ContinuousRNDs\ContinuousUniformDistribution.cs" />
+    <Compile Include="Random\ContinuousRNDs\ErlangDistribution.cs" />
+    <Compile Include="Random\ContinuousRNDs\ExponentialDistribution.cs" />
+    <Compile Include="Random\ContinuousRNDs\FisherSnedecorDistribution.cs" />
+    <Compile Include="Random\ContinuousRNDs\FisherTippettDistribution.cs" />
+    <Compile Include="Random\ContinuousRNDs\GammaDistribution.cs" />
+    <Compile Include="Random\ContinuousRNDs\LaplaceDistribution.cs" />
+    <Compile Include="Random\ContinuousRNDs\LognormalDistribution.cs" />
+    <Compile Include="Random\ContinuousRNDs\NormalDistribution.cs" />
+    <Compile Include="Random\ContinuousRNDs\ParetoDistribution.cs" />
+    <Compile Include="Random\ContinuousRNDs\PowerDistribution.cs" />
+    <Compile Include="Random\ContinuousRNDs\RayleighDistribution.cs" />
+    <Compile Include="Random\ContinuousRNDs\StudentsTDistribution.cs" />
+    <Compile Include="Random\ContinuousRNDs\TriangularDistribution.cs" />
+    <Compile Include="Random\ContinuousRNDs\WeibullDistribution.cs" />
+    <Compile Include="Random\DiscreteRNDs\BernoulliDistribution.cs" />
+    <Compile Include="Random\DiscreteRNDs\BinomialDistribution.cs" />
+    <Compile Include="Random\DiscreteRNDs\DiscreteUniformDistribution.cs" />
+    <Compile Include="Random\DiscreteRNDs\GeometricDistribution.cs" />
+    <Compile Include="Random\DiscreteRNDs\PoissonDistribution.cs" />
+    <Compile Include="Random\Distribution.cs" />
+    <Compile Include="Random\Generator.cs" />
+    <Compile Include="Random\PseudoRNGs\ALFGenerator.cs" />
+    <Compile Include="Random\PseudoRNGs\MT19937Generator.cs" />
+    <Compile Include="Random\PseudoRNGs\StandardGenerator.cs" />
+    <Compile Include="Random\PseudoRNGs\XorShift128Generator.cs" />
+    <Compile Include="Random\Resources\ExceptionMessages.de.Designer.cs">
+      <DependentUpon>ExceptionMessages.de.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Random\Resources\ExceptionMessages.Designer.cs">
+      <DependentUpon>ExceptionMessages.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Random\Resources\ExceptionMessages.es.Designer.cs">
+      <DependentUpon>ExceptionMessages.es.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Random\Resources\ExceptionMessages.fr.Designer.cs">
+      <DependentUpon>ExceptionMessages.fr.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="DistributionData.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Random\LGPL.rtf" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Random\Resources\ExceptionMessages.de.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ExceptionMessages.de.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Random\Resources\ExceptionMessages.es.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ExceptionMessages.es.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Random\Resources\ExceptionMessages.fr.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ExceptionMessages.fr.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
+    <EmbeddedResource Include="Random\Resources\ExceptionMessages.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ExceptionMessages.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FocusedObjective.Common\FocusedObjective.Common.csproj">
+      <Project>{47c8f142-da8e-40d8-8c77-4ac5dbd18ec4}</Project>
+      <Name>FocusedObjective.Common</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  <PropertyGroup>
+    <PostBuildEvent>if defined EAZFUSCATOR_NET_HOME (if /I "$(ConfigurationName)" == "Release" Eazfuscator.NET.exe "$(TargetPath)" --msbuild-project-path "$(ProjectPath)" --msbuild-project-configuration "$(ConfigurationName)" --msbuild-project-platform "$(PlatformName)" --msbuild-solution-path "$(SolutionPath)" -n --newline-flush -v 3.3) else (echo Eazfuscator.NET obfuscator is not installed on this machine. Obfuscation will be skipped.)</PostBuildEvent>
+  </PropertyGroup>
+</Project>

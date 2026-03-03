@@ -1,0 +1,50 @@
+﻿<UserControl x:Class="FocusedObjective.Simulation.Viewers.BoardColumn"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="100" d:DesignWidth="100">
+    <Border BorderThickness="0,0,5,0" BorderBrush="#8ABCCE">
+        <Grid Name="mainGrid" Width="Auto" MinWidth="120" MaxWidth="125" Background="#BDD8E2">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+        </Grid.RowDefinitions>
+
+
+            <Border Grid.Row="0" BorderBrush="#8ABCCE" BorderThickness="0,2">
+                <StackPanel Background="White">
+                
+            <TextBlock Name="columnName" TextAlignment="Center" FontWeight="SemiBold">Name</TextBlock>
+                <TextBlock Name="wipLimit" TextAlignment="Center">WIP</TextBlock>
+                
+            </StackPanel>
+</Border>
+        <StackPanel Orientation="Vertical" Grid.Row="1">
+            
+            <!--
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="150"></ColumnDefinition>
+                <ColumnDefinition Width="3"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0">
+                <TextBlock>Doing</TextBlock>
+            </StackPanel>
+            <GridSplitter Grid.Column="1"></GridSplitter>
+            <StackPanel Grid.Column="2">
+                <TextBlock>Done</TextBlock>
+            </StackPanel>
+            -->
+            <WrapPanel Name="violateWipCardPositions" Background="Red" Orientation="Horizontal">
+            </WrapPanel>
+
+            <WrapPanel Orientation="Horizontal" Name="normalCardPositions" Background="#BDD8E2">
+            </WrapPanel>
+            
+        </StackPanel>
+    </Grid>
+    </Border>
+</UserControl>

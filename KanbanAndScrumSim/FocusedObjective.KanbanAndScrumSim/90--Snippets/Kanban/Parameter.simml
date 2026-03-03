@@ -1,0 +1,2 @@
+﻿ <?parameter name="[date parameter name]"     value="[initial value]" type="date" ?>
+ <?parameter name="[numeric parameter name]"  value="[initial value]" type="number" lowest="[lowest allowed value]" highest="[highest allowed value]" step="1" ?>

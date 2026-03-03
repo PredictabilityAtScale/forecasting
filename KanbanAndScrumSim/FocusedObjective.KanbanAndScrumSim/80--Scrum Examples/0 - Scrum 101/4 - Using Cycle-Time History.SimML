@@ -1,0 +1,49 @@
+<simulation name="Scrum Mined Data Example" locale="en-US">
+
+  <example>This example shows how to use historical work-day cycle-time data pulled from an ALM system.
+The approach used is to use the data-mined cycle-time days for backlog groups "small", "medium" and "large" with a fixed iteration size of 10 days.
+This technique yields quick approximations of the remaining time necessary to complete an ongoing project without burdening developers with story estimation work.</example>
+
+  <execute type="Scrum" dateFormat="dd-MMM-yyyy" >
+    <visual />
+  </execute>
+
+  <setup>
+  
+  	<!-- For this case, we set the iteration points to the number of days in an iteration. 
+  		multiplied by the number of sub-teams completing different stories.
+  		For example, if there were 2 teams, the storyPointsPerIteration (in this case ideal-days) would be:
+  		   2 team x  10 ideal days each = 20. This will emulate pulling 20 days of work from the backlog each iteration. -->
+    	<iteration storyPointsPerIterationLowBound="20" storyPointsPerIterationHighBound="20"  />
+      	
+      	<forecastDate startDate="01-Jan-2012" costPerDay="$2000" workDaysPerIteration="10" /> 
+
+    	<backlog type="custom">
+    		<!--When there is enough historical data, a distribution can be created and used instead of simple estimate ranges-->
+		<custom name="small" count="15" estimateDistribution="Small From Historical" />
+      		<custom name="medium" count="10" estimateDistribution="Medium From Historical" />
+      		<custom name="large" count="3" estimateDistribution="Large From Historical" />   		
+	</backlog>
+
+	<distributions>
+		<!-- Historical data of WORK DAYS to complete stories of these sizes -->
+		<!-- This can be mined from most ALM systems -->	
+		<distribution name="Small From Historical" numberType="double" shape="fromSamples" >
+			0.5,2,1,3,1,2,0.5,2,1</distribution>		
+		
+		<distribution name="Medium From Historical" numberType="double" shape="fromSamples" >
+			2,5,3,4,2,3,5,6,3,9</distribution>	
+			
+		<distribution name="Large From Historical" numberType="double" shape="fromSamples" >
+			6,9,13,6,3,9,6,8</distribution>	
+
+		<!--How does fromSamples distribution work?
+		
+			The fromSamples distribution type fits the given samples into a histogram (value versus frequency of occurence)
+			and then generates random numbers that fit that distribution shape. The samples you provide are ONLY
+			used as a seed for building shape, meaning the order of samples is irrelavent, and returned data will follow
+			a distribution pattern based on occurrence rate and values. -->			
+			
+	</distributions>
+   </setup>
+</simulation>

@@ -1,0 +1,32 @@
+﻿<simulation name="Earliest start date test" locale="en-US">
+
+  <execute dateFormat="dd-MMM-yyyy" >
+    <visual showVisualizer="false" />
+    <monteCarlo cycles="1" />
+  </execute>
+
+  <setup>
+
+    <backlog type="custom" nameFormat="{3}\{0}" shuffle="false" >
+
+      <deliverable name="Del1" earliestStartDate="01-Feb-2014">
+        <custom count="10" />
+      </deliverable>
+      <deliverable name="Del2" earliestStartDate="01-Mar-2014">
+        <custom count="10" />
+      </deliverable>
+      <deliverable name="Del3" earliestStartDate="01-Apr-2014">
+        <custom count="10" />
+      </deliverable>
+    </backlog>
+
+    <columns>
+      <column id="1" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Design</column>
+      <column id="2" estimateLowBound="1" estimateHighBound="1" wipLimit="1" >Development</column>
+      <column id="3" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Test</column>
+    </columns>
+
+    <forecastDate startDate="01-Jan-2014" workDays="monday,tuesday,wednesday,thursday,friday,saturday,sunday" />
+
+  </setup>
+</simulation>

@@ -1,0 +1,27 @@
+﻿<simulation name="Classes of Service test" locale="en-US">
+
+  <execute>
+    <visual showVisualizer="false" />
+    <monteCarlo cycles="1" />
+  </execute>
+
+  <setup>
+
+    <classOfServices>
+      <classOfService order="1" violateWIP="true" maximumAllowedOnBoard="1">Expedite</classOfService>
+      <classOfService order="2" default="true">Standard</classOfService>
+    </classOfServices>
+
+    <backlog type="custom" nameFormat="{1}" shuffle="true">
+      <custom count="1" classOfService="Expedite" name="Urgent {0}" />
+      <custom count="1"  name="Default {0}" />
+    </backlog>
+
+    <columns>
+      <column id="1" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Design</column>
+      <column id="2" estimateLowBound="1" estimateHighBound="1" wipLimit="1" displayWidth="1">Development</column>
+      <column id="3" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Test</column>
+    </columns>
+
+  </setup>
+</simulation>

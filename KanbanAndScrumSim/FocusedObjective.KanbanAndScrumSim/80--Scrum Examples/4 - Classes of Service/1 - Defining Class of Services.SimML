@@ -1,0 +1,35 @@
+<simulation name="Scrum Defining Classes of Service Example" locale="en-US">
+  
+<example>This example shows how to define different classes of service.
+Classes of service allow the story priority order to be defined in the backlog and in Added Scope and Defect events.</example>
+    
+  <execute type="Scrum" dateFormat="dd-MMM-yyyy">
+    	<visual />
+  </execute>
+
+  <setup>
+  
+    	<iteration storyPointsPerIterationLowBound="25" storyPointsPerIterationHighBound="35"  />
+    
+    	<forecastDate startDate="01-Jan-2012" costPerDay="2000" /> 
+
+    	<backlog type="custom" shuffle="true">
+	      <custom name="small" count="15" estimateLowBound="2" estimateHighBound="5" valueLowBound="100" valueHighBound="500" />
+	      <custom name="medium" count="10" estimateLowBound="5" estimateHighBound="10" valueLowBound="500" valueHighBound="1000" />
+	      <custom name="large" count="10" estimateLowBound="10" estimateHighBound="20" valueLowBound="1000" valueHighBound="1500" />
+	</backlog>
+
+	<!-- these classes of service allow different severities and story start ordering -->
+	<!-- The number of stories of any one type of class of service can be limited by the 'maximumAllowedOnBoard' attribute. -->
+	<!-- To model some low priority work that may be skipped, the 'skipPercentage' attribute will cause that % of stories with this class of service to be skipped (moved directly to the complete list) -->
+	<!-- Stories will be started from the lowest order to the highest order values. I.e. 1's first, 2's second, etc. -->
+	<!-- One class of service MUST be marked as the default. -->
+	<classOfServices>
+		<classOfService order="1" maximumAllowedOnBoard="2">Expedite</classOfService>
+		<classOfService order="2" default="true">Standard</classOfService>
+		<classOfService order="3" skipPercentage="50">Intangible</classOfService>
+	</classOfServices>
+
+    </setup>
+
+</simulation>

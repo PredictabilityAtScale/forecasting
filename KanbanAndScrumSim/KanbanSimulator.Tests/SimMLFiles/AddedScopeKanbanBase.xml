@@ -1,0 +1,28 @@
+﻿<simulation name="Simple test">
+  <execute>
+    <monteCarlo cycles="1"  />
+  </execute>
+  <setup>
+    <backlog type="simple" simpleCount="100" shuffle="false"/>
+    
+    <columns>
+      <column id="0" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Column 1</column>
+      <column id="1" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Column 2</column>
+      <column id="2" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Column 3</column>
+      <column id="3" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Column 4</column>
+      <column id="4" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Column 5</column>
+    </columns>
+
+    <addedScopes>
+      <addedScope occurrenceDistribution="custom">Added scope</addedScope>
+    </addedScopes>
+
+    <distributions>
+      <distribution name="custom"
+                shape="custom"
+                parameters="2,1"
+                numberType="integer"
+                count="1000"/>
+    </distributions>
+  </setup>
+</simulation>

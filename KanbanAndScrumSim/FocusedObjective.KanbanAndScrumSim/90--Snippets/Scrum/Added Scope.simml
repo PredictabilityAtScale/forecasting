@@ -1,0 +1,2 @@
+﻿<addedScope occurrenceType="percentage" occurrenceLowBound="[low occurrence estimate]" occurrenceHighBound="[high occurrence estimate]"
+     estimateLowBound="[low story point estimate]" estimateHighBound="[high story point estimate]">[Added Scope Name]</addedScope>

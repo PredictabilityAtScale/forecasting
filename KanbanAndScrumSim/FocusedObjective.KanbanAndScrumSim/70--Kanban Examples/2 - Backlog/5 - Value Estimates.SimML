@@ -1,0 +1,36 @@
+<simulation name="Adding Value Estimates to the Backlog" locale="en-US">
+
+  <example>This example shows how to add dollar value estimates to backlog stories (or groups). This is displayed in the header of the Kanban board view. 
+A random dollar value between the range you specify will be totalled on completion of each story from that backlog custom group.
+See the resources ribbon tab for documentation, exercises and tutorials.</example>
+
+  <execute currencyFormat="C">
+    <visual />
+  </execute>
+  
+  <setup>
+  	
+  	<!-- Three size ranges of backlog story size overriding the default column cycle-times using percentage ranges.
+  	       Exercises -
+  			1. Change the shuffle="true" to shuffle="false" and see the change on the simulated board
+			2. Changes the percentage ranges and see what effect that has on randomly chosen story sizes.-->
+			
+  	<backlog type="custom"  nameFormat="{1}" shuffle="true">
+  		<custom name="Small {0}" count="20" percentageLowBound="0" percentageHighBound="33"  valueLowBound="100" valueHighBound="500" />
+  		<custom name="Medium {0}" count="20" percentageLowBound="33" percentageHighBound="66" valueLowBound="1000" valueHighBound="5000"  />
+  		<custom name="Large {0}" count="10" percentageLowBound="66" percentageHighBound="100"  valueLowBound="10000" valueHighBound="50000" />
+	</backlog>
+ 	
+ 	<!-- Tip: What do the {0} special pleaceholders do? 
+ 	When simulating each card is given a unique number, the {0} in the name of each backlog entry is replaced with this unique number when simulating.
+ 	This is a good idea so that you can see the different cards move across the board. Without it, all cards would be names 'Small', 'Medium' or 'Large' and you wouldn't be able to tell them apart. 
+ 	Note: For this to work, you MUST have the defaukt name format in the backlog tag set the following way: nameFormat="{1}"--> 
+ 	
+    	<columns>
+       		<column id="1" estimateLowBound="1" estimateHighBound="3" wipLimit="2">Design</column>
+       		<column id="2" estimateLowBound="2" estimateHighBound="5" wipLimit="4" displayWidth="2">Development</column>
+       		<column id="3" estimateLowBound="1" estimateHighBound="3" wipLimit="2">Test</column>
+    </columns>
+    
+  </setup>
+</simulation>

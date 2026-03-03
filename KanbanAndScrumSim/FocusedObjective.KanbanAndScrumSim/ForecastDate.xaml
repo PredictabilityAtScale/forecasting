@@ -1,0 +1,119 @@
+﻿<Window x:Class="FocusedObjective.KanbanSim.ForecastDate"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:FocusedObjective.KanbanSim"
+        Title="Forecast Date and Likelihood" Height="400" Width="500" Loaded="Window_Loaded" 
+        >
+
+
+
+    <Grid>
+        <TabControl Name="tabControl1" Margin="0,0,0,43">
+            <TabItem Header="Results" Name="tabItemResults">
+                <Grid>
+                    <ScrollViewer>
+                        <StackPanel Name="stackPanelResults" Orientation="Vertical">
+                            <DataGrid    AutoGenerateColumns="False" Name="dataGridResults" ItemsSource="{Binding Path=Elements[date]}" MinColumnWidth="50" IsReadOnly="True" HorizontalAlignment="Left" VerticalAlignment="Top">
+                                <DataGrid.Resources>
+                                    <Style TargetType="{x:Type DataGridCell}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Path=Attribute[targetLikelihood].Value}" Value="true">
+                                                <Setter Property="Background" Value="Yellow" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGrid.Resources>
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Binding="{Binding Path=Attribute[likelihood].Value}" Header="Likelihood" />
+                                    <DataGridTextColumn Binding="{Binding Path=Attribute[date].Value}" Header="Date" />
+                                    <DataGridTextColumn Binding="{Binding Path=Attribute[workDays].Value}" Header="Workdays" />
+                                    <DataGridTextColumn Binding="{Binding Path=Attribute[cost].Value}" Header="Cost" />
+                                    <DataGridTextColumn Binding="{Binding Path=Attribute[costOfDelay].Value}" Header="Cost of Delay" />
+                                    <DataGridTextColumn Binding="{Binding Path=Attribute[delayInDays].Value}" Header="Days of Delay" />
+                                    <DataGridTextColumn Binding="{Binding Path=Attribute[latestStartDate].Value}" Header="Latest Start Date" />
+                                    <!--<DataGridTextColumn Binding="{Binding Path=Attribute[intervals].Value}" Header="Intervals" />-->
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Permutations" Name="tabItem1">
+                <Grid>
+                    <ComboBox Height="23" Margin="91,6,69,0" Name="comboBoxPermutations" VerticalAlignment="Top">
+                        <ComboBoxItem Name="itemBacklogSequentially" Content="Backlog (Cumulative in priority order)" IsSelected="True"/>
+                        <ComboBoxItem Name="itemDeliverablesSequentially" Content="Deliverables (Cumulative in priority order)"  />
+                        <ComboBoxItem Name="itemDeliverablesRisk" Content="Deliverables (Risk Combinations)" />
+                    </ComboBox>
+                    <Label Content="Forecast by" Height="28" HorizontalAlignment="Left" Margin="6,3,0,0" Name="label1" VerticalAlignment="Top" Width="79" />
+                    <Button Content="Execute" Height="27" Margin="0,6,7,0" Name="buttonPermutationExecute" VerticalAlignment="Top" Click="buttonPermutationExecute_Click" HorizontalAlignment="Right" Width="52" />
+                    <ComboBox Height="23" Margin="91,39,10,0" Name="comboBoxPermutationResult" VerticalAlignment="Top" 
+                              SelectionChanged="comboBoxPermutationResult_SelectionChanged" 
+                              ItemsSource="{Binding Path=Elements[permutation]}" 
+                              DisplayMemberPath="Attribute[name].Value"
+                              
+                              />
+                    <Label Content="Permutation" Height="28" HorizontalAlignment="Left" Margin="6,35,0,0" Name="labelPermutation" VerticalAlignment="Top" Width="79" />
+
+                    <ScrollViewer Margin="0,75,0,10">
+                        <StackPanel Name="stackPanelPermutationResults" Orientation="Vertical">
+                            <DataGrid AutoGenerateColumns="False" Name="dataGridPermutationResults" ItemsSource="{Binding Path=Elements[date]}" MinColumnWidth="50" IsReadOnly="True">
+                                <DataGrid.Resources>
+                                    <Style TargetType="{x:Type DataGridCell}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Path=Attribute[targetLikelihood].Value}" Value="true">
+                                                <Setter Property="Background" Value="Yellow" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGrid.Resources>
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Binding="{Binding Path=Attribute[likelihood].Value}" Header="Likelihood" />
+                                    <DataGridTextColumn Binding="{Binding Path=Attribute[date].Value}" Header="Date" />
+                                    <DataGridTextColumn Binding="{Binding Path=Attribute[workDays].Value}" Header="Workdays" />
+                                    <DataGridTextColumn Binding="{Binding Path=Attribute[cost].Value}" Header="Cost" />
+                                    <DataGridTextColumn Binding="{Binding Path=Attribute[costOfDelay].Value}" Header="Cost of Delay" />
+                                    <DataGridTextColumn Binding="{Binding Path=Attribute[delayInDays].Value}" Header="Days of Delay" />
+                                    <DataGridTextColumn Binding="{Binding Path=Attribute[latestStartDate].Value}" Header="Latest Start Date" />
+                                    <!--<DataGridTextColumn Binding="{Binding Path=Attribute[intervals].Value}" Header="Intervals" />-->
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                </Grid>
+            </TabItem>
+            <!--
+            <TabItem Header="Tracking (beta)" Name="tabItemVariance"  GotFocus="tabItemVariance_GotFocus" >
+                <Grid>
+                </Grid>
+            </TabItem>
+
+
+            <TabItem Header="Chart" Name="tabItemGraph" >
+                <Grid>
+                    <syncfusion:SfChart  x:Name="forecastChart" Visibility="Visible" Grid.Row="1" >
+
+                        <syncfusion:SfChart.Legend>
+                            <syncfusion:ChartLegend />
+                        </syncfusion:SfChart.Legend>
+
+                        <syncfusion:SfChart.PrimaryAxis>
+                            <syncfusion:CategoryAxis x:Name="dateForecastAxis" Header="Calendar Date" LabelsPosition="Outside" FontSize="12" />
+                        </syncfusion:SfChart.PrimaryAxis>
+
+                        <syncfusion:SfChart.SecondaryAxis>
+                            <syncfusion:NumericalAxis x:Name="probabilityForecastAxis" Header="Frequency" FontSize="12" LabelsPosition="Outside" />
+                        </syncfusion:SfChart.SecondaryAxis>
+
+                        <syncfusion:LineSeries Label="Count" x:Name="forecastSeries"  XBindingPath="date" YBindingPath="count" >
+                        </syncfusion:LineSeries>
+                    </syncfusion:SfChart>
+                </Grid>
+            </TabItem>
+-->
+
+        </TabControl>
+        <Button Content="Close" Height="23" HorizontalAlignment="Right" Margin="0,0,12,12" Name="buttonClose" VerticalAlignment="Bottom" Width="75" Click="buttonClose_Click" />
+    </Grid>
+</Window>

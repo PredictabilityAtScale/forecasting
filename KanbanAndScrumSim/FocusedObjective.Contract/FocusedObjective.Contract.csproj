@@ -1,0 +1,141 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{1C640761-D358-4F4E-9A99-8AE3DD1A14E9}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>FocusedObjective.Contract</RootNamespace>
+    <AssemblyName>FocusedObjective.Contract</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release Siemens|AnyCPU'">
+    <OutputPath>bin\Release Siemens\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Siemens|AnyCPU'">
+    <OutputPath>bin\Siemens\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\GlobalVersionInformation.cs">
+      <Link>Properties\GlobalVersionInformation.cs</Link>
+    </Compile>
+    <Compile Include="ContractCommon.cs" />
+    <Compile Include="Data\ContractDataBase.cs" />
+    <Compile Include="Data\ForecastDateActualData.cs" />
+    <Compile Include="Data\SetupThroughputData.cs" />
+    <Compile Include="Data\SetupPhasesData.cs" />
+    <Compile Include="Data\ExecuteBallotData.cs" />
+    <Compile Include="Data\SimMLAttribute.cs" />
+    <Compile Include="Data\VariableData.cs" />
+    <Compile Include="Data\LicenseData.cs" />
+    <Compile Include="Data\SetupClassOfServiceData.cs" />
+    <Compile Include="Data\ForecastDateData.cs" />
+    <Compile Include="Data\ForecastDateExcludeData.cs" />
+    <Compile Include="Data\SetupPhaseColumnData.cs" />
+    <Compile Include="Data\SetupPhaseData.cs" />
+    <Compile Include="Data\ExecuteModelAuditData.cs" />
+    <Compile Include="Data\SetupDistributionData.cs" />
+    <Compile Include="Data\SetupBacklogDeliverableData.cs" />
+    <Compile Include="Data\ExecuteSummaryStatisticsData.cs" />
+    <Compile Include="Data\SetupIterationData.cs" />
+    <Compile Include="Data\ExecuteForecastDateData.cs" />
+    <Compile Include="Data\SetupBacklogCustomColumnData.cs" />
+    <Compile Include="Data\SetupBacklogCustomData.cs" />
+    <Compile Include="Data\ExecuteSensitivityData.cs" />
+    <Compile Include="Data\SensitivityBase.cs" />
+    <Compile Include="Data\SetupDefectColumnData.cs" />
+    <Compile Include="Data\SetupBlockingEventData.cs" />
+    <Compile Include="Data\SetupColumnData.cs" />
+    <Compile Include="Data\SetupAddedScopeData.cs" />
+    <Compile Include="Data\SetupDefectData.cs" />
+    <Compile Include="Data\SetupBacklogData.cs" />
+    <Compile Include="Data\SetupData.cs" />
+    <Compile Include="Data\ExecuteAddStaffColumnsData.cs" />
+    <Compile Include="Data\ExecuteAddStaffData.cs" />
+    <Compile Include="Data\ExecuteMonteCarloData.cs" />
+    <Compile Include="Data\SimulationData.cs" />
+    <Compile Include="Data\ExecuteVisualData.cs" />
+    <Compile Include="Data\ExecuteData.cs" />
+    <Compile Include="Enums\AggregationValueEnum.cs" />
+    <Compile Include="Enums\BacklogTypeEnum.cs" />
+    <Compile Include="Enums\BallotTypeEnum.cs" />
+    <Compile Include="Enums\PullOrderEnum.cs" />
+    <Compile Include="Enums\PhaseUnitEnum.cs" />
+    <Compile Include="Enums\ForecastPermutationsEnum.cs" />
+    <Compile Include="Enums\ShufflePositionsEnum.cs" />
+    <Compile Include="Enums\OccurrenceTypeEnum.cs" />
+    <Compile Include="Enums\SortOrderEnum.cs" />
+    <Compile Include="Enums\SensitivityTypeEnum.cs" />
+    <Compile Include="Enums\OptimizeForLowestEnum.cs" />
+    <Compile Include="Enums\SimulationTypeEnum.cs" />
+    <Compile Include="IValidate.cs" />
+    <Compile Include="PartitionModel.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FocusedObjective.Common\FocusedObjective.Common.csproj">
+      <Project>{47c8f142-da8e-40d8-8c77-4ac5dbd18ec4}</Project>
+      <Name>FocusedObjective.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\FocusedObjective.Distributions\FocusedObjective.Distributions.csproj">
+      <Project>{3C2F4020-10F9-4138-BC04-F6FE1EDE9A11}</Project>
+      <Name>FocusedObjective.Distributions</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

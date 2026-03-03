@@ -1,0 +1,30 @@
+﻿<simulation name="Initial Position Test" locale="en-US">
+
+  <execute dateFormat="dd-MMM-yyyy" >
+    <visual showVisualizer="false" />
+    <monteCarlo cycles="1" />
+  </execute>
+  
+  <setup>
+  	<!-- start by putting 50 items into the backlog -->
+  	<backlog type="custom">
+  		<custom name="S1" count="1" initialColumn="2" />
+  		<custom name="S2" count="1" initialColumn="2" />
+  		<custom name="S3" count="1" initialColumn="2" />
+  		<custom name="S4" count="1" initialColumn="2" />
+  		<custom name="S5" count="1" initialColumn="2" />
+  		<custom name="S6" count="1" initialColumn="2" />
+  		<custom name="S7" count="1" initialColumn="3" />
+  		<custom name="general" count="10"  />
+  	</backlog>
+ 	
+ 	<columns>
+       		<column id="1" estimateLowBound="1" estimateHighBound="1" wipLimit="2">Design</column>
+       		<column id="2" estimateLowBound="2" estimateHighBound="2" wipLimit="4" displayWidth="2">Development</column>
+       		<column id="3" estimateLowBound="1" estimateHighBound="1" wipLimit="2">Test</column>
+    </columns>
+    
+    <forecastDate startDate="01-May-2012" costPerDay="2500" />
+    
+  </setup>
+</simulation>

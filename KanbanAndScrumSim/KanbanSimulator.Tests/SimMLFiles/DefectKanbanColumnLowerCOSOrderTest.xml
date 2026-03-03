@@ -1,0 +1,38 @@
+﻿<simulation name="DefectKanbanColumn">
+  <execute>
+    <monteCarlo cycles="1"  />
+    <visual showVisualizer="false" />
+  </execute>
+  <setup>
+  
+    <backlog type="custom" shuffle="false">
+     <custom count="10" classOfService="highest" />
+    </backlog>
+    
+    <columns>
+      <column id="0" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Column 1</column>
+      <column id="1" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Column 2</column>
+      <column id="2" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Column 3</column>
+      <column id="3" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Column 4</column>
+      <column id="4" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Column 5</column>
+    </columns>
+
+    <defects>
+      <defect columnId="4" startsInColumnId="2" occurrenceDistribution="custom"  classOfService="standard">Defect</defect>
+    </defects>
+
+ <classOfServices>
+  <classOfService  order="1">highest</classOfService>
+  <classOfService  order="2" default="true">standard</classOfService>
+  </classOfServices>
+ 
+
+    <distributions>
+      <distribution name="custom"
+                shape="custom"
+                parameters="1|1"
+                numberType="integer"
+                count="1000"/>
+    </distributions>
+  </setup>
+</simulation>

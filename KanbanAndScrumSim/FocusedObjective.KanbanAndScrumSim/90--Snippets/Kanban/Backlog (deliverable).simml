@@ -1,0 +1,4 @@
+﻿<deliverable name="[name]" order="1">
+	<custom name="[Title] {0}" count="[count]" />
+	<custom name="[Title] {0}" count="[count]" />      
+</deliverable>

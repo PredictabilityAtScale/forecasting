@@ -1,0 +1,35 @@
+<simulation name="Multi-modal risk example" locale="en-US">
+
+<example>This example demonstrates how a risk factor creates a multi-modal forecast, 
+and how the Flaw of Averages is so dangerous in software development.</example> 
+
+  <execute deliverables="Baseline|performance Issues" >
+    <visual />
+  </execute>
+  <setup>
+   
+    <backlog type="custom" >
+    
+    	<deliverable name="Baseline">
+    		<custom count="10">Baseline</custom>
+    	</deliverable>
+    	
+    	<deliverable name="performance issues" skipPercentage="50">
+    		<custom count="10"  >Possible Performance Issues</custom>
+    	</deliverable>
+    
+    	<deliverable name="third party component issues" skipPercentage="50">
+    		<custom count="10"  >Possible chart component issues</custom>
+    	</deliverable>
+
+</backlog>
+ 
+    <columns>
+       <column id="1" estimateLowBound="1" estimateHighBound="3" wipLimit="1">Develop</column>
+       <column id="2" estimateLowBound="1" estimateHighBound="3" wipLimit="1">Test</column>
+    </columns>
+  </setup>
+  
+  <forecastDate startDate="01-May-2012" costPerDay="3000" />
+   
+</simulation>

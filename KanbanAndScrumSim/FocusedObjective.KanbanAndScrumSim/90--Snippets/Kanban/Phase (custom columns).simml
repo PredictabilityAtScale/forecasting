@@ -1,0 +1,6 @@
+﻿<phase startPercentage="0" endPercentage="20" 
+     estimateMultiplier="[multiple all estimates by]" occurrenceMultiplier="[multiply all occurrences by]">[Title] 
+
+    <column id="[column id]" wipLimit="[wip limit when phase active]" />
+    <column id="[column id]" wipLimit="[wip limit when phase active]" />	 
+</phase>

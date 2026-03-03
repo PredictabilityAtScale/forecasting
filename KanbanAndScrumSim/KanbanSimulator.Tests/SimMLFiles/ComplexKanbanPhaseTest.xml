@@ -1,0 +1,47 @@
+﻿<simulation name="Phases"  >
+  <execute limitIntervalsTo="100000">
+    <visual showVisualizer="false" />
+    <monteCarlo cycles="1" />
+  </execute>
+
+  <setup>
+
+    <phases>
+      <phase startPercentage="0" endPercentage="20"   occurrenceMultiplier="1.0" estimateMultiplier="2.0">ramp-up</phase>
+
+      <phase startPercentage="25" endPercentage="74"   occurrenceMultiplier="0.5" estimateMultiplier="1.0">prod release</phase>
+    </phases>
+
+    <backlog type="simple" simpleCount="100" shuffle="false"/>
+
+    <columns>
+      <column id="1" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Column1</column>
+      <column id="2" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Column2</column>
+      <column id="3" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Column3</column>
+      <column id="4" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Column4</column>
+      <column id="5" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Column5</column>
+    </columns>
+
+    <!-- blocking events only counted when something in the backlog and complete.
+  		       Should be (100 + 75 + 75) / 2 = 125  but only counted when something is in both the backlog and the complete list
+  		       so it equates to 119 -->
+    <blockingEvents>
+      <blockingEvent
+        blockAddedScope="true"
+        blockDefects="true"
+      columnId ="1"
+      occurrenceLowBound="2" occurrenceHighBound="2"
+      estimateLowBound="1" estimateHighBound="1">Blocking event</blockingEvent>
+    </blockingEvents>
+
+    <!-- 1 in 2 for 50% time, 1 in 1 for 50% time = 75 total -->
+    <defects>
+      <defect columnId="3" startsInColumnId="1" occurrenceLowBound="2" occurrenceHighBound="2">Defect</defect>
+    </defects>
+
+    <!-- 1 in 2 for 50% time, 1 in 1 for 50% time = 75 total -->
+    <addedScopes>
+      <addedScope occurrenceLowBound="2" occurrenceHighBound="2">Added scope</addedScope>
+    </addedScopes>
+  </setup>
+</simulation>

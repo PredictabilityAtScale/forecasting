@@ -1,0 +1,63 @@
+<simulation name="Backlog with Deliverables" locale="en-US">
+
+  <example>This example shows how to quickly divide a backlog into multiple deliverables, and multiple groups.
+Deliverables allow you to force a backlog pull order (the priority cards are pulled), and to restrict simulation to some or all of these deliverables (see the attribute in the execute section).
+See the resources ribbon tab for documentation, exercises and tutorials.</example>
+
+  <execute deliverables="Must-Haves|Everything-Remaining">
+    <visual />
+  </execute>
+  
+  <setup>
+  	
+  	<!-- The backlog can be divided into multiple deliverables. This can help grouping shippable units of work together and making sure all of those stories are completed first.
+  	       Exercises -
+  			1. Remove the order="1" and order="2" attributes (or make them the same) and see what effect it has.
+  			2. Change the deliverables attribute value in the execute section. Simulate just the Must-Haves or the Everything-Remaining deliverable separately.
+  			3. Further divide the Must-Haves into multiple deliverables for Alpha, Beta, and 1.0. Tip:Deliverables can't be nested, you can only have one level. -->
+  			
+  	<backlog type="custom"  nameFormat="{1}" shuffle="true">
+  	
+
+      <deliverable name="Must-Haves" order="1">
+
+        <custom name="MH's Small" count="6"  percentageLowBound="0" percentageHighBound="66" />
+        <custom name="MH's Medium" count="4"  percentageLowBound="33" percentageHighBound="100" />
+
+        <custom name="MH's UI Intensive" count="5"  percentageLowBound="0" percentageHighBound="100" >
+          <column id="1" estimateLowBound="2" estimateHighBound="5" />
+          <column id="2" estimateLowBound="3" estimateHighBound="5" />
+        </custom>
+
+        <custom name="MH's Server-Side Intensive" count="6"  percentageLowBound="0" percentageHighBound="100" >
+          <column id="3" estimateLowBound="3" estimateHighBound="6" />
+        </custom>
+
+      </deliverable>
+
+      <deliverable name="Everything-Remaining" order="2">
+
+        <custom name="ER's Small" count="2"  percentageLowBound="0" percentageHighBound="66" />
+        <custom name="ER's Medium" count="3"  percentageLowBound="33" percentageHighBound="100" />
+
+        <custom name="ER's UI Intensive" count="2"  percentageLowBound="0" percentageHighBound="100" >
+          <column id="1" estimateLowBound="2" estimateHighBound="5" />
+          <column id="2" estimateLowBound="3" estimateHighBound="5" />
+        </custom>
+
+        <custom name="ER's Server-Side Intensive" count="3"  percentageLowBound="0" percentageHighBound="100" >
+          <column id="3" estimateLowBound="3" estimateHighBound="6" />
+        </custom>
+
+      </deliverable>
+
+    </backlog>
+    
+    	<columns>
+       		<column id="1" estimateLowBound="1" estimateHighBound="3" wipLimit="2">Design</column>
+       		<column id="2" estimateLowBound="2" estimateHighBound="5" wipLimit="4" displayWidth="2">Development</column>
+       		<column id="3" estimateLowBound="1" estimateHighBound="3" wipLimit="2">Test</column>
+    </columns>
+    
+  </setup>
+</simulation>

@@ -1,0 +1,39 @@
+<simulation name="Simple test" locale="en-US">
+
+<example>LSSC Presentation Example</example>
+
+  <execute dateFormat="dd-MMM-yyyy" >
+    <visual />
+  </execute> 
+  <setup>
+  
+   <forecastDate startDate="01-May-2012" costPerDay="1000" />
+  
+    <backlog type="simple" simpleCount="3" />
+    
+    <columns>
+      <column id="1" estimateLowBound="1" estimateHighBound="2" 
+      			wipLimit="1">Design</column>
+      <column id="2" estimateLowBound="1" estimateHighBound="5" 
+      			wipLimit="2">Develop</column>
+      <column id="3" estimateLowBound="1" estimateHighBound="2" 
+      			wipLimit="1">Test</column>
+    </columns>
+    
+    <defects>
+    	<defect columnId="3" 
+    	  		occurrenceLowBound="2" occurrenceHighBound="3">Bug</defect>
+    </defects>
+    
+    <addedScopes>
+    	<addedScope occurrenceLowBound="2" occurrenceHighBound="3">Added Scope</addedScope>
+    </addedScopes>
+    
+    <blockingEvents>
+    	<blockingEvent columnId="2" occurrenceLowBound="3" occurrenceHighBound="5"
+    		estimateLowBound="1" estimateHighBound="2">Block</blockingEvent>
+    </blockingEvents>
+    
+  </setup>
+
+</simulation>

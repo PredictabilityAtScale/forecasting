@@ -1,0 +1,55 @@
+<simulation name="Interactice Defects" locale="en-US">
+
+	<example>This example shows a simple Kanban board where the defect discovery rate can be interactivel explored. This is useful to see the impact of high defec count versus extra development time.</example>
+ 
+ 	<!-- These parameters allow forecast experiments to be performed using the Interactive window.
+       Use them by adding a @ before their name. For example, @SmallItemCount (would get replaced by 20 at simulation time) -->
+  	<?parameter name="StartDate" value="01-Jan-2016" type="date" ?>
+  	<?parameter name="TargetDate" value="01-Jul-2016" type="date" ?>
+
+  	<?parameter name="BacklogItemCount" 	value="50" type="number" lowest="10"  highest="100" step="5" ?>
+
+  	<!-- Staffing numbers for each skillset -->
+  	<?parameter name="Designers"  	value="2" type="hide"      	lowest="1" highest="10" step="1" ?>
+  	<?parameter name="Developers" 	value="2" type="number" 	lowest="1" highest="10" step="1" ?>
+  	<?parameter name="Testers"    		value="2" type="hide" 		lowest="1" highest="10" step="1" ?>
+  	<?parameter name="DevOps"     	value="1" type="hide" 		lowest="1" highest="10" step="1" ?>
+  
+  	
+  	<?parameter name="DefectPercentageLow" 	value="50" type="number" lowest="0" highest="100" step="5" ?>
+  	<?parameter name="DefectPercentageHigh" 	value="50" type="number" lowest="0" highest="100" step="5" ?>
+
+  	<?parameter name="DevDaysLow" 	value="2" type="number" lowest="1"   highest="10" step="1" ?>
+  	<?parameter name="DevDaysHigh" 	value="3" type="number" lowest="1"   highest="10" step="1" ?>
+
+
+  	<!-- cost per day used to calculate running project staff cost -->
+  	<?parameter name="CostPerDayPerPerson" value="$800" type="currency" lowest="500" highest="1500" step="100"?>
+  	<?parameter name="RevenuePerMonth" value="$10000" ?>
+  
+  	<execute dateFormat="dd-MMM-yyyy" currencyFormat="C0">
+    		<visual />
+  	</execute>
+  
+	<setup>
+    		<forecastDate startDate="@StartDate" targetDate="@TargetDate" costPerDay="=@CostPerDayPerPerson * (@Designers + @Developers + @Testers + @DevOps)" revenue="@RevenuePerMonth" revenueUnit="month"></forecastDate>
+    
+    		<backlog type="custom" nameFormat="{1}" shuffle="true">
+        		<custom name="Work Item{0}" count="@BacklogItemCount" />
+    		</backlog>
+    
+    		<columns>
+      			<column id="1" buffer="true" replenishInterval="5" wipLimit="3">Input Queue</column>
+      			<column id="2" estimateLowBound="1" estimateHighBound="2" wipLimit="= @Designers">Design</column>
+      			<column id="3" estimateLowBound="@DevDaysLow" estimateHighBound="@DevDaysHigh" wipLimit="= @Developers * 2" displayWidth="2">Develop</column>
+      			<column id="4" estimateLowBound="1" estimateHighBound="2" wipLimit="= @Testers">Test</column>
+      			<column id="5" estimateLowBound="1" estimateHighBound="1" wipLimit="= @DevOps">DevOps</column>
+    		</columns>
+    
+    		<defects>
+      			<defect columnId="4" startsInColumnId="3" occurrenceType="percentage" occurrenceLowBound="@DefectPercentageLow" occurrenceHighBound="@DefectPercentageHigh">
+        			Bug found in Testing ({0})
+      			</defect>
+    		</defects>
+  	</setup>
+</simulation>

@@ -1,0 +1,4 @@
+﻿<defect count="1" estimateLowBound="[low story point estimate]" estimateHighBound="[high story point estimate]"
+	occurrenceType="percentage"	occurrenceLowBound="[low occurrence rate estimate]" occurrenceHighBound="[high occurrence rate estimate]">
+   [Title]
+</defect>

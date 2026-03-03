@@ -1,0 +1,24 @@
+﻿<simulation name="SIP Test" locale="en-US">
+
+  <execute dateFormat="dd-MMM-yyyy" >
+    <visual showVisualizer="false"/>
+    <monteCarlo cycles="1" />
+  </execute>
+
+  <setup>
+    <backlog type="simple" simpleCount="25" />
+
+    <columns>
+      <column id="1" estimateDistribution="Dist for SIP Column" wipLimit="2">Col</column>
+    </columns>
+
+    <forecastDate startDate="01-May-2012" costPerDay="$2500" />
+
+    <distributions>
+      <distribution name="Dist for SIP Column" numberType="double" shape="sip">
+        <sip name="test">1,2,3,4,5,6,7,8,9,10</sip>
+      </distribution>
+    </distributions>
+
+  </setup>
+</simulation>

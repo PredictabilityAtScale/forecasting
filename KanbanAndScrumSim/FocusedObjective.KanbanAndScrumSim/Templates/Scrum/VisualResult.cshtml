@@ -1,0 +1,259 @@
+﻿@using System.Xml.Linq
+@using System.Xml
+@{ 
+    XElement root = null; 
+    XElement stats = null;
+
+    if (!String.IsNullOrEmpty(Context))
+    {
+        root = XDocument.Parse(Context).Element("results").Element("visual");
+        stats = root.Element("statistics");
+    }
+}
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Focused Objective Scrum Visual Simulation Results</title>
+       <style type="text/css">
+        #box-table-a
+        {
+            font-family: Arial;
+            font-size: 12px;
+            margin: 45px;
+            width: 500px;
+            text-align: center;
+            border-collapse: collapse;
+        }
+        #box-table-a th
+        {
+            font-size: 12px;
+            font-weight: normal;
+            padding: 8px;
+            background: #b9c9fe;
+            border-top: 4px solid #aabcfe;
+            border-bottom: 1px solid #fff;
+            color: #039;
+        }
+        #box-table-a td
+        {
+            padding: 8px;
+            background: #e8edff;
+            border-bottom: 1px solid #fff;
+            color: #669;
+            border-top: 1px solid transparent;
+        }
+        #box-table-a tr:hover td
+        {
+            background: #d0dafd;
+            color: #339;
+        }
+    </style>
+</head>
+<body style="font-family: Arial; border: 0 none; font-size: 12px">
+    <h2>
+        Focused Objective Scrum Visual Simulation Results</h2>
+    Simulation took <strong>@stats.Element("iterations").Attribute("value").Value</strong> iterations to complete all
+    backlog, defects and added scope.<br />
+<table id="box-table-a" summary="Iteration Statistics">
+        <thead>
+            <tr>
+            <th>&nbsp;</th>
+            <th>Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th>
+                    Count
+                </th>
+                <td>
+                    @stats.Element("pointsAllocatedPerIteration").Attribute("count").Value
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    Points Allocated Minimum
+                </th>
+                <td>
+                    @stats.Element("pointsAllocatedPerIteration").Attribute("minimum").Value
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    Points Allocated Average
+                </th>
+                <td>
+                    @stats.Element("pointsAllocatedPerIteration").Attribute("average").Value
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    Points Allocated Maximum
+                </th>
+                <td>
+                    @stats.Element("pointsAllocatedPerIteration").Attribute("maximum").Value
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    Points Allocated Histogram
+                </th>
+                <td>
+                    <a href="@stats.Element("pointsAllocatedPerIteration").Element("histogram").Element("chart").Value">
+                        <img src="@stats.Element("pointsAllocatedPerIteration").Element("histogram").Element("chart").Value" width="150px" /></a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+        <table id="box-table-a" summary="Card Type Summary Statistics">
+        <thead>
+            <tr>
+                <th>
+                    &nbsp;
+                </th>
+                <th>
+                    Work Cards
+                </th>
+                <th>
+                    Defect Cards
+                </th>
+                <th>
+                    Added Scope
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th>
+                    Count
+                </th>
+                <td>
+                    @stats.Element("cards").Element("work").Attribute("value").Value
+                </td>
+                <td>
+                    @stats.Element("cards").Element("defect").Attribute("value").Value
+                </td>
+                <td>
+                    @stats.Element("cards").Element("addedScope").Attribute("value").Value
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    Point-size Minimum
+                </th>
+                <td>
+                    @stats.Element("cards").Element("work").Element("pointSize").Attribute("minimum").Value
+                </td>
+                <td>
+                    @stats.Element("cards").Element("defect").Element("pointSize").Attribute("minimum").Value
+                </td>
+                <td>
+                    @stats.Element("cards").Element("addedScope").Element("pointSize").Attribute("minimum").Value
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    Point-size Average
+                </th>
+                <td>
+                    @stats.Element("cards").Element("work").Element("pointSize").Attribute("average").Value
+                </td>
+                <td>
+                    @stats.Element("cards").Element("defect").Element("pointSize").Attribute("average").Value
+                </td>
+                <td>
+                    @stats.Element("cards").Element("addedScope").Element("pointSize").Attribute("average").Value
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    Point-size Maximum
+                </th>
+                <td>
+                    @stats.Element("cards").Element("work").Element("pointSize").Attribute("maximum").Value
+                </td>
+                <td>
+                    @stats.Element("cards").Element("defect").Element("pointSize").Attribute("maximum").Value
+                </td>
+                <td>
+                    @stats.Element("cards").Element("addedScope").Element("pointSize").Attribute("maximum").Value
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    Point-size Histogram
+                </th>
+                <td>
+                    <a href="@stats.Element("cards").Element("work").Element("pointSize").Element("histogram").Element("chart").Value">
+                        <img src="@stats.Element("cards").Element("work").Element("pointSize").Element("histogram").Element("chart").Value" width="150px" /></a>
+                </td>
+                <td>
+                    <a href="@stats.Element("cards").Element("defect").Element("pointSize").Element("histogram").Element("chart").Value">
+                        <img src="@stats.Element("cards").Element("defect").Element("pointSize").Element("histogram").Element("chart").Value" width="150px" /></a>
+                </td>
+                <td>
+                    <a href="@stats.Element("cards").Element("addedScope").Element("pointSize").Element("histogram").Element("chart").Value">
+                        <img src="@stats.Element("cards").Element("addedScope").Element("pointSize").Element("histogram").Element("chart").Value" width="150px" /></a>
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    Blocked Point-size Minimum
+                </th>
+                <td>
+                    @stats.Element("cards").Element("work").Element("blockPointSize").Attribute("minimum").Value
+                </td>
+                <td>
+                    @stats.Element("cards").Element("defect").Element("blockPointSize").Attribute("minimum").Value
+                </td>
+                <td>
+                    @stats.Element("cards").Element("addedScope").Element("blockPointSize").Attribute("minimum").Value
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    Blocked Point-size Average
+                </th>
+                <td>
+                    @stats.Element("cards").Element("work").Element("blockPointSize").Attribute("average").Value
+                </td>
+                <td>
+                    @stats.Element("cards").Element("defect").Element("blockPointSize").Attribute("average").Value
+                </td>
+                <td>
+                    @stats.Element("cards").Element("addedScope").Element("blockPointSize").Attribute("average").Value
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    Blocked Point-size Maximum
+                </th>
+                <td>
+                    @stats.Element("cards").Element("work").Element("blockPointSize").Attribute("maximum").Value
+                </td>
+                <td>
+                    @stats.Element("cards").Element("defect").Element("blockPointSize").Attribute("maximum").Value
+                </td>
+                <td>
+                    @stats.Element("cards").Element("addedScope").Element("blockPointSize").Attribute("maximum").Value
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    Blocked Point-size Histogram
+                </th>
+                <td>
+                    <a href="@stats.Element("cards").Element("work").Element("blockPointSize").Element("histogram").Element("chart").Value">
+                        <img src="@stats.Element("cards").Element("work").Element("blockPointSize").Element("histogram").Element("chart").Value" width="150px" /></a>
+                </td>
+                <td>
+                    <a href="@stats.Element("cards").Element("defect").Element("blockPointSize").Element("histogram").Element("chart").Value">
+                        <img src="@stats.Element("cards").Element("defect").Element("blockPointSize").Element("histogram").Element("chart").Value" width="150px" /></a>
+                </td>
+                <td>
+                    <a href="@stats.Element("cards").Element("addedScope").Element("blockPointSize").Element("histogram").Element("chart").Value">
+                        <img src="@stats.Element("cards").Element("addedScope").Element("blockPointSize").Element("histogram").Element("chart").Value" width="150px" /></a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+

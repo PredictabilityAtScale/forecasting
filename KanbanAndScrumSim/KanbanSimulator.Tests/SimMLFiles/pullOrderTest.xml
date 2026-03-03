@@ -1,0 +1,25 @@
+﻿<simulation name="Pull Order" locale="en-US">
+
+  <execute dateFormat="dd-MMM-yyyy"  pullOrder="randomAfterOrdering" >
+    <visual />
+  </execute>
+
+  <setup>
+
+    <backlog type="custom"  nameFormat="{1} - {0}"  shuffle="false">
+      <custom name="G4" count="5" order="4" />
+      <custom name="G3" count="5" order="3" />
+
+      <custom name="G1" count="5" order="1" />
+      <custom name="G2" count="5" order="2" />
+
+    </backlog>
+
+    <columns>
+      <column id="1" estimateLowBound="1" estimateHighBound="1" wipLimit="2">Design</column>
+      <column id="2" estimateLowBound="1" estimateHighBound="1" wipLimit="4" displayWidth="2">Development</column>
+      <column id="3" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Test</column>
+    </columns>
+
+  </setup>
+</simulation>

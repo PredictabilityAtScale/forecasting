@@ -1,0 +1,33 @@
+<simulation name="Phase Estimate Multipliers" locale="en-US">
+
+  <example>This example shows how to define multiple project phases that apply different effort tax on cycle-time estimates.
+These can be used to model team ramp-up time for example.
+See the resources ribbon tab for documentation, exercises and tutorials.</example>
+
+  <execute intervalUnit="days">
+    	<visual />
+  </execute>
+  
+  <setup>
+  	
+  	<!-- Define two project phases where the team moves slower than normal. Every cycle-time random value is multiplied by 2 in this case.
+  	
+  	Exercises -
+  		1. Look at the cumulative flow diagram and observe the approximated 'S' curve effect.
+
+    	-->
+ 	<phases>
+ 		<phase startPercentage="0" endPercentage="20" estimateMultiplier="2">Ramp-up</phase>
+ 		<phase startPercentage="80" endPercentage="100" estimateMultiplier="2">Final Release</phase>
+ 	</phases>
+ 
+    	<columns>
+       		<column id="2" estimateLowBound="1" estimateHighBound="2" wipLimit="3">Design</column>
+       		<column id="3" estimateLowBound="2" estimateHighBound="5" wipLimit="4" displayWidth="2">Development</column>
+       		<column id="4" estimateLowBound="1" estimateHighBound="3" wipLimit="2">Test</column>
+   	</columns>
+  	
+  	<backlog type="simple" simpleCount="100" />
+  	
+  </setup>
+</simulation>

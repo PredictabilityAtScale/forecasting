@@ -1,0 +1,34 @@
+﻿<simulation name="Pre req Deliverables" locale="en-US">
+  <execute>
+    <visual showVisualizer="false" />
+    <monteCarlo cycles="1" />
+  </execute>
+
+  <setup>
+
+    <backlog type="custom" nameFormat="{0}\{3}" shuffle="false">
+
+      <deliverable name="Del1" order="1">
+        <custom count="5" />
+        <custom count="5" />
+      </deliverable>
+
+      <deliverable name="Del2" preRequisiteDeliverables="Del1">
+        <custom count="5" />
+        <custom count="5" />
+      </deliverable>
+
+      <deliverable name="Del3"  preRequisiteDeliverables="Del1|Del2" >
+        <custom count="5" />
+      </deliverable>
+
+    </backlog>
+
+    <columns>
+      <column id="1" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Design</column>
+      <column id="2" estimateLowBound="1" estimateHighBound="1" wipLimit="1" >Development</column>
+      <column id="3" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Test</column>
+    </columns>
+
+  </setup>
+</simulation>

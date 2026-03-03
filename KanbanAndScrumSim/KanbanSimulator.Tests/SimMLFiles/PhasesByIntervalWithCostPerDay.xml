@@ -1,0 +1,51 @@
+﻿<simulation name="Phases by interval" locale="en-US">
+
+  <execute dateFormat="dd-MMM-yyyy" >
+    <visual showVisualizer="false" />
+    <monteCarlo cycles="1" />
+  </execute>
+
+  <setup>
+    <!-- start by putting 50 items into the backlog -->
+    <backlog type="simple" simpleCount="50" />
+
+    <!-- defined three columns -->
+    <columns>
+      <column id="1" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Column</column>
+    </columns>
+
+    <phases unit="interval">
+      <phase start="0" end="2">
+        P0-2
+        <column id="1" wipLimit="2" />
+      </phase>
+      <!-- at the start -->
+
+      <!-- a gap back to default -->
+      <!-- APPLY PHASE DAY COST OVVERRIDE -->
+
+      <phase start="5" end="10" costPerDay="1000">
+        P5-10
+        <column id="1" wipLimit="2" />
+      </phase>
+
+      <!-- adjacent -->
+
+      <phase start="11" end="15">
+        P11-15
+        <column id="1" wipLimit="2" />
+      </phase>
+
+      <!-- gap back to default -->
+
+      <phase start="20" end="25">
+        P20-25
+        <column id="1" wipLimit="2" />
+      </phase>
+      <!-- in the middle -->
+    </phases>
+
+    <forecastDate startDate="01-May-2012" costPerDay="2500" />
+
+  </setup>
+</simulation>

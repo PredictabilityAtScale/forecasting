@@ -65,6 +65,18 @@ export default function Header() {
               >
                 Latent Defects
               </Link>
+              <Link
+                to="/kanban-scrum-sim"
+                className="block rounded-lg px-3 py-2 text-sm font-semibold text-[var(--sea-ink-soft)] no-underline transition hover:bg-[var(--link-bg-hover)] hover:text-[var(--sea-ink)]"
+              >
+                KanbanSim
+              </Link>
+              <Link
+                to="/kanban-scrum-sim"
+                className="block rounded-lg px-3 py-2 text-sm font-semibold text-[var(--sea-ink-soft)] no-underline transition hover:bg-[var(--link-bg-hover)] hover:text-[var(--sea-ink)]"
+              >
+                ScrumSim
+              </Link>
             </div>
           </div>
 
@@ -201,6 +213,22 @@ export default function Header() {
             onClick={() => setMobileOpen(false)}
           >
             Latent Defects
+          </Link>
+          <Link
+            to="/kanban-scrum-sim"
+            className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-[var(--sea-ink-soft)] no-underline transition hover:bg-[var(--link-bg-hover)] hover:text-[var(--sea-ink)]"
+            activeProps={{ className: 'block rounded-lg px-3 py-2.5 text-sm font-semibold text-[var(--sea-ink)] no-underline bg-[var(--link-bg-hover)]' }}
+            onClick={() => setMobileOpen(false)}
+          >
+            KanbanSim
+          </Link>
+          <Link
+            to="/kanban-scrum-sim"
+            className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-[var(--sea-ink-soft)] no-underline transition hover:bg-[var(--link-bg-hover)] hover:text-[var(--sea-ink)]"
+            activeProps={{ className: 'block rounded-lg px-3 py-2.5 text-sm font-semibold text-[var(--sea-ink)] no-underline bg-[var(--link-bg-hover)]' }}
+            onClick={() => setMobileOpen(false)}
+          >
+            ScrumSim
           </Link>
 
           <p className="px-3 pb-1 pt-3 text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--sea-ink-soft)]">

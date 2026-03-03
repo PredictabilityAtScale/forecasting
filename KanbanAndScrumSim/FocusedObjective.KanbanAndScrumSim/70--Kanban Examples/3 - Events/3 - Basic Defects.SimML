@@ -1,0 +1,48 @@
+<simulation name="Basic Defects" locale="en-US">
+
+  <example>This example shows how to define defects. 
+Defects can be created at any rate from cards entering a column, and these defects can start in the backlog or any other column.
+See the resources ribbon tab for documentation, exercises and tutorials.</example>
+
+  <execute intervalUnit="days">
+    	<visual />
+  </execute>
+  
+  <setup>
+  	
+  	<!-- Define two defects, both found by Test. One starts in Design, the other starts in Development.
+  	
+  	Exercises -
+  		1. Make the occurrenceLowBound and occurrenceHighBound equal to 1 to see what happens.
+  		
+  	Tips -
+  		1. The value for columnId MUST match a defined column id value in the columns section.
+  		2. Use a value of -1 (columnId="-1") to count and create defects when cards complete (rather than enter a column).
+  		3. Use a startsInColumnId value of -1 (startsInColumnId="-1") to have defects queued in the backlog rather than a board column.
+    	-->
+ 
+    	<defects>
+    		<!-- 'For every second to fifth card (picked at random) entering the Test column, create and queue one defect in the Development column' -->
+      		<defect columnId="3" startsInColumnId="2" count="1"
+       			occurrenceLowBound="2" occurrenceHighBound="5">
+        		Dev Bug ({0})
+      		</defect>
+
+    		<!-- 'For 20-50% of cards (picked at random) entering the Test column, create and queue one defect in the Design column' -->
+      		<defect columnId="3" startsInColumnId="1" count="1" 
+      			occurrenceType="percentage"	occurrenceLowBound="20" occurrenceHighBound="50">
+        		Design Issue ({0})
+      		</defect>
+    </defects>
+
+ 
+    	<columns>
+       		<column id="1" estimateLowBound="1" estimateHighBound="2" wipLimit="3">Design</column>
+       		<column id="2" estimateLowBound="2" estimateHighBound="5" wipLimit="4" displayWidth="2">Development</column>
+       		<column id="3" estimateLowBound="1" estimateHighBound="3" wipLimit="2">Test</column>
+   	</columns>
+  	
+  	<backlog type="simple" simpleCount="100" />
+  	
+  </setup>
+</simulation>

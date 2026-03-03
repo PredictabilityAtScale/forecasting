@@ -1,0 +1,34 @@
+<simulation name="Basic Columns" locale="en-US">
+
+  <example>This example shows the most basic Kanban column definition.
+Like all estimates, the cycle-time low and high bound estimates can be any unit you choose, but you MUST be consistent within the model. Specify the unit in the intervalUnit attribute in the execute section.
+See the resources ribbon tab for documentation, exercises and tutorials.</example>
+
+  <execute intervalUnit="days">
+    	<visual />
+  </execute>
+  
+  <setup>
+  	
+  	<!-- Define three columns with cycle-time estimates and WIP limits.
+  	
+  	Exercises -
+  		1. Play with the wipLimit values and see the effect on the Kanban board.
+  		2. Change the intervalUnit attribute to hours and notice that it changes the text in the header of the Kanban board.
+  		
+  	Tips:
+  		1. The id value for each column MUST be unique, and sequentially numbered.
+  		2.  You can change the display size of the columns using the displayWidth attribute (like we have done here for the development column)
+  	-->
+ 
+    	<columns>
+       		<column id="1" estimateLowBound="1" estimateHighBound="3" wipLimit="2">Design</column>
+       		<column id="2" estimateLowBound="2" estimateHighBound="5" wipLimit="4" displayWidth="2">Development</column>
+       		<column id="3" estimateLowBound="1" estimateHighBound="3" wipLimit="2">Test</column>
+    	</columns>
+
+  	
+  	<backlog type="simple" simpleCount="50" />
+  	
+  </setup>
+</simulation>

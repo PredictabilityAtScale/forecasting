@@ -1,0 +1,9 @@
+﻿- ActivePositions and InActivePositions StatisticResults
+- Class of service from and too XML contract
+- Class of service validation errors in AddedScope, Defect and custom backlog 
+- Class of service rippled through defect definitions when added to backlog
+- Class of service rippled through added scope defects when added to backlog
+- ComplexKanbanPhaseTest() changed. check blocked positions average
+
+- Are cards pulled from previous columns in the correct order - added some, but more needed...
+- Card comparer - URGENT - added some....

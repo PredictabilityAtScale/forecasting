@@ -1,0 +1,4 @@
+﻿<blockingEvent columnId="[column id to block]" occurrenceType="percentage" occurrenceLowBound="[low occurrence estimate]" occurrenceHighBound="[high occurrence estimate]"
+      estimateLowBound="[low block time estimate]" estimateHighBound="[high block time estimate">
+      [Title]
+</blockingEvent>

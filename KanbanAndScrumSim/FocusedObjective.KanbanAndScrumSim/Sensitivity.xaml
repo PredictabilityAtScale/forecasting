@@ -1,0 +1,67 @@
+﻿<Window
+x:Class="FocusedObjective.KanbanSim.Sensitivity"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:FocusedObjective.KanbanSim"
+        Title="Sensitivity" Height="300" Width="300">
+
+
+    <Grid>
+        <TabControl x:Name="tabControl" Margin="0,0,0,43">
+
+            <TabItem Header="Setup" x:Name="tabItemSetup" >
+                <Grid>
+
+                    <ComboBox x:Name="comboMeasure" Height="23" HorizontalAlignment="Right" Margin="0,70,7,0" VerticalAlignment="Top" Width="131" >
+                        <ComboBoxItem Content="Intervals" IsSelected="True" />
+                        <ComboBoxItem Content="Cycle-Time" />
+                        <ComboBoxItem Content="Empty Positions" />
+                        <ComboBoxItem Content="Queued Positions" />
+                    </ComboBox>
+                    <Button Content="Execute" Margin="7,0,7,6" x:Name="buttonExecute" Height="23" VerticalAlignment="Bottom" Click="buttonExecute_Click" />
+                    <!--
+                    <Label Content="Estimate Multiplier" Height="28" HorizontalAlignment="Left" Margin="6,15,0,0" x:Name="label1" VerticalAlignment="Top" />
+                    <Label Content="Occurrence Multiplier" Height="28" HorizontalAlignment="Left" Margin="6,41,0,0" x:Name="label2" VerticalAlignment="Top" />
+                    -->
+                    <Label Content="Measure" Height="28" HorizontalAlignment="Left" Margin="6,68,0,0" x:Name="label3" VerticalAlignment="Top" />
+                    <ComboBox Height="23" HorizontalAlignment="Right" Margin="0,99,7,0" x:Name="comboBoxSort" VerticalAlignment="Top" Width="131">
+                        <ComboBoxItem Content="Ascending"  IsSelected="True" />
+                        <ComboBoxItem Content="Descending"  />
+                    </ComboBox>
+                    <Label Content="Sort" Height="28" HorizontalAlignment="Left" Margin="7,97,0,0" x:Name="label4" VerticalAlignment="Top" />
+                    <CheckBox Content="Or, use the model sensitivity command" Height="16" HorizontalAlignment="Left" Margin="7,0,0,39" x:Name="checkBoxUseModel" VerticalAlignment="Bottom" />
+
+                   
+                </Grid>
+            </TabItem>
+
+
+            <TabItem Header="Results" x:Name="tabItemResults">
+                <Grid>
+                    <ScrollViewer>
+                        <StackPanel x:Name="stackPanelResults" Orientation="Vertical">
+                            <DataGrid AutoGenerateColumns="False" x:Name="dataGridResults" ItemsSource="{Binding Elements[test]}" MinColumnWidth="50" IsReadOnly="True">
+
+                                <DataGrid.Resources>
+                                </DataGrid.Resources>
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn  Binding="{Binding Attribute[index].Value}" Header="Index" />
+                                    <DataGridTextColumn Binding="{Binding Attribute[name].Value}" Header="Name" />
+                                    <DataGridTextColumn Binding="{Binding Attribute[type].Value}" Header="Object" />
+                                    <DataGridTextColumn Binding="{Binding Attribute[changeType].Value}" Header="Change Type" />
+                                    <DataGridTextColumn Binding="{Binding Attribute[intervalDelta].Value}" Header="Intervals Delta" />
+                                    <DataGridTextColumn Binding="{Binding Attribute[cycleTimeDelta].Value}" Header="Cycle-Time Delta" />
+                                    <DataGridTextColumn Binding="{Binding Attribute[emptyPositionsDelta].Value}" Header="Empty Positions Delta" />
+                                    <DataGridTextColumn Binding="{Binding Attribute[queuedPositionsDelta].Value}" Header="Queued Positions Delta" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </TabItem>
+        </TabControl>
+        <Button Content="As XML File..." Height="23" HorizontalAlignment="Left" Margin="5,0,0,12" x:Name="buttonAsHTML" VerticalAlignment="Bottom" Width="75" Click="buttonAsHTML_Click" />
+        <Button Content="Close" Height="23" HorizontalAlignment="Right" Margin="0,0,12,12" x:Name="buttonClose" VerticalAlignment="Bottom" Width="75" Click="buttonClose_Click" />
+        <Label  Visibility="Hidden" Content="Tips..." HorizontalAlignment="Left" Margin="9,0,0,6" x:Name="labelTip" Width="126" Height="30" VerticalAlignment="Bottom" FontStyle="Oblique" Foreground="Blue" />
+    </Grid>
+</Window>

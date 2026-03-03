@@ -1,0 +1,29 @@
+<simulation name="Basic Columns" locale="en-US">
+
+  <example>This example shows how to define a buffer (or queue) column on a Kanban board.
+These columns are zero-time columns used to hold cards waiting to be pulled, and skipped if the following column has an open position. 
+See the resources ribbon tab for documentation, exercises and tutorials.</example>
+
+  <execute intervalUnit="days">
+    	<visual />
+  </execute>
+  
+  <setup>
+  	
+  	<!-- Define a buffer/queue column called Dev Ready
+  	
+  	Exercises -
+  		1. Notice at the start of simulation the Dev Ready column is skipped. When necessary, the Dev Ready column holds cards allowing the Design column to avoid violating WIP and start new work.
+    	-->
+ 
+    	<columns>
+       		<column id="1" estimateLowBound="1" estimateHighBound="2" wipLimit="3">Design</column>
+       		<column id="2" buffer="true" wipLimit="2">Dev Ready</column>
+       		<column id="3" estimateLowBound="2" estimateHighBound="5" wipLimit="4" displayWidth="2">Development</column>
+       		<column id="4" estimateLowBound="1" estimateHighBound="3" wipLimit="2">Test</column>
+    	</columns>
+  	
+  	<backlog type="simple" simpleCount="50" />
+  	
+  </setup>
+</simulation>

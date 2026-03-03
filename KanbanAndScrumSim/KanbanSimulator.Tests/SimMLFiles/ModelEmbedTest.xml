@@ -1,0 +1,24 @@
+<simulation name="Model Distibution Test" locale="en-US">
+
+  <execute dateFormat="dd-MMM-yyyy" >
+    <monteCarlo cycles="1" />
+  </execute>
+  
+  <setup>
+  	<backlog type="simple" simpleCount="10" />
+ 	
+    	<columns>
+       		<column id="1"  estimateDistribution="Embed1"  wipLimit="2">Design</column>
+       		<column id="2"  estimateDistribution="Embed2" wipLimit="4" displayWidth="2">Development</column>
+       		<column id="3"  estimateLowBound="1" estimateHighBound="1" wipLimit="2" displayWidth="2">Development</column>
+   		</columns>
+    
+    <forecastDate startDate="01-May-2012" costPerDay="$2500" />
+    
+    <distributions>
+    	<distribution name="Embed2" count="25" numberType="int" shape="model" path="\\MAC\Dropbox\Private\GitHub\KanbanAndScrumSimulator\KanbanSimulator.Tests\SimMLFiles\Test.xml" parameters="" />
+    	<distribution name="Embed1" count="25" numberType="int" shape="model" path="\\MAC\Dropbox\Private\GitHub\KanbanAndScrumSimulator\KanbanSimulator.Tests\SimMLFiles\Test.xml" parameters="Designers,2,Developers,2" />
+    </distributions>
+    
+  </setup>
+</simulation>

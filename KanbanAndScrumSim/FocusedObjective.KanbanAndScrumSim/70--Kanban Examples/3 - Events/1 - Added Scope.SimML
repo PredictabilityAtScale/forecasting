@@ -1,0 +1,40 @@
+<simulation name="Added Scope to Project" locale="en-US">
+
+  <example>This example shows how to define added scope events that add work to the backlog once the project beigns.
+Added scope events can be used to represent scope-creep (changes and additions over time), or other un-planned intangible work such as refactoring tasks, or software upgrades, etc.
+See the resources ribbon tab for documentation, exercises and tutorials.</example>
+
+  <execute intervalUnit="days">
+    	<visual />
+  </execute>
+  
+  <setup>
+  	
+  	<!-- Define two added scope events. These will occur last in the project, but it is possible to have them occur at anytime using Class of Service definitions.
+  	
+  	Exercises -
+  		1. Make the occurrenceLowBound and occurrenceHighBound equal to 1 to see what happens.
+    	-->
+ 
+    	<addedScopes>
+    	
+    		<!-- 'Add one card to the backlog at a rate of between every four and ten card completed (picked at random each time)' -->
+      		<addedScope count="1"
+      			occurrenceLowBound="4" occurrenceHighBound="10">Scope Creep {0}</addedScope>
+      	
+      		<!-- 'Add two cards to the backlog for every 10-25% of cards that complete (picked at random each time' -->
+	      	<addedScope occurrenceType="percentage" count="2" 
+	      		occurrenceLowBound="10" occurrenceHighBound="25">Refactoring {0}</addedScope>
+	      		
+    	</addedScopes>
+ 
+    	<columns>
+       		<column id="2" estimateLowBound="1" estimateHighBound="2" wipLimit="3">Design</column>
+       		<column id="3" estimateLowBound="2" estimateHighBound="5" wipLimit="4" displayWidth="2">Development</column>
+       		<column id="4" estimateLowBound="1" estimateHighBound="3" wipLimit="2">Test</column>
+   	</columns>
+  	
+  	<backlog type="simple" simpleCount="20" />
+  	
+  </setup>
+</simulation>

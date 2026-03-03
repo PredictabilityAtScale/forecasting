@@ -1,0 +1,48 @@
+<simulation name="Added Scope Tests" locale="en-US">
+
+  <execute>
+    <visual showVisualizer="false" />
+    <monteCarlo cycles="1" />
+  </execute>
+  
+  <!-- tests pre-requisites, target added scope, custom backlog overrides for entries within deliverables -->
+  
+  <setup>
+  			
+  	<backlog type="custom"  nameFormat="{1}" shuffle="false">
+  	
+
+      <deliverable name="A" order="1">
+        <custom name="A1" count="6"  />
+        <custom name="A2" count="4"  />
+     </deliverable>
+
+      <deliverable name="B" order="1" preRequisiteDeliverables="A">
+        <custom name="B1" count="6"  />
+        <custom name="B2" count="4"  />
+     </deliverable>
+     
+      <deliverable name="C" order="2">
+        <custom name="C1" count="6" >
+        	<column id="2" estimateLowBound="2" estimateHighBound="2" />
+        </custom>
+        <custom name="C2" count="4"  />
+     </deliverable>
+
+    </backlog>
+    
+    <addedScopes>
+    			<!-- should cause 6 added scopes to be placed in deliverable C with a column 2 cycle time of 2 -->
+        		<addedScope occurrenceType="percentage" occurrenceLowBound="100" occurrenceHighBound="100" 
+    					targetCustomBacklog="B1"
+    					deliverable="C" customBacklog="C1">Added scope</addedScope>
+    </addedScopes>
+    
+    	<columns>
+       		<column id="1" estimateLowBound="1" estimateHighBound="1" wipLimit="2">Col1</column>
+       		<column id="2" estimateLowBound="1" estimateHighBound="1" wipLimit="2">Col2</column>
+       		<column id="3" estimateLowBound="1" estimateHighBound="1" wipLimit="2">Col3</column>
+    </columns>
+    
+  </setup>
+</simulation>

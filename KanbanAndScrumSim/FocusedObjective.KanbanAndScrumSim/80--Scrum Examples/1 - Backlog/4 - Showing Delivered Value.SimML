@@ -1,0 +1,29 @@
+<simulation name="Scrum Delivered Value Example" locale="en-US">
+
+  <example>This example shows a how to forecast delivered value of backlog items. 
+Once defined, the dollar value of delivered work is calculated and displayed in the header bar of the visual Scrum board.</example>
+
+  <execute type="Scrum" dateFormat="dd-MMM-yyyy" >
+    	<visual />
+  </execute>
+
+  <setup>
+
+	<iteration storyPointsPerIterationLowBound="15" storyPointsPerIterationHighBound="25"  />
+    
+    	<forecastDate startDate="01-Jan-2012" costPerDay="$2000" /> 
+
+    	<backlog type="custom" shuffle="true" >
+      		<custom name="small" count="15" estimateLowBound="5" estimateHighBound="8"  
+      			valueLowBound="$100" valueHighBound="$500" />
+      		
+      		<custom name="medium" count="10" estimateLowBound="8" estimateHighBound="10"
+      			valueLowBound="$1000" valueHighBound="$5000"  />
+      		
+      		<custom name="large" count="10" estimateLowBound="10" estimateHighBound="20"  
+      		valueLowBound="$10000" valueHighBound="$50000" />
+    	</backlog>
+
+  </setup>
+
+</simulation>

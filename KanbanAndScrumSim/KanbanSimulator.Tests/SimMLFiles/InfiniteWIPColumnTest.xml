@@ -1,0 +1,22 @@
+﻿<simulation name="Phases"  >
+  <execute dateFormat="dd-MMM-yyyy">
+    <visual showVisualizer="false" />
+    <monteCarlo cycles="1" />
+  </execute>
+
+  <setup>
+
+    <backlog type="simple" simpleCount="50" />
+
+    <columns>
+      <column id="1" estimateLowBound="1" estimateHighBound="1" wipLimit="2">Col1</column>
+      <column id="2" estimateLowBound="1" estimateHighBound="1" wipLimit="2">Col2</column>
+      <column id="3" estimateLowBound="5" estimateHighBound="5" wipLimit="0">Col3</column>
+    </columns>
+    
+    <!-- completeInterval="10" buffer="false"-->
+
+    <forecastDate startDate="01-May-2012" costPerDay="2500" />
+
+  </setup>
+</simulation>

@@ -1,0 +1,18 @@
+﻿<UserControl x:Class="FocusedObjective.KanbanSim.HowToInteractive"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="100" d:DesignWidth="400">
+    <Grid>
+        <TextBlock HorizontalAlignment="Left" Margin="10,10,10,10" TextWrapping="Wrap"  VerticalAlignment="Top">
+            No parameters are defined in the current model. See the example files for ideas how to expose key values to make models interactive in this window. For more help see our knowledge base: <Hyperlink 
+        NavigateUri="http://support.focusedobjective.com/entries/96045207-How-to-use-the-Interactive-Experiment-Window"
+        RequestNavigate="Hyperlink_RequestNavigate">
+        support article.
+    </Hyperlink>
+        </TextBlock>
+        
+    </Grid>
+</UserControl>

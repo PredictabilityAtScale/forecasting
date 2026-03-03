@@ -1,0 +1,24 @@
+<simulation name="Simplest Board" locale="en-US">
+
+  <example>This example shows the simplest Kanban board with work flowing from left to right.
+See the Kanban 101 document on the resources ribbon tab for exercises and tutorials.</example>
+
+  <execute dateFormat="dd-MMM-yyyy" >
+    <visual />
+  </execute>
+  
+  <setup>
+  	<!-- start by putting 50 items into the backlog -->
+  	<backlog type="simple" simpleCount="50" />
+ 	
+ 	<!-- defined three columns -->
+    	<columns>
+       		<column id="1" estimateLowBound="1" estimateHighBound="3" wipLimit="2">Design</column>
+       		<column id="2" estimateLowBound="2" estimateHighBound="4" wipLimit="4" displayWidth="2">Development</column>
+       		<column id="3" estimateLowBound="1" estimateHighBound="3" wipLimit="2">Test</column>
+    </columns>
+    
+    <forecastDate startDate="01-May-2012" costPerDay="2500" />
+    
+  </setup>
+</simulation>

@@ -1,0 +1,8 @@
+﻿<Window x:Class="FocusedObjective.Simulation.Viewers.VideoProgressWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Generating Video..." Height="77" Width="318">
+    <Grid>
+        <ProgressBar Height="10" HorizontalAlignment="Left" Margin="20,12,0,0" Name="videoProgressBar" VerticalAlignment="Top" Width="264" />
+    </Grid>
+</Window>

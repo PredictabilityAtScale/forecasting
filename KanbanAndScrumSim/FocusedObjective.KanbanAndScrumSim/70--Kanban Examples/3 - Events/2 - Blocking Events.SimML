@@ -1,0 +1,43 @@
+<simulation name="Blocking Events" locale="en-US">
+
+  <example>This example shows how to define blocking events that impede progress of work for given times.
+See the resources ribbon tab for documentation, exercises and tutorials.</example>
+
+  <execute intervalUnit="days">
+    	<visual />
+  </execute>
+  
+  <setup>
+  	
+  	<!-- Define two blocking events
+  	
+  	Exercises -
+  		1. Make the occurrenceLowBound and occurrenceHighBound equal to 1 to see what happens.
+    	-->
+ 
+    	<blockingEvents>
+ 
+ 		<!-- 'Block every fourth to tenth (picked at random) card entering the Design column for somewhere between one and three days (picked at random)' -->
+ 		<blockingEvent columnId="2" occurrenceLowBound="4" occurrenceHighBound="10"
+       			estimateLowBound="1" estimateHighBound="3">
+        		Block dev (missing requirement)
+      		</blockingEvent>
+
+      		<!-- 'Block 10-25% of cards (picked at random) entering the Test column for somewhere between one and two days (picked at random)' -->
+      		<blockingEvent columnId="4" occurrenceType="percentage" occurrenceLowBound="10" occurrenceHighBound="25"
+       			estimateLowBound="1" estimateHighBound="2">
+        		Block testing (environment down)
+      		</blockingEvent>
+ 
+	 </blockingEvents>
+ 
+    	<columns>
+       		<column id="2" estimateLowBound="1" estimateHighBound="2" wipLimit="3">Design</column>
+       		<column id="3" estimateLowBound="2" estimateHighBound="5" wipLimit="4" displayWidth="2">Development</column>
+       		<column id="4" estimateLowBound="1" estimateHighBound="3" wipLimit="2">Test</column>
+   	</columns>
+  	
+  	<backlog type="simple" simpleCount="100" />
+  	
+  </setup>
+</simulation>

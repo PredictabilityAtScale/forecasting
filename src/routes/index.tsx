@@ -296,6 +296,20 @@ function App() {
             </svg>
           }
         />
+        <ToolCard
+          title="Kanban & Scrum Sim"
+          description="Load legacy .simml examples, step through a browser board visualization, and run Monte Carlo plus sensitivity analysis without the desktop licensing layer."
+          href="/kanban-scrum-sim"
+          delay={630}
+          icon={
+            <svg className="h-7 w-7 text-[var(--lagoon)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="4" width="5" height="16" rx="1" />
+              <rect x="10" y="4" width="5" height="10" rx="1" />
+              <rect x="17" y="4" width="4" height="7" rx="1" />
+              <path d="M10 18h11" />
+            </svg>
+          }
+        />
         </div>
       </section>
 

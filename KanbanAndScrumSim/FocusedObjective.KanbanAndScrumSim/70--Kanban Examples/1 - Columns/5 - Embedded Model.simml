@@ -1,0 +1,25 @@
+<simulation name="Embed Test" locale="en-US">
+
+  <example>This is the model used as the embedded model for example: 4 - Embedded Model as Column.simml.
+It also demonstrates how the parameters can be altered from the calling parent model.
+This is common for supplying the staff avaialble for each skill, but can be used to pass any value.</example>  
+  
+  <?parameter name="Designers" value="1" ?>
+  <?parameter name="Developers" value="2" ?>
+
+  <execute dateFormat="dd-MMM-yyyy" >
+    <visual />
+  </execute>
+  
+  <setup>
+  	<backlog type="simple" simpleCount="10" />
+ 	
+    	<columns>
+       		<column id="1" estimateLowBound="1" estimateHighBound="1" wipLimit="=@Designers * 2">Design</column>
+       		<column id="2" estimateLowBound="1" estimateHighBound="1" wipLimit="=@Developers * 2" >Development</column>
+    </columns>
+    
+    <forecastDate startDate="01-May-2012" costPerDay="2500" />
+    
+  </setup>
+</simulation>

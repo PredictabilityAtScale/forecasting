@@ -1,0 +1,51 @@
+﻿<simulation name="Phases"  >
+  <execute type="Scrum">
+    <visual showVisualizer="false" />
+    <monteCarlo cycles="1" />
+  </execute>
+
+  <setup>
+
+    <iteration storyPointsPerIterationLowBound="1"  storyPointsPerIterationHighBound="1" />
+
+    <backlog type="custom" shuffle="false">
+      <custom name="backlog" count="100" estimateLowBound="1" estimateHighBound="1" />
+    </backlog>
+
+    <phases>
+      <phase startPercentage="0" endPercentage="19">phase1</phase>
+      <phase startPercentage="26" endPercentage="75">phase2</phase>
+      <phase startPercentage="81" endPercentage="100">phase3</phase>
+    </phases>
+
+    <!-- <blockPointSize count="100" minimum="0" average="0.5" maximum="1" populationStandardDeviation="0.5" sampleStandardDeviation="0.503" median="0.5" mode="0,1" fifthPercentile="0" twentyFifthPercentile="0" seventyFifthPercentile="1" ninetyFifthPercentile="1">
+            <histogram>
+              <group bin="1" value="0" count="50" />
+              <group bin="2" value="1" count="50" />
+    -->
+    <blockingEvents>
+      <blockingEvent
+      phases="phase2"
+      columnId ="1"
+      occurrenceLowBound="1" occurrenceHighBound="1"
+      estimateLowBound="1" estimateHighBound="1">Blocking event</blockingEvent>
+    </blockingEvents>
+
+    <!-- <defect value="39">
+    -->
+    <defects>
+      <defect phases="phase1|phase3" columnId="3" startsInColumnId="1"
+      occurrenceLowBound="1" occurrenceHighBound="1"
+      estimateLowBound="1" estimateHighBound="1">Defect</defect>
+    </defects>
+
+<!--         <addedScope value="20">
+          <pointSize count="20" minimum="1" average="1" maximum="1" populationStandardDeviation="0" sampleStandardDeviation="0" median="1" mode="1" fifthPercentile="1" twentyFifthPercentile="1" seventyFifthPercentile="1" ninetyFifthPercentile="1">
+-->
+    <addedScopes>
+      <addedScope phases="phase3"
+      occurrenceLowBound="1" occurrenceHighBound="1"
+      estimateLowBound="1" estimateHighBound="1">Added scope</addedScope>
+    </addedScopes>
+  </setup>
+</simulation>

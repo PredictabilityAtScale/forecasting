@@ -1,0 +1,49 @@
+<simulation name="Embeded Model" locale="en-US">
+
+<example>This example showes how to reference an external model as the distribution of a column's cycle time.</example>
+
+<!-- Note: If omitted, the basePath of the execute attribute defaults to the same path as the executable running the simulation. 
+       You can explicitely set this value to any path, and any path value entered elsewhere will be combined with this path. 
+       
+       E.g. <execute basePath="c:\models\" ...>
+       -->
+  <execute dateFormat="dd-MMM-yyyy"  >
+    <visual />
+  </execute>
+  
+  <setup>
+  	<backlog type="simple" simpleCount="10" />
+ 	
+    	<columns>
+       		<column id="1"  estimateDistribution="Embed1"  wipLimit="2">Investigate</column>
+       		<column id="2"  estimateDistribution="Embed2" wipLimit="4" displayWidth="2">Development</column>
+       		<column id="3"  estimateLowBound="1" estimateHighBound="1" wipLimit="2" displayWidth="2">Verify</column>
+   		</columns>
+    
+    <forecastDate startDate="01-May-2012" costPerDay="$2500" />
+    
+    <distributions>
+    
+    <!-- To use an external model, define a distribution of shape="model" and specify a path attribute. 
+         Either use a FULL path, or specify a basePath in the execute section (see above). 
+         Fist the full path is tried, if the file cannot be found, the basePath + the path is tried.
+         If still not found, the running application (FocusedObjective.KanbanAndScrumSim.exe path is used as the base path (as in this example).
+    	     
+    	     Optionally: You can specify parameters in the target model to override values in variables that are used as variable values in that model. 
+    	     	
+    	     		Some ideas:  Difficulty of work, specialist skillset of work, reducing capacity for expert or simple tasks. 
+              
+              The target model has the following parameters -
+              
+                <?parameter name="Designers" value="1" ?>
+                <?parameter name="Developers" value="2" ?>
+              
+              -->
+    
+    	<distribution name="Embed2" count="10" shape="model" path="\98-Kanban Examples\1 - Columns\5 - Embedded Model.simml" />
+    	<distribution name="Embed1" count="10" shape="model" path="\98-Kanban Examples\1 - Columns\5 - Embedded Model.simml" parameters="Designers,4,Developers,4" />
+    	
+    </distributions>
+    
+  </setup>
+</simulation>

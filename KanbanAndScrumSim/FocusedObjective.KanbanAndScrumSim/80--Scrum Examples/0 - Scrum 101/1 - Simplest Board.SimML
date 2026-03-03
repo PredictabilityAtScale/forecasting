@@ -1,0 +1,19 @@
+<simulation name="Scrum Simplest Example" locale="en-US">
+  
+  <example>This example shows the simplest scrum project.</example>
+  
+  <execute type="Scrum" dateFormat="dd-MMM-yyyy">
+    <visual />
+  </execute>
+
+  <setup>
+    <iteration storyPointsPerIterationLowBound="15" storyPointsPerIterationHighBound="25"  />
+    
+    <forecastDate startDate="01Jan2012" costPerDay="$2000" workDaysPerIteration="10"/> 
+
+    <backlog type="custom">
+      <custom name="backlog" count="15" estimateLowBound="4" estimateHighBound="8" />
+    </backlog>
+  </setup>
+
+</simulation>

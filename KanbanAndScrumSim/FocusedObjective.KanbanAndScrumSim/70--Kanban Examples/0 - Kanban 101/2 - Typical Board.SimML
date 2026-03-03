@@ -1,0 +1,143 @@
+<simulation name="Typical Board" locale="en-US">
+
+  <example>This example shows a typical Kanban board with various project phases, defects, blocking events and added scope events defined. 
+There is still many more model details we can add, but this shows the most common basics.</example>
+
+  <!-- These parameters allow forecast experiments to be performed using the Interactive window.
+       Use them by adding a @ before their name. For example, @SmallItemCount (would get replaced by 20 at simulation time) -->
+ 
+  <?parameter name="StartDate" value="01-Jan-2016" type="date" ?>
+  <?parameter name="TargetDate" value="01-Jul-2016" type="date" ?>
+
+  <!-- Staffing numbers for each skillset -->
+  <?parameter name="Designers"  value="1" type="number" lowest="1" highest="10" step="1" ?>
+  <?parameter name="Developers" value="2" type="number" lowest="1" highest="10" step="1" ?>
+  <?parameter name="Testers"    value="2" type="number" lowest="1" highest="10" step="1" ?>
+  <?parameter name="DevOps"     value="1" type="number" lowest="1" highest="10" step="1" ?>
+
+  <?parameter name="SmallItemCount" value="20" type="number" lowest="10"  highest="30" step="1" ?>
+  <?parameter name="MedItemCount"   value="20" type="number" lowest="10"  highest="30" step="1" ?>
+  <?parameter name="LargeItemCount" value="10" type="number" lowest="5"   highest="20" step="1" ?>
+  
+  <?parameter name="PerformanceRiskPercentage" value="30" type="number" lowest="0" highest="100" step="1" ?>
+  
+  <!-- cost per day used to calculate running project staff cost -->
+  <?parameter name="CostPerDayPerPerson" value="$800" type="currency" lowest="500" highest="1500" step="100"?>
+  <?parameter name="RevenuePerMonth" value="$10000" ?>
+
+  <execute dateFormat="dd-MMM-yyyy" currencyFormat="C0">
+    <visual />
+  </execute>
+  
+  <setup>
+
+    <forecastDate startDate="@StartDate" targetDate="@TargetDate"
+      costPerDay="=@CostPerDayPerPerson * (@Designers + @Developers + @Testers + @DevOps)"
+      revenue="@RevenuePerMonth" revenueUnit="month" >
+
+      <actuals>
+        <actual date="01-Feb-2016" count="5" />
+        <actual date="01-Mar-2016" count="15" />
+        <actual date="01-Apr-2016" count="25" />
+        <actual date="03-May-2016" count="27" />
+        <actual date="01-Jun-2016" count="31" />
+      </actuals>
+      
+    </forecastDate>
+	
+	<classOfServices>
+		<classOfService order="1" violateWIP="true" maximumAllowedOnBoard="1">Expedite</classOfService>
+		<classOfService order="2" default="true">Standard</classOfService>
+		<classOfService order="3" skipPercentage="50">Intangible</classOfService>
+	</classOfServices>
+	
+  	<backlog type="custom"  nameFormat="{1}" shuffle="true">
+  	
+  		<!-- features that need to be delivered - all MUST HAVES -->
+  	    	<deliverable name="Features">
+  			<custom name="Small {0}" count="@SmallItemCount" percentageLowBound="0" percentageHighBound="33"  valueLowBound="100" valueHighBound="500" />
+  			<custom name="Medium {0}" count="@MedItemCount" percentageLowBound="33" percentageHighBound="66"  valueLowBound="500" valueHighBound="1000"  />
+  			<custom name="Large {0}" count="@LargeItemCount" percentageLowBound="66" percentageHighBound="100"   valueLowBound="1000" valueHighBound="2500"  />
+  		</deliverable>
+  		
+  		<!-- 30% chance that there will be memory and performance issues that need to be remedied -->
+  	    	<deliverable name="RISK: Performance/Memory Issues" skipPercentage="=100.0-(@PerformanceRiskPercentage * 1.0)" >
+  			<custom name="Small {0}" count="5" percentageLowBound="0" percentageHighBound="33"  />
+  			<custom name="Medium {0}" count="5" percentageLowBound="33" percentageHighBound="66"  />
+  			<custom name="Large {0}" count="2" percentageLowBound="66" percentageHighBound="100"  />
+  		</deliverable>
+
+	</backlog>
+
+    	<!-- Columns; Add a "column" element for each column on your Kanban board -->
+    	<!-- Estimates can be in any unit you choose, but it must be the same for all entries in this file. -->
+    	<columns>
+      		<column id="1" buffer="true" replenishInterval="5" wipLimit="3">Input Queue</column>
+      		<column id="2" estimateLowBound="1" estimateHighBound="2" wipLimit="= @Designers">Design</column>
+      		<column id="3" estimateLowBound="2" estimateHighBound="3" wipLimit="= @Developers * 2" displayWidth="2">Develop</column>
+      		<column id="4" estimateLowBound="1" estimateHighBound="2" wipLimit="= @Testers">Test</column>
+      		<column id="5" estimateLowBound="1" estimateHighBound="1" wipLimit="= @DevOps">DevOps</column>
+    	</columns>
+
+    	<!-- Phases allow estimates and occurrence rate to be globall chenged, 
+    	certain events included/excluded, and column WIP limits to be adjusted
+    	throughout the progress of the simulation (based on % initial backlog completed)-->
+    	<phases>
+      		<phase startPercentage="0" endPercentage="20" 
+             		estimateMultiplier="2.0" occurrenceMultiplier="0.8">Team Ramp-Up</phase>
+      
+      		<!-- 21-74% uses the default values, no specific phase specified -->
+      
+      		<phase startPercentage="75" endPercentage="100">In Beta
+        		<!-- add more Test and Release resources for the last quarter of the project -->
+        		<column id="4" wipLimit="3" />
+        		<column id="5" wipLimit="2" />
+      		</phase>
+    	</phases>
+    
+    	<!-- BlockingEvents; Add any number of events that inhibit progress of a card -->
+    	<!-- Cards that are blocked will not move to the next column until the block time expires. -->
+    	<blockingEvents>
+      		<blockingEvent columnId="3" occurrenceLowBound="4" occurrenceHighBound="10"
+       					estimateLowBound="1" estimateHighBound="3">
+        				Block dev (missing requirement)
+      		</blockingEvent>
+
+      		<blockingEvent columnId="4" occurrenceType="percentage" occurrenceLowBound="10" occurrenceHighBound="25"
+       					estimateLowBound="1" estimateHighBound="2">
+        				Block testing (environment down)
+      		</blockingEvent>
+    	</blockingEvents>
+
+    	<!-- Defects; Add any number of defect categories. Defects cause added scope as part of completing other work at a give occurrence rate. -->
+    	<!-- Defect cards will be created when work completed a given column, and that defect will start either in the backlog (-1) or the column chosen (id) -->
+    	<!-- By default, the defect card will use the time edstimates allocated for each column. You can override this by adding column elements. -->
+    	<!-- The name of the defect card is the text value of the element, and the special tag: {0} is the id of the defect card. -->
+    	<defects>
+      		<defect columnId="4" startsInColumnId="2"
+       			occurrenceLowBound="2" occurrenceHighBound="5">
+        		Bug found in Testing ({0})
+      		</defect>
+
+      		<defect columnId="5" startsInColumnId="3" phases="In Beta"
+       			occurrenceType="percentage" occurrenceLowBound="10" occurrenceHighBound="20">
+        		Bug found in Dev Ops ({0})
+        			<column id="3" estimateLowBound="1" estimateHighBound="2" />
+        			<column id="4" estimateLowBound="1" estimateHighBound="1.5" />
+        			<column id="5" estimateLowBound="1" estimateHighBound="1" />
+      		</defect>
+    	</defects>
+
+    	<!-- AddedScopes; Add any number of added scope categories. Added scope is any increase in scope once a project begins. -->
+    	<!-- Added scope will cause cards to be added to the backlog at a given occurrence rate. These cards will be executed last. -->
+    	<!-- The name of the card is the text value of the element, and the special string {0} is the id of the new card. -->
+    	<addedScopes>
+      		<addedScope occurrenceLowBound="4" occurrenceHighBound="10" 
+      			classOfService="Expedite">Expedite {0}</addedScope>
+      			
+      		<addedScope occurrenceType="percentage" occurrenceLowBound="10" occurrenceHighBound="25" 
+      			classOfService="Intangible">Refactoring {0}</addedScope>
+    	</addedScopes>
+
+ 	</setup>
+ </simulation>

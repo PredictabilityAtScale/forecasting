@@ -1,0 +1,27 @@
+<simulation name="Scrum Defining Iterations Example" locale="en-US">
+  
+  <example>This example shows how to define and control iteration size and length for a scrum project.</example>
+  
+  <execute type="Scrum" dateFormat="dd-MMM-yyyy">
+    <visual />
+  </execute>
+
+  <setup>
+  
+  	<!-- The number of story points to complete for each iteration (picked at random between the limits) -->
+  	<!-- This isn't the total of the stories attempted, this estimate is the actual completed points for each simulated iteration. -->
+  	<!-- The allowedToOverAllocate flag determines if a story that will exceed this limit is included in the current iteration, or the next (default is true) -->
+    	<iteration storyPointsPerIterationLowBound="15" 
+    		storyPointsPerIterationHighBound="25"  
+    		allowedToOverAllocate="false"/>
+    
+    	<!-- the number of WORKDAYS per iteration is set in the forecastDate section (default is 10) -->
+    	<forecastDate startDate="01Jan2012" workDaysPerIteration="10" /> 
+
+    	<backlog type="custom">
+      		<custom name="backlog" count="15" estimateLowBound="4" estimateHighBound="8" />
+    	</backlog>
+  
+  </setup>
+
+</simulation>

@@ -1,0 +1,48 @@
+<simulation name="Scrum Added Scope Event Example" locale="en-US">
+  
+<example>This example shows how to define added scope events.</example>
+    
+  <execute type="Scrum" dateFormat="dd-MMM-yyyy">
+    	<visual />
+  </execute>
+
+  <setup>
+  
+    	<iteration storyPointsPerIterationLowBound="25" storyPointsPerIterationHighBound="35"  />
+    
+    	<forecastDate startDate="01-Jan-2012" costPerDay="2000" /> 
+
+    	<backlog type="custom" shuffle="true">
+	      <custom name="small" count="15" estimateLowBound="2" estimateHighBound="5" valueLowBound="100" valueHighBound="500" />
+	      <custom name="medium" count="10" estimateLowBound="5" estimateHighBound="10" valueLowBound="500" valueHighBound="1000" />
+	      <custom name="large" count="10" estimateLowBound="10" estimateHighBound="20" valueLowBound="1000" valueHighBound="1500" />
+	</backlog>
+
+
+	<!-- three added scope examples using the three occurrence types: count, percentage, and size -->
+	<!-- different classes of service for these additional stories controls the priority they are pulled from the backlog -->
+    	<addedScopes>
+      		<addedScope  count="2" occurrenceType="count" occurrenceLowBound="4" occurrenceHighBound="10"
+                 	estimateLowBound="3" estimateHighBound="5">Scope Creep {0}</addedScope>
+
+		<!-- prod issues during beta period ONLY -->
+      		<addedScope  occurrenceType="percentage" occurrenceLowBound="10" occurrenceHighBound="25"
+                 	estimateLowBound="3" estimateHighBound="5" classOfService="Expedite" phases="Beta-live">Beta Prod Issues {0}</addedScope>
+
+      		<addedScope   occurrenceType="size" occurrenceLowBound="20" occurrenceHighBound="40"
+                 	estimateLowBound="2" estimateHighBound="5" classOfService="Intangible">Refactoring {0}</addedScope>
+    	</addedScopes>
+    	
+	<phases>
+		<phase startPercentage="70" endPercentage="100" iterationMultiplier="0.75">Beta-live</phase>
+	</phases>
+
+	<classOfServices>
+		<classOfService order="1" maximumAllowedOnBoard="2">Expedite</classOfService>
+		<classOfService order="2" default="true">Standard</classOfService>
+		<classOfService order="2" skipPercentage="50">Intangible</classOfService>
+	</classOfServices>
+
+    </setup>
+
+</simulation>

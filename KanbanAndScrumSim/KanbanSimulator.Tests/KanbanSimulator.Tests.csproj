@@ -1,0 +1,264 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>
+    </ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{33133671-8540-421A-BFC9-44B7876017F8}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>KanbanSimulator.Tests</RootNamespace>
+    <AssemblyName>KanbanSimulator.Tests</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <NuGetPackageImportStamp>4d342b14</NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release Siemens|AnyCPU'">
+    <OutputPath>bin\Release Siemens\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Siemens|AnyCPU'">
+    <OutputPath>bin\Siemens\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Accessibility">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="PresentationUI, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="Syncfusion.Calculate.Base, Version=13.3400.0.18, Culture=neutral, PublicKeyToken=3d67ed1f87d44c89, processorArchitecture=MSIL">
+      <HintPath>..\packages\Syncfusion.Calculate.Base40.13.3.0.18\lib\net40\Syncfusion.Calculate.Base.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Syncfusion.Core, Version=13.1400.0.21, Culture=neutral, PublicKeyToken=632609b4d040f6b4, processorArchitecture=MSIL">
+      <HintPath>..\packages\Syncfusion.Core40.13.1.0.21\lib\net40\Syncfusion.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="UIAutomationProvider" />
+    <Reference Include="UIAutomationTypes" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <CodeAnalysisDependentAssemblyPaths Condition=" '$(VS100COMNTOOLS)' != '' " Include="$(VS100COMNTOOLS)..\IDE\PrivateAssemblies">
+      <Visible>False</Visible>
+    </CodeAnalysisDependentAssemblyPaths>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AddedScopeTests.cs" />
+    <Compile Include="BlockingEventTests.cs" />
+    <Compile Include="ColumnDistributionTests.cs" />
+    <Compile Include="CompleteCriteria.cs" />
+    <Compile Include="DateHelperTests.cs" />
+    <Compile Include="DistributionHelperTest.cs" />
+    <Compile Include="ExecuteForecastDateSimulationTest.cs" />
+    <Compile Include="ExpediteClassOfServiceTests.cs" />
+    <Compile Include="ModelDistributionTest.cs" />
+    <Compile Include="SIPDistributionTests.cs" />
+    <Compile Include="InfiniteWIPTests.cs" />
+    <Compile Include="InitialPositionTest.cs" />
+    <Compile Include="IntervalEventTests.cs" />
+    <Compile Include="DeliverableTests.cs" />
+    <Compile Include="ClassOfServiceTests.cs" />
+    <Compile Include="PhaseTests.cs" />
+    <Compile Include="DefectTests.cs" />
+    <Compile Include="CustomBacklogTests.cs" />
+    <Compile Include="KanbanSimulationTest.cs" />
+    <Compile Include="MarkovChainTest.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ScrumSimulationTest.cs" />
+    <Compile Include="SensitivitySimulationTests.cs" />
+    <Compile Include="SimulationDataTest.cs" />
+    <Compile Include="StatisticExtensionsTest.cs" />
+    <Compile Include="PartitionerTests.cs" />
+    <Compile Include="StatisticResultsTest.cs" />
+    <Compile Include="VariableExpressionDecoderTest.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="SimMLFiles\AddedScopeKanbanBase.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="SimMLFiles\AddedScopeScrumBase.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="SimMLFiles\BlockingEventKanbanBase.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="SimMLFiles\BlockingEventScrumBase.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="SimMLFiles\DefectKanbanBase.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="SimMLFiles\DefectScrumBase.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="SimMLFiles\ColumnDistributionTest.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="SimMLFiles\ColumnOverrideDistributionTest.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="SimMLFiles\BasicKanbanPhaseTest.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="SimMLFiles\ComplexKanbanPhaseTest.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="SimMLFiles\PhasesEventTest.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="SimMLFiles\ScrumPhaseTest.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="SimMLFiles\ScrumPhasesEventTest.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="SimMLFiles\BlockingEventKanbanMultipleColumnDefect.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="SimMLFiles\ReplenishFirstColumnTest.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="SimMLFiles\ReplenishFirstColumnBufferTest.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="SimMLFiles\ReplenishColumnTest.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="SimMLFiles\ReplenishColumnBufferTest.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="SimMLFiles\CompleteColumnBufferTest.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="SimMLFiles\CompleteLastColumnTest.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="SimMLFiles\CompleteColumnTest.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="SimMLFiles\CompleteLastColumnBufferTest.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="SimMLFiles\Permutations_sequentialDeliverables.xml" />
+    <EmbeddedResource Include="SimMLFiles\Permutations_sequentialBacklog.xml" />
+    <EmbeddedResource Include="SimMLFiles\Permutations_deliverables.xml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SimMLFiles\ColumnOverridesWithinDeliverables.xml" />
+    <EmbeddedResource Include="SimMLFiles\ColumnOverridesNoDeliverables.xml" />
+    <EmbeddedResource Include="SimMLFiles\PhasesByInterval.xml" />
+    <EmbeddedResource Include="SimMLFiles\ScrumPhaseIterationTest.xml" />
+    <EmbeddedResource Include="SimMLFiles\InfiniteWIPColumnTest.xml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SimMLFiles\InitialPositionTest.xml" />
+    <EmbeddedResource Include="SimMLFiles\BasicKanbanThreeColumnsModel.xml" />
+    <EmbeddedResource Include="SimMLFiles\CompleteByActivePercentageTest.xml" />
+    <EmbeddedResource Include="SimMLFiles\expedite.xml" />
+    <Content Include="FodyWeavers.xml" />
+    <EmbeddedResource Include="SimMLFiles\prereqtest.xml" />
+    <EmbeddedResource Include="SimMLFiles\earlieststarttest.xml" />
+    <EmbeddedResource Include="SimMLFiles\cos_overrides.xml" />
+    <EmbeddedResource Include="SimMLFiles\SIP.xml" />
+    <EmbeddedResource Include="SimMLFiles\AddedScopeTargets.xml" />
+    <EmbeddedResource Include="SimMLFiles\DefectTargets.xml" />
+    <EmbeddedResource Include="SimMLFiles\AddedScopeTargetsNoDeliverable.xml" />
+    <EmbeddedResource Include="SimMLFiles\DefectTargetsNoDeliverable.xml" />
+    <EmbeddedResource Include="SimMLFiles\BlockingTargets.xml" />
+    <EmbeddedResource Include="SimMLFiles\BlockingTargetsNoDeliverable.xml" />
+    <EmbeddedResource Include="SimMLFiles\AddedScopeScrumTarget.xml" />
+    <EmbeddedResource Include="SimMLFiles\DefectScrumTarget.xml" />
+    <EmbeddedResource Include="SimMLFiles\BlockingScrumTarget.xml" />
+    <EmbeddedResource Include="SimMLFiles\DefectKanbanColumn.xml" />
+    <EmbeddedResource Include="SimMLFiles\DefectKanbanColumnLowerCOSOrderTest.xml" />
+    <EmbeddedResource Include="SimMLFiles\pullOrderTest.xml" />
+    <EmbeddedResource Include="SimMLFiles\PartitionForecastDateTest.xml" />
+    <EmbeddedResource Include="SimMLFiles\PhasesByIntervalWithCostPerDay.xml" />
+    <Content Include="Tests Needed.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <EmbeddedResource Include="SimMLFiles\ModelEmbedTest.xml" />
+    <Content Include="SimMLFiles\test.xml" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FocusedObjective.Common\FocusedObjective.Common.csproj">
+      <Project>{47c8f142-da8e-40d8-8c77-4ac5dbd18ec4}</Project>
+      <Name>FocusedObjective.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\FocusedObjective.Contract\FocusedObjective.Contract.csproj">
+      <Project>{1c640761-d358-4f4e-9a99-8ae3dd1a14e9}</Project>
+      <Name>FocusedObjective.Contract</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\FocusedObjective.Distributions\FocusedObjective.Distributions.csproj">
+      <Project>{3c2f4020-10f9-4138-bc04-f6fe1ede9a11}</Project>
+      <Name>FocusedObjective.Distributions</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\FocusedObjective.Simulation\FocusedObjective.Simulation.csproj">
+      <Project>{c096fa7d-6262-47ea-b504-ba797438882e}</Project>
+      <Name>FocusedObjective.Simulation</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

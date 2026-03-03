@@ -1,0 +1,31 @@
+<simulation name="Scrum Fib Backlog Example" locale="en-US">
+
+  <example>This example shows a how to segment a backlog into size groups in order to reflect different story sizes.
+Groups in this case follow the common Fibonacci Sequence used in Planning Poker.</example>
+
+  <execute type="Scrum" dateFormat="dd-MMM-yyyy" >
+    <visual />
+  </execute>
+
+  <setup>
+    	<iteration storyPointsPerIterationLowBound="20" storyPointsPerIterationHighBound="35"  />
+    
+    	<forecastDate startDate="01-Jan-2012" costPerDay="2000" /> 
+
+    	<backlog type="custom">
+    	
+    		<!-- initial guessed ranges using the theory/pattern that cards could be in the group
+    		above or below that chosen by the group -->
+      		<custom name="1" count="5" estimateLowBound="0.5" estimateHighBound="2" />
+      		<custom name="2" count="12" estimateLowBound="1" estimateHighBound="4" />
+      		<custom name="3" count="15" estimateLowBound="2" estimateHighBound="6" />
+      		<custom name="5" count="10" estimateLowBound="3" estimateHighBound="10" />
+      		<custom name="8" count="5"  estimateLowBound="5" estimateHighBound="16" />
+      		<custom name="13" count="2" estimateLowBound="8" estimateHighBound="26" />
+      		<custom name="21" count="1" estimateLowBound="13" estimateHighBound="42" />
+      		
+	</backlog>
+
+  </setup>
+
+</simulation>

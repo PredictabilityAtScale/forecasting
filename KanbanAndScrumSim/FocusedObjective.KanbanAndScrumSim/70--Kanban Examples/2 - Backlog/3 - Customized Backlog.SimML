@@ -1,0 +1,46 @@
+<simulation name="Fully Customized Backlog" locale="en-US">
+
+  <example>This example shows how to quickly divide a backlog into multiple groups. 
+Column cycle times are are randomly chosen from the explicit column ranges for those stories sizes that have one, or from within the percentage range specifiedif they don't.
+See the resources ribbon tab for documentation, exercises and tutorials.</example>
+
+  <execute>
+    <visual />
+  </execute>
+  
+  <setup>
+  	
+  	<!-- Three size ranges of backlog story size overriding the default column cycle-times using both percentage ranges and explicit column cycle times.
+  	       Exercise -
+  			1. Create some entries of your own and play with column cycle-time overriding. 
+  			2. Some ideas:  
+  			    a) UI heavy stories that have larger Design column cycle times, but low server side development time.
+  			    b) Server-side intensive stories that have minimal Design time, but larger server side development time-->
+  			    
+  	<backlog type="custom"  nameFormat="{1}" shuffle="true">
+  	
+	      <!-- override the first two columns, use a specified percentage range for Test -->
+	      <custom name="Small {0}" count="20"  percentageLowBound="0" percentageHighBound="25" >
+	        	<column id="1" estimateLowBound="1" estimateHighBound="1.5" />
+	        	<column id="2" estimateLowBound="1" estimateHighBound="2" />
+	      </custom>
+	
+	      <!-- override all columns -->
+	      <custom name="Medium {0}"  count="20">
+	        	<column id="1" estimateLowBound="1.5" estimateHighBound="2.5" />
+	        	<column id="2" estimateLowBound="2.5" estimateHighBound="4.5" />
+	        	<column id="3" estimateLowBound="1.5" estimateHighBound="2" />
+	      </custom>
+	
+	      <custom name="Large {0}" count="10" percentageLowBound="66" percentageHighBound="100" />
+
+	</backlog>
+ 
+    	<columns>
+       		<column id="1" estimateLowBound="1" estimateHighBound="3" wipLimit="2">Design</column>
+       		<column id="2" estimateLowBound="2" estimateHighBound="5" wipLimit="4" displayWidth="2">Development</column>
+       		<column id="3" estimateLowBound="1" estimateHighBound="3" wipLimit="2">Test</column>
+    </columns>
+    
+  </setup>
+</simulation>

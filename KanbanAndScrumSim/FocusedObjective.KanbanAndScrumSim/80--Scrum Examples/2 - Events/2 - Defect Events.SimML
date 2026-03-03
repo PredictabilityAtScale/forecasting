@@ -1,0 +1,46 @@
+<simulation name="Scrum Defect Event Example" locale="en-US">
+  
+<example>This example shows how to define defect events.</example>
+    
+  <execute type="Scrum" dateFormat="dd-MMM-yyyy">
+    	<visual />
+  </execute>
+
+  <setup>
+  
+    	<iteration storyPointsPerIterationLowBound="25" storyPointsPerIterationHighBound="35"  />
+    
+    	<forecastDate startDate="01-Jan-2012" costPerDay="2000" /> 
+
+    	<backlog type="custom" shuffle="true">
+	      <custom name="small" count="15" estimateLowBound="2" estimateHighBound="5" valueLowBound="100" valueHighBound="500" />
+	      <custom name="medium" count="10" estimateLowBound="5" estimateHighBound="10" valueLowBound="500" valueHighBound="1000" />
+	      <custom name="large" count="10" estimateLowBound="10" estimateHighBound="20" valueLowBound="1000" valueHighBound="1500" />
+	</backlog>
+
+	<!-- three defect examples using the three occurrence types: count, percentage, and size -->
+	<!-- different classes of service for these additional stories controls the priority they are pulled from the backlog -->
+    	<defects>
+      		<defect  count="2" occurrenceLowBound="4" occurrenceHighBound="10"
+          		estimateLowBound="1" estimateHighBound="3" >Bug found in Testing ({0})</defect>
+
+      		<defect  occurrenceType="percentage" occurrenceLowBound="10" occurrenceHighBound="25"
+                	estimateLowBound="1" estimateHighBound="1" >Bug in CSS Code ({0})</defect>
+
+      		<defect  occurrenceType="size" occurrenceLowBound="10" occurrenceHighBound="20"
+   			estimateLowBound="1" estimateHighBound="2" classOfService="Expedite" phases="Beta-live">Bug in DevOps ({0})</defect>
+    	</defects>
+    	
+	<phases>
+		<phase startPercentage="70" endPercentage="100" iterationMultiplier="0.75">Beta-live</phase>
+	</phases>
+
+	<classOfServices>
+		<classOfService order="1" maximumAllowedOnBoard="2">Expedite</classOfService>
+		<classOfService order="2" default="true">Standard</classOfService>
+		<classOfService order="2" skipPercentage="50">Intangible</classOfService>
+	</classOfServices>
+
+    </setup>
+
+</simulation>

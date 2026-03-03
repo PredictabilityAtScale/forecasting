@@ -1,0 +1,129 @@
+<simulation name="Website Launch" version="1.0" locale="en-US">
+
+<example>Book Website Example</example>
+
+  <!-- These parameters allow forecast experiments to be performed using the Interactive window.
+       Use them by adding a @ before their name. For example, @CostPerDay (would get replaced by 2500 at simulation time) -->
+
+  <?parameter name="StartDate" value="01-Jan-2016" type="date" ?>
+  <?parameter name="CostPerDay"  value="2500" type="number" lowest="2000" highest="5000" step="500" ?>
+
+  <execute limitIntervalsTo="1000" decimalRounding="3" deliverables="Must-Haves"  dateFormat="dd-MMM-yyyy">
+  		
+  	<visual />
+   		
+<!--
+  		<addStaff count="5" cycles="250">
+  			<column id="1" maxWip="5" />
+  			<column id="2" maxWip="5" />
+  			<column id="3" maxWip="5" />
+  			<column id="4" maxWip="5" />
+  		</addStaff>  	
+-->
+<!--   		<forecastDate cycles="250" startDate="01Oct2011" intervalsToOneDay="1" workDays="monday,tuesday,wednesday,thursday,friday" costPerDay="3461" />
+
+--> 
+<!--
+  		<sensitivity cycles="250" estimateMultiplier="0.5" occurrenceMultiplier="2" sortOrder="descending" />  		
+	-->	
+   		
+ 	</execute>
+
+	<setup>
+		<forecastDate startDate="@StartDate" costPerDay="@CostPerDay" />
+	
+		<backlog type="custom"  shuffle="true">
+
+			<deliverable name="Must-Haves">
+			   	
+			   	<custom name="Small" count="6"  percentageLowBound="0" percentageHighBound="66" /> 
+			   	<custom name="Medium" count="4"  percentageLowBound="33" percentageHighBound="100" /> 
+
+				<custom name="UI Intensive" count="5"  percentageLowBound="0" percentageHighBound="100" > 
+			   		<column id="1" estimateLowBound="2" estimateHighBound="5" />
+			   		<column id="2" estimateLowBound="3" estimateHighBound="5" />
+			   	</custom>
+
+			   	<custom name="Server-Side Intensive" count="6"  percentageLowBound="0" percentageHighBound="100" > 
+			   		<column id="3" estimateLowBound="3" estimateHighBound="6" />
+			   	</custom>
+			   	
+		   	</deliverable>
+
+			<deliverable name="Everything-Remaining">
+			   	
+			   	<custom name="Small" count="2"  percentageLowBound="0" percentageHighBound="66" /> 
+			   	<custom name="Medium" count="3"  percentageLowBound="33" percentageHighBound="100" /> 
+
+				<custom name="UI Intensive" count="2"  percentageLowBound="0" percentageHighBound="100" > 
+			   		<column id="1" estimateLowBound="2" estimateHighBound="5" />
+			   		<column id="2" estimateLowBound="3" estimateHighBound="5" />
+			   	</custom>
+
+			   	<custom name="Server-Side Intensive" count="3"  percentageLowBound="0" percentageHighBound="100" > 
+			   		<column id="3" estimateLowBound="3" estimateHighBound="6" />
+			   	</custom>
+			   	
+		   	</deliverable>
+
+		</backlog>
+  		
+  		<phases>
+  			<!-- initial team getting their feet. show things take longer as team learns -->
+  			<phase startPercentage="0" endPercentage="20" estimateMultiplier="1.5">Ramp-up</phase>
+  			
+  			<!-- buildout enough product for functional testing to begin. borrow a graphics designer and UI dev to cover initial work -->
+  			<phase startPercentage="21" endPercentage="50" >Build Minimum Product
+  				<column id="1" wipLimit="3" /> 
+  				<column id="2" wipLimit="3" />
+  			</phase>
+  			
+  			<!-- add more testers, and devs to cover defect fixing. return the borrowed staff -->
+  			<phase startPercentage="51" endPercentage="80">Begin Functional Testing
+  				<column id="4" wipLimit="4" /> 
+  			</phase>
+  			
+  			<!-- ramp-down team to normal operating level -->
+  			<phase startPercentage="81" endPercentage="100">Go-live</phase>
+  		</phases>
+  		
+  		<columns>
+     			<column id="1" estimateLowBound="1" estimateHighBound="3" wipLimit="2">Graphics-Design</column>
+     			<column id="2" estimateLowBound="1" estimateHighBound="3" wipLimit="2">UI-Code</column>
+     			<column id="3" estimateLowBound="1" estimateHighBound="3" wipLimit="3">Server-Side Code</column>
+     			<column id="4" estimateLowBound="1" estimateHighBound="3" wipLimit="2">QA</column>
+  		</columns>
+  		
+  		<defects>
+  			<!-- UI defects, normally simple fixes -->
+ 		   	<defect columnId="4" startsInColumnId="2" scale="1" occurrenceLowBound="2" occurrenceHighBound="3">UI Defect 
+ 		   	<!--<defect columnId="4" startsInColumnId="2" scale="1" occurrenceLowBound="1" occurrenceHighBound="1">UI Defect -->
+ 		   	    	<column id="2" estimateLowBound="1" estimateHighBound="2" />
+    				<column id="3" estimateLowBound="0.5" estimateHighBound="1" />
+    				<column id="4" estimateLowBound="0.5" estimateHighBound="1" />
+    			</defect>
+ 		   	
+  			<!-- Server-side defects -->
+ 		   	<defect columnId="4" startsInColumnId="3" scale="1" occurrenceLowBound="3" occurrenceHighBound="6">Server-Side Defect
+ 		   	    	<column id="3" estimateLowBound="1" estimateHighBound="2" />
+    				<column id="4" estimateLowBound="0.5" estimateHighBound="1" />
+    			</defect>
+
+  		</defects>
+  		
+  		<blockingEvents>
+  			<!-- Designer blocked waiting for answer from business owner -->
+			<blockingEvent columnId="1" scale="1" occurrenceLowBound="5" occurrenceHighBound="10"
+			    	estimateLowBound="1" estimateHighBound="3">Spec question (awaiting answer)
+			</blockingEvent>
+			
+  			<!-- Testers blocked because environment unavailable -->
+			<blockingEvent columnId="4" scale="1" occurrenceLowBound="4" occurrenceHighBound="8"
+			     estimateLowBound="1" estimateHighBound="2">Block testing (environment down)
+			</blockingEvent>
+			
+		</blockingEvents>
+  		
+ 	</setup>
+
+</simulation>

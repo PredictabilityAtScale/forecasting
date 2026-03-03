@@ -1,0 +1,31 @@
+<simulation name="Scrum Defining Phases Example" locale="en-US">
+  
+<example>This example shows how to define project phases.</example>
+    
+  <execute type="Scrum" dateFormat="dd-MMM-yyyy">
+    	<visual />
+  </execute>
+
+  <setup>
+  
+    	<iteration storyPointsPerIterationLowBound="25" storyPointsPerIterationHighBound="35"  />
+    
+    	<forecastDate startDate="01-Jan-2012" costPerDay="2000" /> 
+
+    	<backlog type="custom" shuffle="true">
+	      <custom name="small" count="15" estimateLowBound="2" estimateHighBound="5" valueLowBound="100" valueHighBound="500" />
+	      <custom name="medium" count="10" estimateLowBound="5" estimateHighBound="10" valueLowBound="500" valueHighBound="1000" />
+	      <custom name="large" count="10" estimateLowBound="10" estimateHighBound="20" valueLowBound="1000" valueHighBound="1500" />
+	</backlog>
+
+	<!-- project phases are displayed in the header of the Scrum board -->
+	<!-- The percentages are the amount of stories STARTED of the original backlog.  -->
+	<phases>
+		<phase startPercentage="0" endPercentage="25">Ramp up</phase>
+		<!-- 26 - 79 % will be called 'default' phase -->
+		<phase startPercentage="60" endPercentage="100">Beta-live</phase>
+	</phases>
+
+    </setup>
+
+</simulation>

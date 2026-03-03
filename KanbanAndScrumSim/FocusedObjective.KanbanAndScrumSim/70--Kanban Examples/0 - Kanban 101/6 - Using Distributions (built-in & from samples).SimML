@@ -1,0 +1,28 @@
+<simulation name="Simplest Board" locale="en-US">
+
+  <example>This example shows how to use both the built-in distributions or generate distributions from sample data</example>
+
+  <execute dateFormat="dd-MMM-yyyy" >
+    <visual />
+  </execute>
+  
+  <setup>
+  	<!-- start by putting 50 items into the backlog -->
+  	<backlog type="simple" simpleCount="50" />
+ 	
+ 	<!-- defined three columns -->
+    	<columns>
+       		<column id="1" estimateDistribution="Dist for Design Column" wipLimit="2">Design</column>
+       		<column id="2" estimateLowBound="2" estimateHighBound="4" wipLimit="4" displayWidth="2">Development</column>
+       		<column id="3" estimateDistribution="Dist for Design Column" wipLimit="2">Test</column>
+    </columns>
+    
+    <forecastDate startDate="01-May-2012" costPerDay="$2500" />
+    
+    <distributions>
+    	<distribution name="Dist for Design Column" numberType="double" shape="normal" lowBound="1" highBound="3" parameters="2,0.5" />
+    	<distribution name="Dist for Test Column" numberType="double" shape="fromSamples">2.399,2.825,1.783,2.193,2.96,2.007,2.563,2.557,2.484,2.052,2.382,1.623,2.11,1.578,2.343,2.424,1.965,2.573,2.566,1.697,1.946,2.419,1.843,2.244,2.491</distribution>
+    </distributions>
+    
+  </setup>
+</simulation>

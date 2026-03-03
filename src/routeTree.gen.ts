@@ -14,8 +14,10 @@ import { Route as VotingRouteImport } from './routes/voting'
 import { Route as ThroughputRouteImport } from './routes/throughput'
 import { Route as TeamDashboardRouteImport } from './routes/team-dashboard'
 import { Route as StoryCountRouteImport } from './routes/story-count'
+import { Route as SimmlReferenceRouteImport } from './routes/simml-reference'
 import { Route as MultiFeatureRouteImport } from './routes/multi-feature'
 import { Route as LatentDefectRouteImport } from './routes/latent-defect'
+import { Route as KanbanScrumSimRouteImport } from './routes/kanban-scrum-sim'
 import { Route as CapabilityMatrixRouteImport } from './routes/capability-matrix'
 import { Route as IndexRouteImport } from './routes/index'
 
@@ -44,6 +46,11 @@ const StoryCountRoute = StoryCountRouteImport.update({
   path: '/story-count',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SimmlReferenceRoute = SimmlReferenceRouteImport.update({
+  id: '/simml-reference',
+  path: '/simml-reference',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MultiFeatureRoute = MultiFeatureRouteImport.update({
   id: '/multi-feature',
   path: '/multi-feature',
@@ -52,6 +59,11 @@ const MultiFeatureRoute = MultiFeatureRouteImport.update({
 const LatentDefectRoute = LatentDefectRouteImport.update({
   id: '/latent-defect',
   path: '/latent-defect',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KanbanScrumSimRoute = KanbanScrumSimRouteImport.update({
+  id: '/kanban-scrum-sim',
+  path: '/kanban-scrum-sim',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CapabilityMatrixRoute = CapabilityMatrixRouteImport.update({
@@ -68,8 +80,10 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/capability-matrix': typeof CapabilityMatrixRoute
+  '/kanban-scrum-sim': typeof KanbanScrumSimRoute
   '/latent-defect': typeof LatentDefectRoute
   '/multi-feature': typeof MultiFeatureRoute
+  '/simml-reference': typeof SimmlReferenceRoute
   '/story-count': typeof StoryCountRoute
   '/team-dashboard': typeof TeamDashboardRoute
   '/throughput': typeof ThroughputRoute
@@ -79,8 +93,10 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/capability-matrix': typeof CapabilityMatrixRoute
+  '/kanban-scrum-sim': typeof KanbanScrumSimRoute
   '/latent-defect': typeof LatentDefectRoute
   '/multi-feature': typeof MultiFeatureRoute
+  '/simml-reference': typeof SimmlReferenceRoute
   '/story-count': typeof StoryCountRoute
   '/team-dashboard': typeof TeamDashboardRoute
   '/throughput': typeof ThroughputRoute
@@ -91,8 +107,10 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/capability-matrix': typeof CapabilityMatrixRoute
+  '/kanban-scrum-sim': typeof KanbanScrumSimRoute
   '/latent-defect': typeof LatentDefectRoute
   '/multi-feature': typeof MultiFeatureRoute
+  '/simml-reference': typeof SimmlReferenceRoute
   '/story-count': typeof StoryCountRoute
   '/team-dashboard': typeof TeamDashboardRoute
   '/throughput': typeof ThroughputRoute
@@ -104,8 +122,10 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/capability-matrix'
+    | '/kanban-scrum-sim'
     | '/latent-defect'
     | '/multi-feature'
+    | '/simml-reference'
     | '/story-count'
     | '/team-dashboard'
     | '/throughput'
@@ -115,8 +135,10 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/capability-matrix'
+    | '/kanban-scrum-sim'
     | '/latent-defect'
     | '/multi-feature'
+    | '/simml-reference'
     | '/story-count'
     | '/team-dashboard'
     | '/throughput'
@@ -126,8 +148,10 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/capability-matrix'
+    | '/kanban-scrum-sim'
     | '/latent-defect'
     | '/multi-feature'
+    | '/simml-reference'
     | '/story-count'
     | '/team-dashboard'
     | '/throughput'
@@ -138,8 +162,10 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CapabilityMatrixRoute: typeof CapabilityMatrixRoute
+  KanbanScrumSimRoute: typeof KanbanScrumSimRoute
   LatentDefectRoute: typeof LatentDefectRoute
   MultiFeatureRoute: typeof MultiFeatureRoute
+  SimmlReferenceRoute: typeof SimmlReferenceRoute
   StoryCountRoute: typeof StoryCountRoute
   TeamDashboardRoute: typeof TeamDashboardRoute
   ThroughputRoute: typeof ThroughputRoute
@@ -184,6 +210,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StoryCountRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/simml-reference': {
+      id: '/simml-reference'
+      path: '/simml-reference'
+      fullPath: '/simml-reference'
+      preLoaderRoute: typeof SimmlReferenceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/multi-feature': {
       id: '/multi-feature'
       path: '/multi-feature'
@@ -196,6 +229,13 @@ declare module '@tanstack/react-router' {
       path: '/latent-defect'
       fullPath: '/latent-defect'
       preLoaderRoute: typeof LatentDefectRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/kanban-scrum-sim': {
+      id: '/kanban-scrum-sim'
+      path: '/kanban-scrum-sim'
+      fullPath: '/kanban-scrum-sim'
+      preLoaderRoute: typeof KanbanScrumSimRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/capability-matrix': {
@@ -218,8 +258,10 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CapabilityMatrixRoute: CapabilityMatrixRoute,
+  KanbanScrumSimRoute: KanbanScrumSimRoute,
   LatentDefectRoute: LatentDefectRoute,
   MultiFeatureRoute: MultiFeatureRoute,
+  SimmlReferenceRoute: SimmlReferenceRoute,
   StoryCountRoute: StoryCountRoute,
   TeamDashboardRoute: TeamDashboardRoute,
   ThroughputRoute: ThroughputRoute,

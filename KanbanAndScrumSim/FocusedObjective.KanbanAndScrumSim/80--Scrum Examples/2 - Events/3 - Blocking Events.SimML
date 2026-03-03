@@ -1,0 +1,35 @@
+<simulation name="Scrum Blocking Event Example" locale="en-US">
+  
+<example>This example shows how to define blocking events (impediments).</example>
+    
+  <execute type="Scrum" dateFormat="dd-MMM-yyyy">
+    	<visual />
+  </execute>
+
+  <setup>
+  
+    	<iteration storyPointsPerIterationLowBound="25" storyPointsPerIterationHighBound="35"  />
+    
+    	<forecastDate startDate="01-Jan-2012" costPerDay="2000" /> 
+
+    	<backlog type="custom" shuffle="true">
+	      <custom name="small" count="15" estimateLowBound="2" estimateHighBound="5" valueLowBound="100" valueHighBound="500" />
+	      <custom name="medium" count="10" estimateLowBound="5" estimateHighBound="10" valueLowBound="500" valueHighBound="1000" />
+	      <custom name="large" count="10" estimateLowBound="10" estimateHighBound="20" valueLowBound="1000" valueHighBound="1500" />
+	</backlog>
+
+	<!-- three blocking event examples using the three occurrence types: count, percentage, and size -->
+	<blockingEvents>    
+      		<blockingEvent  occurrenceType="count" occurrenceLowBound="8" occurrenceHighBound="15"
+    			estimateLowBound="1" estimateHighBound="3">Block - Question</blockingEvent>
+
+      		<blockingEvent  occurrenceType="percentage" occurrenceLowBound="5" occurrenceHighBound="15"
+                	estimateLowBound="1" estimateHighBound="2">Block - Vacation/Illness</blockingEvent>
+
+      		<blockingEvent  occurrenceType="size" occurrenceLowBound="75" occurrenceHighBound="100"
+                  	estimateLowBound="1" estimateHighBound="2">Block - No test envir.</blockingEvent>
+    	</blockingEvents>
+    	
+    </setup>
+
+</simulation>

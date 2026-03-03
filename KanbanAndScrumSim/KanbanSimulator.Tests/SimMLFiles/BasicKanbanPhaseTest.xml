@@ -1,0 +1,24 @@
+﻿<simulation name="Phases"  >
+  <execute>
+    <visual showVisualizer="false" />
+    <monteCarlo cycles="1" />
+  </execute>
+
+  <setup>
+
+    <phases>
+      <phase startPercentage="0" endPercentage="20"   occurrenceMultiplier="1.0" estimateMultiplier="2" />
+      <phase startPercentage="81" endPercentage="100"   occurrenceMultiplier="1.0" estimateMultiplier="2" />
+    </phases>
+
+    <backlog type="simple" simpleCount="100" />
+
+    <columns>
+      <column id="1" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Column1</column>
+      <column id="2" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Column2</column>
+      <column id="3" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Column3</column>
+      <column id="4" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Column4</column>
+      <column id="5" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Column5</column>
+    </columns>
+  </setup>
+</simulation>

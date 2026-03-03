@@ -17,6 +17,9 @@ const config = defineConfig({
     tanstackStart(),
     viteReact(),
   ],
+  test: {
+    exclude: ['KanbanAndScrumSim/**', 'node_modules/**'],
+  },
 })
 
 export default config

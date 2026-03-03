@@ -1,0 +1,2 @@
+﻿<distribution name="[Dist name]" numberType="[double|integer]" shape="[shape: e.g. normal]" parameters="[parameters specific to distribution shape]"
+    lowBound="[lowest value allowed]" highBound="[highest value allowed]" />

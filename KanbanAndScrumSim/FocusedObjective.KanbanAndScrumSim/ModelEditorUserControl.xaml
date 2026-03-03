@@ -1,0 +1,52 @@
+﻿<UserControl xmlns:avalonedit="http://icsharpcode.net/sharpdevelop/avalonedit"  x:Class="FocusedObjective.KanbanSim.ModelEditorUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300" xmlns:my="clr-namespace:FocusedObjective.KanbanSim"
+             Focusable="True">
+    
+    <Grid>
+        <TabControl Name="EditorTabControl">
+            <TabItem Name="TabItemModel" Focusable="True" GotFocus="TabItemModel_GotFocus" Header="Model" HorizontalAlignment="Left">
+
+                <DockPanel Margin="5">
+                    <my:FindPanelUserControl x:Name="FindPanel" Visibility="Collapsed" DockPanel.Dock="Top" HorizontalAlignment="Left" Height="20" Foreground="#FF302F2F" VerticalAlignment="Top" />
+
+                    <TextBlock DockPanel.Dock="Bottom" Height="15" Background="#59F5F195" Text="tip: ctrl+space opens code completion popup. ctrl+f toggles the Find panel." FontSize="10" Foreground="#FF302F2F" />
+                    <avalonedit:TextEditor Focusable="True"  ScrollViewer.CanContentScroll="True" Name="textEditorModel" IsReadOnly="False" ShowLineNumbers="True" SyntaxHighlighting="XML" DocumentChanged="textEditorModel_DocumentChanged" TextChanged="textEditorModel_TextChanged" KeyDown="textEditorModel_KeyDown">
+                        <avalonedit:TextEditor.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Command="Cut"/>
+                                <MenuItem Command="Copy"/>
+                                <MenuItem Command="Paste"/>
+                                <MenuItem Command="SelectAll"/>
+                                <Separator />
+                                <MenuItem Command="Undo"/>
+                                <MenuItem Command="Redo"/>
+                            </ContextMenu>
+                        </avalonedit:TextEditor.ContextMenu>
+                    </avalonedit:TextEditor>
+                </DockPanel>
+            </TabItem>
+            <TabItem Name="tabItemErrors" Header="Errors">
+                <DockPanel>
+                    <ListBox Margin="0" ItemsSource="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=my:ModelEditorUserControl, AncestorLevel=1}, Path=Errors}" MouseDoubleClick="ListBox_MouseDoubleClick" />
+                </DockPanel>
+            </TabItem>
+            <TabItem Name="tabItemWarningsAndInfo" Header="Warnings">
+                <DockPanel>
+                    <ListBox Margin="0" ItemsSource="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=my:ModelEditorUserControl, AncestorLevel=1}, Path=Warnings}" />
+                </DockPanel>
+            </TabItem>
+
+            <TabItem Name="tabItemRawResults" Header="Last Results">
+                <DockPanel Margin="5">
+                    <avalonedit:TextEditor ScrollViewer.CanContentScroll="True" Name="textEditorResults" IsReadOnly="True" ShowLineNumbers="True" SyntaxHighlighting="XML">
+                    </avalonedit:TextEditor>
+                </DockPanel>
+            </TabItem>
+        </TabControl>
+       </Grid>
+</UserControl>

@@ -1,0 +1,12 @@
+﻿Snippets are pieces of model code that will be inserted at the current cursor position in the Model source editor window.
+
+To use -
+1. View the model source window (click on the )
+2. Put the cursor where you want the snipped inserted
+3. Click on the snippet in the Snippets ribbon toolbar
+
+To edit or add -
+1. Open Finder (mac) or File Explorer (windows)
+2. Navigate to the "90-Snippets" folder
+3. Open the .simml files with a text editor or create a new .simml file with your desired content
+4. Restart the KanbanSim and ScrumSim application

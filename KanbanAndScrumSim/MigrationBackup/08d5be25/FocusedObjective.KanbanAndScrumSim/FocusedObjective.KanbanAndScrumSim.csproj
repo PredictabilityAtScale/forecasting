@@ -1,0 +1,801 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{4FBF4AEA-5082-461A-A8E8-F902F55A2635}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>FocusedObjective.KanbanSim</RootNamespace>
+    <AssemblyName>FocusedObjective.KanbanAndScrumSim</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Icon1.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release Siemens|x86'">
+    <OutputPath>bin\x86\Release Siemens\</OutputPath>
+    <DefineConstants>TRACE;SIEMENS</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Siemens|x86'">
+    <OutputPath>bin\x86\Siemens\</OutputPath>
+    <DefineConstants>TRACE;SIEMENS</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+    <Compile Include="..\GlobalVersionInformation.cs">
+      <Link>Properties\GlobalVersionInformation.cs</Link>
+    </Compile>
+    <Compile Include="AddStaff.xaml.cs">
+      <DependentUpon>AddStaff.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="DateParameterControl.xaml.cs">
+      <DependentUpon>DateParameterControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="FindPanelUserControl.xaml.cs">
+      <DependentUpon>FindPanelUserControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ForecastDateScrum.xaml.cs">
+      <DependentUpon>ForecastDateScrum.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="HowToInteractive.xaml.cs">
+      <DependentUpon>HowToInteractive.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="InteractiveForecast.xaml.cs">
+      <DependentUpon>InteractiveForecast.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="IParameterControl.cs" />
+    <Compile Include="Publish.xaml.cs">
+      <DependentUpon>Publish.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SelectionListParameterControl.xaml.cs">
+      <DependentUpon>SelectionListParameterControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="NumericParameterControl.xaml.cs">
+      <DependentUpon>NumericParameterControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SensitivityScrum.xaml.cs">
+      <DependentUpon>SensitivityScrum.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="EULAConfirmWindow.xaml.cs">
+      <DependentUpon>EULAConfirmWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ComboboxTreeView\ComboBoxTreeView.cs" />
+    <Compile Include="ComboboxTreeView\ExtendedTreeView.cs" />
+    <Compile Include="ComboboxTreeView\ITreeViewItemModel.cs" />
+    <Compile Include="ExtractIconFromFile.cs" />
+    <Compile Include="ForecastDate.xaml.cs">
+      <DependentUpon>ForecastDate.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="FullName.cs" />
+    <Compile Include="LicenseWindow.xaml.cs">
+      <DependentUpon>LicenseWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ModelEditorUserControl.xaml.cs">
+      <DependentUpon>ModelEditorUserControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Razor\Core\RazorEngine.cs" />
+    <Compile Include="Razor\Core\RazorEngineConfiguration.cs" />
+    <Compile Include="Razor\Core\RazorEngineFactory.cs" />
+    <Compile Include="Razor\Core\Utilities.cs" />
+    <Compile Include="Razor\HostContainers\RazorBaseHostContainer.cs" />
+    <Compile Include="Razor\HostContainers\RazorFolderHostContainer.cs" />
+    <Compile Include="Razor\HostContainers\RazorStringHostContainer.cs" />
+    <Compile Include="Razor\Properties\Resources1.Designer.cs">
+      <DependentUpon>Resources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Razor\TemplateBase\RazorRequest.cs" />
+    <Compile Include="Razor\TemplateBase\RazorResponse.cs" />
+    <Compile Include="Razor\TemplateBase\RazorTemplateBase.cs" />
+    <Compile Include="Razor\TemplateBase\RazorTemplateFolderHost.cs" />
+    <Compile Include="RealTimeSimulation.xaml.cs">
+      <DependentUpon>RealTimeSimulation.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Sensitivity.xaml.cs">
+      <DependentUpon>Sensitivity.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Include="SimulatingProgress.xaml.cs">
+      <DependentUpon>SimulatingProgress.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="StatisticsData.cs" />
+    <Compile Include="StringToDoubleConverter.cs" />
+    <Compile Include="XMLEditor.cs" />
+    <Page Include="DateParameterControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="FindPanelUserControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ForecastDateScrum.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="HowToInteractive.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="InteractiveForecast.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Publish.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SelectionListParameterControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="NumericParameterControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SensitivityScrum.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="EULAConfirmWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ChartsUserControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="AddStaff.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ForecastDate.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="LicenseWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MainWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ChartsUserControl.xaml.cs">
+      <DependentUpon>ChartsUserControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MainWindow.xaml.cs">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Page Include="ModelEditorUserControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="RealTimeSimulation.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Sensitivity.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SimulatingProgress.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ProjectState.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Razor\Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources1.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <Content Include="90-Snippets\Kanban\0 - Using snippets.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="70-Kanban Examples\0 - Kanban 101\1 - Simplest Board.SimML">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="70-Kanban Examples\0 - Kanban 101\2 - Typical Board.SimML">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="70-Kanban Examples\0 - Kanban 101\3 - Website Example.SimML">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="70-Kanban Examples\0 - Kanban 101\4 - LSSC Paper.SimML">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="70-Kanban Examples\0 - Kanban 101\5 - Flaw of Averages.SimML">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="70-Kanban Examples\0 - Kanban 101\6 - Using Distributions %28built-in &amp; from samples%29.SimML">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="70-Kanban Examples\1 - Columns\1 - Basic Columns.SimML">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="70-Kanban Examples\1 - Columns\2 - Buffer or Queue Columns.SimML">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="70-Kanban Examples\1 - Columns\3 - Batch Replenish or Completion.SimML">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="70-Kanban Examples\2 - Backlog\1 - Simplest Backlog.SimML">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="70-Kanban Examples\2 - Backlog\2 - Segmenting Backlog.SimML">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="70-Kanban Examples\2 - Backlog\3 - Customized Backlog.SimML">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="70-Kanban Examples\2 - Backlog\4- Deliverables.SimML">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="70-Kanban Examples\2 - Backlog\5 - Value Estimates.SimML">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="70-Kanban Examples\3 - Events\1 - Added Scope.SimML">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="70-Kanban Examples\3 - Events\2 - Blocking Events.SimML">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="70-Kanban Examples\3 - Events\3 - Basic Defects.SimML">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="70-Kanban Examples\3 - Events\4 - Defect Cycle Times.SimML">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="70-Kanban Examples\3 - Events\5 - Event Targeting by Phase.SimML">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="70-Kanban Examples\4 - Project Phases\1 - Defining Phases.SimML">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="70-Kanban Examples\4 - Project Phases\2 - Phase Estimate Multipliers.SimML">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="70-Kanban Examples\4 - Project Phases\3 - Phase WIP limits.SimML">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="70-Kanban Examples\4 - Project Phases\4 - Event Targeting.SimML">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="70-Kanban Examples\5 - Classes of Service\1 - Defining Class of Services.simML">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="80-Scrum Examples\0 - Scrum 101\1 - Simplest Board.SimML">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="80-Scrum Examples\0 - Scrum 101\2 - Typical Board.SimML">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="80-Scrum Examples\0 - Scrum 101\3 - Defining Iterations.SimML">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="80-Scrum Examples\0 - Scrum 101\4 - Using Cycle-Time History.SimML">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="80-Scrum Examples\0 - Scrum 101\5 - Using Velocity History.SimML">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="80-Scrum Examples\1 - Backlog\1 - Simplest Backlog.SimML">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="80-Scrum Examples\1 - Backlog\2 - Segmented Backlog.SimML">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="80-Scrum Examples\1 - Backlog\3 - Multiple Deliverables.SimML">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="80-Scrum Examples\1 - Backlog\4 - Showing Delivered Value.SimML">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="80-Scrum Examples\1 - Backlog\5 - Fibonacci Segmentation.SimML">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="80-Scrum Examples\1 - Backlog\6 - Historical Data Estimates.SimML">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="80-Scrum Examples\2 - Events\1 - Added Scope Events.SimML">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="80-Scrum Examples\2 - Events\2 - Defect Events.SimML">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="80-Scrum Examples\2 - Events\3 - Blocking Events.SimML">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="80-Scrum Examples\3 - Project Phases\1 - Defining Phases.SimML">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="80-Scrum Examples\3 - Project Phases\2 - Phase Multipliers.SimML">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="80-Scrum Examples\3 - Project Phases\3 - Event Targeting.SimML">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="80-Scrum Examples\4 - Classes of Service\1 - Defining Class of Services.SimML">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="80-Scrum Examples\4 - Classes of Service\2 - Events and COS.SimML">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="70-Kanban Examples\1 - Columns\4 - Embedded Model as Column.simML">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="70-Kanban Examples\1 - Columns\5 - Embedded Model.simml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="70-Kanban Examples\3 - Events\6 - Event Targeting by Deliverable or Custom Backlog.simML">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="70-Kanban Examples\0 - Kanban 101\Lean or Kanban Template.simml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="90-Snippets\Kanban\Column.simml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="90-Snippets\Kanban\Backlog %28simple%29.simml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="90-Snippets\Kanban\Backlog %28deliverable%29.simml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="90-Snippets\Kanban\Defect %28simple%29.simml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="90-Snippets\Kanban\Defect %28custom columns%29.simml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="90-Snippets\Kanban\Blocking Event.simml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="90-Snippets\Kanban\Distribution.simml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="90-Snippets\Kanban\Distribution %28from data%29.simml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="90-Snippets\Kanban\Parameter.simml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="90-Snippets\Kanban\Phase.simml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="90-Snippets\Kanban\Phase %28custom columns%29.simml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="90-Snippets\Kanban\Added Scope.simml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="90-Snippets\Kanban\Backlog %28custom%29.simml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="90-Snippets\Scrum\Phase.simml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="90-Snippets\Scrum\Added Scope.simml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="90-Snippets\Scrum\Backlog %28custom%29.simml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="90-Snippets\Scrum\Backlog %28deliverable%29.simml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="90-Snippets\Scrum\Blocking Event.simml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="90-Snippets\Scrum\Defect %28simple%29.simml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="90-Snippets\Scrum\Distribution %28from data%29.simml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="90-Snippets\Scrum\Distribution.simml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="90-Snippets\Scrum\Parameter.simml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <None Include="70-Kanban Examples\0 - Kanban 101\7 - Interactive Defects.SimML">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="app.config" />
+    <Resource Include="90-Snippets\Scrum\0 - Using snippets.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="FodyWeavers.xml" />
+    <Content Include="Help\1. Online Help\Support.url">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Help\1. Online Help\Twitter.url">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Help\1. Online Help\Website.url">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Help\2. Physical Help\Book.url">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Help\2. Physical Help\Consulting.url">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Help\2. Physical Help\Training.url">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Help\3. Legal\EULA.pdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Help\3. Legal\Notices.url">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <AppDesigner Include="Properties\" />
+    <None Include="Razor\Hosting the Razor Engine for Templating in Non-Web Applications - Rick Strahl%27s Web Log_files\count.json" />
+    <None Include="Razor\Hosting the Razor Engine for Templating in Non-Web Applications - Rick Strahl%27s Web Log_files\RickStrahl" />
+    <None Include="Razor\Hosting the Razor Engine for Templating in Non-Web Applications - Rick Strahl%27s Web Log_files\saved_resource" />
+    <None Include="Razor\Hosting the Razor Engine for Templating in Non-Web Applications - Rick Strahl%27s Web Log_files\saved_resource%281%29" />
+    <None Include="Razor\Hosting the Razor Engine for Templating in Non-Web Applications - Rick Strahl%27s Web Log_files\saved_resource%282%29" />
+    <None Include="Razor\Hosting the Razor Engine for Templating in Non-Web Applications - Rick Strahl%27s Web Log_files\saved_resource%283%29" />
+    <None Include="Razor\Hosting the Razor Engine for Templating in Non-Web Applications - Rick Strahl%27s Web Log_files\wwSC.axd" />
+    <None Include="Images\splash\LeanKit_Splash.png" />
+    <Resource Include="Images\splash\LeanKit.png" />
+    <Resource Include="Images\splash\FocusedObjective-ScrumSim.png" />
+    <Resource Include="Images\Experiment.png" />
+    <Resource Include="Images\experiment_32x32.png" />
+    <Content Include="Resources\Getting Started\Getting Started.docx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\LSSC 12\Proceedings.pdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\LSSC 12\Session.pdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <None Include="Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Content Include="80-Scrum Examples\0 - Scrum 101\Throughput or Scrum Template.simml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <None Include="Templates\EULA.xps">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <Resource Include="Images\CloudSim_32.png" />
+    <SplashScreen Condition="'$(Configuration)|$(Platform)' != 'Siemens|x86'" Include="Images\splash\kanban and scrum sim splash.png" />
+    <Resource Include="Images\Stats_32.png" />
+    <SplashScreen Condition="'$(Configuration)|$(Platform)' == 'Siemens|x86'" Include="Images\splash\siemens medical splash.png" />
+    <Content Include="Resources\Getting Started\Readme.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Tools\LeanKit Importer.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Templates\Kanban\AddStaffResults.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Templates\Kanban\ForecastDateResults.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Templates\Kanban\MonteCarloResult.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Templates\Kanban\SensitivityResults.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Templates\Kanban\VisualResult.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Templates\Scrum\ForecastDateResults.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Templates\Scrum\MonteCarloResult.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Templates\Scrum\SensitivityResults.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Templates\Scrum\VisualResult.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\LargeIcon.png" />
+    <Resource Include="Images\SmallIcon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\base_floppydisk_32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\1683_Lightbulb_16x16.png" />
+    <Resource Include="Images\1683_Lightbulb_32x32.png" />
+    <Resource Include="Images\FolderOpen_16x16_72.png" />
+    <Resource Include="Images\FolderOpen_32x32_72.png" />
+    <Resource Include="Images\GenVideoDoc_16x16_72.png" />
+    <Resource Include="Images\GenVideoDoc_32x32_72.png" />
+    <Resource Include="Images\Keys.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\base_gauge.png" />
+    <Resource Include="Images\base_movie_reel_32.png" />
+    <Resource Include="Images\book_32.png" />
+    <Resource Include="Images\Calendar-BusinessMonthView_16.png" />
+    <Resource Include="Images\Calendar-BusinessMonthView_32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\NewDocument_32x32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\EditHTMLSource.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Board.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\DataContainer_MoveFirstHS.png" />
+    <Resource Include="Images\DataContainer_MoveLastHS.png" />
+    <Resource Include="Images\DataContainer_MoveNextHS.png" />
+    <Resource Include="Images\DataContainer_MovePreviousHS.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\base_charts.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\base_calendar_32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\base_bars.png" />
+    <Resource Include="Images\Flag.png" />
+    <Resource Include="Images\ProofingTools_32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\base_business_contacts.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\0205_WebInsertHyperlink_32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\base_globe_32.png" />
+    <Resource Include="Images\base_scroll_32.png" />
+    <Resource Include="Images\Encrypt.png" />
+    <Resource Include="Images\hyperlink.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Page.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\NewDocuments_32x32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Web.png" />
+    <Resource Include="Images\WebInsertHyperlinkHS.png" />
+    <Resource Include="Images\XMLFileHS.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="70-Kanban Examples\6 - Distributions\" />
+    <Folder Include="80-Scrum Examples\5 - Distributions\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\splash\DJAA.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\splash\CorporateKanban.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Razor\Hosting the Razor Engine for Templating in Non-Web Applications - Rick Strahl%27s Web Log_files\wwtoollogo_text.gif" />
+    <None Include="Razor\Hosting the Razor Engine for Templating in Non-Web Applications - Rick Strahl%27s Web Log_files\widgets.js" />
+    <Resource Include="Razor\Hosting the Razor Engine for Templating in Non-Web Applications - Rick Strahl%27s Web Log_files\WebLogBannerLogo.jpg" />
+    <None Include="Razor\Hosting the Razor Engine for Templating in Non-Web Applications - Rick Strahl%27s Web Log_files\weblog.js" />
+    <Resource Include="Razor\Hosting the Razor Engine for Templating in Non-Web Applications - Rick Strahl%27s Web Log_files\twitter-chicklet.jpg" />
+    <None Include="Razor\Hosting the Razor Engine for Templating in Non-Web Applications - Rick Strahl%27s Web Log_files\tweet_button.1324331373.htm" />
+    <Resource Include="Razor\Hosting the Razor Engine for Templating in Non-Web Applications - Rick Strahl%27s Web Log_files\t.gif" />
+    <None Include="Razor\Hosting the Razor Engine for Templating in Non-Web Applications - Rick Strahl%27s Web Log_files\Standard.css" />
+    <None Include="Razor\Hosting the Razor Engine for Templating in Non-Web Applications - Rick Strahl%27s Web Log_files\ShowPost.js" />
+    <Resource Include="Razor\Hosting the Razor Engine for Templating in Non-Web Applications - Rick Strahl%27s Web Log_files\rss.png" />
+    <Resource Include="Razor\Hosting the Razor Engine for Templating in Non-Web Applications - Rick Strahl%27s Web Log_files\rick.jpg" />
+    <Resource Include="Razor\Hosting the Razor Engine for Templating in Non-Web Applications - Rick Strahl%27s Web Log_files\RazorSampleForm_870b7737-a3ca-49e0-a88c-a873a3c8cde2.png" />
+    <Resource Include="Razor\Hosting the Razor Engine for Templating in Non-Web Applications - Rick Strahl%27s Web Log_files\profile_normal.jpg" />
+    <None Include="Razor\Hosting the Razor Engine for Templating in Non-Web Applications - Rick Strahl%27s Web Log_files\plusone.js" />
+    <None Include="Razor\Hosting the Razor Engine for Templating in Non-Web Applications - Rick Strahl%27s Web Log_files\m.min.js" />
+    <None Include="Razor\Hosting the Razor Engine for Templating in Non-Web Applications - Rick Strahl%27s Web Log_files\jquery.min.js" />
+    <None Include="Razor\Hosting the Razor Engine for Templating in Non-Web Applications - Rick Strahl%27s Web Log_files\hub.1324331373.htm" />
+    <None Include="Razor\Hosting the Razor Engine for Templating in Non-Web Applications - Rick Strahl%27s Web Log_files\ga.js" />
+    <Resource Include="Razor\Hosting the Razor Engine for Templating in Non-Web Applications - Rick Strahl%27s Web Log_files\folderhostsample[4]_866bdf9b-6ab9-4239-984c-a558dcee2ad1.png" />
+    <None Include="Razor\Hosting the Razor Engine for Templating in Non-Web Applications - Rick Strahl%27s Web Log_files\fastbutton.htm" />
+    <Resource Include="Razor\Hosting the Razor Engine for Templating in Non-Web Applications - Rick Strahl%27s Web Log_files\donation.gif" />
+    <Resource Include="Razor\Hosting the Razor Engine for Templating in Non-Web Applications - Rick Strahl%27s Web Log_files\DM_badge_80x15.gif" />
+    <None Include="Razor\Hosting the Razor Engine for Templating in Non-Web Applications - Rick Strahl%27s Web Log_files\avatar.php" />
+    <None Include="Razor\Hosting the Razor Engine for Templating in Non-Web Applications - Rick Strahl%27s Web Log_files\avatar%289%29.php" />
+    <None Include="Razor\Hosting the Razor Engine for Templating in Non-Web Applications - Rick Strahl%27s Web Log_files\avatar%288%29.php" />
+    <None Include="Razor\Hosting the Razor Engine for Templating in Non-Web Applications - Rick Strahl%27s Web Log_files\avatar%287%29.php" />
+    <None Include="Razor\Hosting the Razor Engine for Templating in Non-Web Applications - Rick Strahl%27s Web Log_files\avatar%286%29.php" />
+    <None Include="Razor\Hosting the Razor Engine for Templating in Non-Web Applications - Rick Strahl%27s Web Log_files\avatar%285%29.php" />
+    <None Include="Razor\Hosting the Razor Engine for Templating in Non-Web Applications - Rick Strahl%27s Web Log_files\avatar%284%29.php" />
+    <None Include="Razor\Hosting the Razor Engine for Templating in Non-Web Applications - Rick Strahl%27s Web Log_files\avatar%283%29.php" />
+    <None Include="Razor\Hosting the Razor Engine for Templating in Non-Web Applications - Rick Strahl%27s Web Log_files\avatar%282%29.php" />
+    <None Include="Razor\Hosting the Razor Engine for Templating in Non-Web Applications - Rick Strahl%27s Web Log_files\avatar%2813%29.php" />
+    <None Include="Razor\Hosting the Razor Engine for Templating in Non-Web Applications - Rick Strahl%27s Web Log_files\avatar%2812%29.php" />
+    <None Include="Razor\Hosting the Razor Engine for Templating in Non-Web Applications - Rick Strahl%27s Web Log_files\avatar%2811%29.php" />
+    <None Include="Razor\Hosting the Razor Engine for Templating in Non-Web Applications - Rick Strahl%27s Web Log_files\avatar%2810%29.php" />
+    <None Include="Razor\Hosting the Razor Engine for Templating in Non-Web Applications - Rick Strahl%27s Web Log_files\avatar%281%29.php" />
+    <None Include="Razor\Hosting the Razor Engine for Templating in Non-Web Applications - Rick Strahl%27s Web Log.htm" />
+    <None Include="Images\splash\FocusedObjective.png" />
+    <Resource Include="Icon1.ico" />
+    <Resource Include="Images\example.png" />
+    <Resource Include="Images\112_RefreshArrow_Green_32x32_72.png" />
+    <Resource Include="Images\base_cog_32.png" />
+    <Resource Include="Images\clock.png" />
+    <Resource Include="Images\options_32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.0,Profile=Client">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4 Client Profile %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.4.5">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 4.5</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AviFile\AviFile.csproj">
+      <Project>{abb32a29-af50-47fa-b243-5fd75a5aba54}</Project>
+      <Name>AviFile</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\FocusedObjective.Common\FocusedObjective.Common.csproj">
+      <Project>{47c8f142-da8e-40d8-8c77-4ac5dbd18ec4}</Project>
+      <Name>FocusedObjective.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\FocusedObjective.Contract\FocusedObjective.Contract.csproj">
+      <Project>{1c640761-d358-4f4e-9a99-8ae3dd1a14e9}</Project>
+      <Name>FocusedObjective.Contract</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\FocusedObjective.Distributions\FocusedObjective.Distributions.csproj">
+      <Project>{3c2f4020-10f9-4138-bc04-f6fe1ede9a11}</Project>
+      <Name>FocusedObjective.Distributions</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\FocusedObjective.Simulation\FocusedObjective.Simulation.csproj">
+      <Project>{c096fa7d-6262-47ea-b504-ba797438882e}</Project>
+      <Name>FocusedObjective.Simulation</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\VotingSystems\VotingSystems.csproj">
+      <Project>{328f3059-ffac-4f81-995b-5a35418963c6}</Project>
+      <Name>VotingSystems</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="ICSharpCode.AvalonEdit, Version=6.3.0.90, Culture=neutral, PublicKeyToken=9cc39be672370310, processorArchitecture=MSIL">
+      <HintPath>..\packages\AvalonEdit.6.3.0.90\lib\net462\ICSharpCode.AvalonEdit.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System" />
+    <Reference Include="System.Windows.Controls.Ribbon" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  <Target Name="AfterBuild">
+  </Target>
+  <Target AfterTargets="AfterBuild;NonWinFodyTarget" Name="CleanReferenceCopyLocalPaths">
+    <Delete Files="@(ReferenceCopyLocalPaths->'$(OutDir)%(DestinationSubDirectory)%(Filename)%(Extension)')" />
+  </Target>
+</Project>

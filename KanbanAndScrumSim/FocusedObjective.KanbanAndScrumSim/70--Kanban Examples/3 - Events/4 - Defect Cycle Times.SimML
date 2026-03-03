@@ -1,0 +1,46 @@
+<simulation name="Defect Cycle Times" locale="en-US">
+
+  <example>This example shows how to define defects that have different column cycle times than each column's default time. 
+This helps model different severity of defects and emphasize or de-emphasize time in the appropriate columns.
+By default defects use the same custom backlog column cycle time or the column default cycle times unless you override as shown here.
+See the resources ribbon tab for documentation, exercises and tutorials.</example>
+
+  <execute intervalUnit="days">
+    	<visual />
+  </execute>
+  
+  <setup>
+  	
+  	<!-- Define a defect that uses its own column cycle time ranges
+  	
+  	Exercises -
+  		1. Remove one of the defect column definitions and confirm the original columns cycle time is used.
+  		2. Create a custom backlog entry with explicit column cycle times and confirm that when a defect doesn't override a column cycle-time, the one defined for the card that triggered the defect is used.
+
+    	-->
+ 
+    	<defects>
+    		<!-- 'For every second to fifth card (picked at random) entering the Test column, create and queue one defect in the Design column and use these explicit cycle-times' -->
+      		<defect columnId="3" startsInColumnId="1" count="1"
+       			occurrenceLowBound="2" occurrenceHighBound="5">
+        		Dev Bug ({0})
+        		
+        		       <column id="1" estimateLowBound="1" estimateHighBound="1" />
+        			<column id="2" estimateLowBound="1" estimateHighBound="1" />
+        			<column id="3" estimateLowBound="1" estimateHighBound="1" />
+        
+      		</defect>
+
+    </defects>
+
+ 
+    	<columns>
+       		<column id="1" estimateLowBound="1" estimateHighBound="2" wipLimit="3">Design</column>
+       		<column id="2" estimateLowBound="2" estimateHighBound="5" wipLimit="4" displayWidth="2">Development</column>
+       		<column id="3" estimateLowBound="1" estimateHighBound="3" wipLimit="2">Test</column>
+   	</columns>
+  	
+  	<backlog type="simple" simpleCount="100" />
+  	
+  </setup>
+</simulation>

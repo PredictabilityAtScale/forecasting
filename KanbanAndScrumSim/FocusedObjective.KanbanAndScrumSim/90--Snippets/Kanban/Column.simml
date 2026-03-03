@@ -1,0 +1,1 @@
+﻿<column id="[unique id number]" estimateLowBound="[low cycle time estimate]" estimateHighBound="[high cycle time estimate]" wipLimit="[number of items]" buffer="false">[Title]</column>

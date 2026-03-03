@@ -1,0 +1,15 @@
+﻿<UserControl x:Class="FocusedObjective.KanbanSim.FindPanelUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d"
+             >
+    <Grid Background="#59F5F195" HorizontalAlignment="Stretch" >
+        
+        <TextBox Focusable="True" TabIndex="0" x:Name="searchText"  HorizontalAlignment="Left" Height="20" Margin="50,0,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="150" KeyDown="searchText_KeyDown"/>
+        <Label Focusable="False" Content="Find"  HorizontalAlignment="Left" Margin="10,-4,0,0" VerticalAlignment="Top"/>
+        <Button Focusable="True" TabIndex="1" x:Name="nextButton"  Content="_Next" HorizontalAlignment="Left" Margin="215,0,0,0" Width="50" Height="20" VerticalAlignment="Bottom"  Click="nextButton_Click"/>
+        
+    </Grid>
+</UserControl>

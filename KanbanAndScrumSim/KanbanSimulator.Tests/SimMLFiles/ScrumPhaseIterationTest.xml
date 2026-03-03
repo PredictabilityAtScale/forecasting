@@ -1,0 +1,28 @@
+﻿<simulation name="Scrum Defining Phases By Iterations" locale="en-US">
+
+  <execute type="Scrum" dateFormat="dd-MMM-yyyy">
+    <visual showVisualizer="false"/>
+    <monteCarlo cycles="1" />
+  </execute>
+
+  <setup>
+
+    <iteration storyPointsPerIterationLowBound="10" storyPointsPerIterationHighBound="10"  />
+
+    <forecastDate startDate="01-Jan-2012" costPerDay="2000" />
+
+    <backlog type="custom" shuffle="true">
+      <custom name="stories" count="50" estimateLowBound="1" estimateHighBound="1" />
+    </backlog>
+
+    <phases unit="iterations">
+      <phase start="0" end="2"
+        estimateMultiplier="2">P0-2</phase>
+
+      <phase start="5" end="6"
+        iterationMultiplier="0.5">P5-6</phase>
+    </phases>
+
+  </setup>
+
+</simulation>

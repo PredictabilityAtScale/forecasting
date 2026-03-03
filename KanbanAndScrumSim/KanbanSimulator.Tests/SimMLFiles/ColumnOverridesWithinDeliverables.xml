@@ -1,0 +1,52 @@
+﻿<simulation>
+  <execute dateFormat="dd-MMM-yyyy" deliverables="" shufflePositions="false" limitIntervalsTo="2000">
+    <visual showVisualizer="false" />
+    <monteCarlo cycles="1" />
+  </execute>
+
+  <setup>
+    <backlog shuffle="false" nameFormat="Req# {1} - card id: {0}">
+
+      <deliverable name="Del1">
+        <custom order="1" count="10" name="xxx">
+          <column id="1" estimateDistribution="One" />
+          <column id="2" estimateLowBound="2" estimateHighBound="2" />
+          <column id="3" estimateDistribution="Three" />
+        </custom>
+
+        <custom order="2" count="10" name="yyy" >
+          <column id="1" estimateLowBound="7" estimateHighBound="7" />
+        </custom>
+
+      </deliverable>
+
+      <deliverable name="Del2">
+        <custom order="3" count="10" name="zzz" />
+      </deliverable>
+
+    </backlog>
+
+    <columns>
+      <column id="1"  wipLimit="3" estimateDistribution="CycleTimesSpecifying" displayWidth="2">SpecActvDone</column>
+      <column id="2"  wipLimit="3" estimateDistribution="CycleTimesDeveloping" displayWidth="3">DevActvDone</column>
+      <column id="3"  wipLimit="3"   estimateDistribution="CycleTimesTesting" displayWidth="2">Testing</column>
+    </columns>
+
+    <phases>
+      <phase startPercentage="0" endPercentage="19" estimateMultiplier="1.0" occurrenceMultiplier="1.0">Phase 1</phase>
+      <phase startPercentage="20" endPercentage="39" estimateMultiplier="1.0" occurrenceMultiplier="1.0">Phase 2</phase>
+      <phase startPercentage="40" endPercentage="59" estimateMultiplier="1.0"  occurrenceMultiplier="1.0">Phase 3</phase>
+      <phase startPercentage="60" endPercentage="79" estimateMultiplier="1.0"  occurrenceMultiplier="1.0">Phase 4</phase>
+      <phase startPercentage="80" endPercentage="100" estimateMultiplier="1.0"  occurrenceMultiplier="1.0">Phase 5</phase>
+    </phases>
+
+    <distributions>
+      <distribution name="One" shape="fromSamples" count="1000">1</distribution>
+      <distribution name="Three" shape="uniform" parameters="3,3" count="1000">7</distribution>
+      <distribution name="CycleTimesSpecifying" shape="fromSamples" count="1000">4</distribution>
+      <distribution name="CycleTimesDeveloping" shape="fromSamples" count="1000">5</distribution>
+      <distribution name="CycleTimesTesting" shape="fromSamples" count="1000">6</distribution>
+    </distributions>
+
+  </setup>
+</simulation>

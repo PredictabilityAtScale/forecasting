@@ -1,0 +1,45 @@
+﻿<simulation name="Classes of Service" locale="en-US">
+
+  <execute intervalUnit="days">
+    <visual showVisualizer="false" />
+    <monteCarlo cycles="1" />
+  </execute>
+
+  <setup>
+
+    <classOfServices>
+      <classOfService default="true">Default</classOfService>
+      <classOfService order="1" >
+        FirstTwo
+        <column id="1" skipPercentage="100" estimateLowBound="10" estimateHighBound="10" />
+        <column id="2" skipPercentage="100" estimateLowBound="20" estimateHighBound="20" />
+        <column id="3" estimateLowBound="2" estimateHighBound="2" />
+      </classOfService>
+
+
+      <classOfService order="2">
+        LastTwo
+        <column id="2" skipPercentage="100" estimateLowBound="30" estimateHighBound="30" />
+        <column id="3" skipPercentage="100" estimateLowBound="40" estimateHighBound="40" />
+        <column id="1" estimateDistribution="FourDist" />
+      </classOfService>
+    </classOfServices>
+
+    <backlog type="custom" nameFormat="{1}" shuffle="false">
+      <custom count="20" name="None {0}" />
+      <custom count="20" classOfService="FirstTwo" name="First {0}" />
+      <custom count="20" classOfService="LastTwo" name="Last {0}" />
+    </backlog>
+
+    <columns>
+      <column id="1" estimateLowBound="1" estimateHighBound="1" wipLimit="2">Design</column>
+      <column id="2" estimateLowBound="1" estimateHighBound="1" wipLimit="2">Development</column>
+      <column id="3" estimateLowBound="1" estimateHighBound="1" wipLimit="2">Test</column>
+    </columns>
+
+    <distributions>
+      <distribution shape="uniform" parameters="4,4" name="FourDist" />
+    </distributions>
+
+  </setup>
+</simulation>

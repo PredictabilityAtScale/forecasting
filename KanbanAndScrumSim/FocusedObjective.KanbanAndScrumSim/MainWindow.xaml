@@ -1,0 +1,246 @@
+﻿<ribbon:RibbonWindow xmlns:my="clr-namespace:FocusedObjective.KanbanSim"  x:Class="FocusedObjective.KanbanSim.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ribbon="clr-namespace:System.Windows.Controls.Ribbon;assembly=System.Windows.Controls.Ribbon"
+        xmlns:viewer="clr-namespace:FocusedObjective.Simulation.Viewers;assembly=FocusedObjective.Simulation"
+        Title="KanbanSim and ScrumSim" 
+		x:Name="RibbonWindow" Icon="Icon1.ico"
+		Width="800" Height="600" Closing="RibbonWindow_Closing" Loaded="RibbonWindow_Loaded">
+
+	<Grid x:Name="LayoutRoot">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <ribbon:Ribbon x:Name="Ribbon">
+
+            
+            <ribbon:Ribbon.ApplicationMenu>
+                <ribbon:RibbonApplicationMenu SmallImageSource="Images\base_floppydisk_32.png" KeyTip="F">
+
+                    <ribbon:RibbonApplicationMenuItem Header="_New..."
+                                                      x:Name="MenuItemNew"
+                                                      ImageSource="Images\NewDocument_32x32.png" Click="MenuItemNew_Click" />
+                    
+                    <ribbon:RibbonApplicationMenuItem Header="_Open File..."
+                                                      x:Name="MenuItemOpen"
+                                                      ImageSource="Images\FolderOpen_32x32_72.png" Click="MenuItemOpen_Click" />
+                    
+                    <ribbon:RibbonApplicationMenuItem Header="_Save File"
+                                                      x:Name="MenuItemSave"
+                                                      ImageSource="Images\base_floppydisk_32.png" Click="MenuItemSave_Click" />
+
+                    <ribbon:RibbonApplicationMenuItem Header="Save File _As..."
+                                                      x:Name="MenuItemSaveAs" Click="MenuItemSaveAs_Click" />
+
+                    <ribbon:RibbonApplicationMenuItem Header="Open Folder..."
+                                                      x:Name="MenuItemOpenFolder"
+                                                      ImageSource="Images\FolderOpen_32x32_72.png" Click="MenuItemOpenFolder_Click" />
+
+                </ribbon:RibbonApplicationMenu>
+
+            </ribbon:Ribbon.ApplicationMenu>
+
+            <ribbon:RibbonTab x:Name="HomeTab" 
+                              Header="Home"
+                              KeyTip="H"
+                              GroupSizeReductionOrder="OptionsGroup, ExecuteGroup, CommandsGroup, ViewGroup">
+
+                <ribbon:RibbonGroup Header="View" Name="ViewGroup" LargeImageSource="Images\board.png">
+                    
+                    <ribbon:RibbonToggleButton x:Name="ButtonViewBoard"
+                                        Label="Board" 
+                                               LargeImageSource="Images\board.png"
+                                               Click="MenuItemViewType_Click"
+                                               IsChecked="true"
+                                               />
+                    <ribbon:RibbonToggleButton x:Name="ButtonViewCharts"
+                                        Label="Charts" 
+                                        LargeImageSource="Images\base_charts.png" 
+                                        Click="MenuItemViewType_Click"
+/>
+                    
+                    <ribbon:RibbonToggleButton x:Name="ButtonViewSimML"
+                                        Label="Source"
+                                        LargeImageSource="Images\EditHTMLSource.png"
+                                        Click="MenuItemViewType_Click"  />
+                </ribbon:RibbonGroup>
+
+                <ribbon:RibbonGroup Header="Execute" Name="ExecuteGroup" LargeImageSource="Images\112_RefreshArrow_Green_32x32_72.png" >
+                    <ribbon:RibbonButton Name="RefreshButton" Label="Refresh" LargeImageSource="Images\112_RefreshArrow_Green_32x32_72.png" Click="RefreshButton_Click" />
+
+                    
+
+                    
+                </ribbon:RibbonGroup>
+                
+                <ribbon:RibbonGroup Header="Simulation Commands" IsEnabled="True" Name="CommandsGroup">
+                    
+                    <ribbon:RibbonButton x:Name="ButtonForecastDate"
+                                        Label="Forecast"
+                                        LargeImageSource="Images\Calendar-BusinessMonthView_32.png" 
+                                         Click="ButtonForecastDate_Click" />
+
+                    <ribbon:RibbonButton x:Name="ButtonSensitivity"
+                                        Label="Sensitivity"
+                                        LargeImageSource="Images\base_bars.png" Click="ButtonSensitivity_Click" />
+
+                    <ribbon:RibbonButton x:Name="ButtonStaff"
+                                        Label="Staff"
+                                        LargeImageSource="Images\base_business_contacts.png" Click="ButtonStaff_Click" />
+
+
+                    <ribbon:RibbonButton x:Name="ButtonStats"
+                                        Label="Statistics"
+                                        LargeImageSource="Images\stats_32.png" Click="ButtonStats_Click" />
+
+                    <ribbon:RibbonButton x:Name="ButtonInteractive"
+                                        Label="Interactive"
+                                        Click="ButtonInteractive_Click"
+                                         LargeImageSource="Images\experiment_32x32.png" />
+                    
+                </ribbon:RibbonGroup>
+
+                    
+                    <ribbon:RibbonGroup Header="Reporting" Visibility="Collapsed">
+
+                    <ribbon:RibbonButton x:Name="ButtonPublishToBrowser"
+                                        Label="Publish to Browser"
+                                        LargeImageSource="Images\0205_WebInsertHyperlink_32.png"/>
+
+                    <ribbon:RibbonButton x:Name="ButtonVideo"
+                                        Label="Generate Video"
+                                        LargeImageSource="Images\base_movie_reel_32.png"/>
+
+
+                </ribbon:RibbonGroup>
+
+                <ribbon:RibbonGroup Header="Options"  LargeImageSource="Images\base_cog_32.png" Name="OptionsGroup">
+<ribbon:RibbonComboBox Label="Monte Carlo Cycles" IsEditable="True" IsReadOnly="True" Name="comboMonteCarlo">
+                    <ribbon:RibbonGallery SelectedValuePath="Tag" Name="monteCarloGallery">
+                        <ribbon:RibbonGalleryCategory>
+                            <ribbon:RibbonGalleryItem Tag="0" Content="None" />
+                                <ribbon:RibbonGalleryItem Tag="25" Content="25" IsSelected="True"/>
+                                <ribbon:RibbonGalleryItem Tag="100" Content="100" />
+                                <ribbon:RibbonGalleryItem Tag="250" Content="250" />
+                                <ribbon:RibbonGalleryItem Tag="500" Content="500" />
+                                <ribbon:RibbonGalleryItem Tag="1000" Content="1000"/>
+                                <ribbon:RibbonGalleryItem Tag="5000" Content="5000"/>
+                                <ribbon:RibbonGalleryItem Tag="10000" Content="10000"/>
+                            </ribbon:RibbonGalleryCategory>
+                    </ribbon:RibbonGallery>
+                    </ribbon:RibbonComboBox>
+                    
+                    <ribbon:RibbonComboBox Label="Monte Carlo Measure" Name="comboAggregationValue" >
+                        <ribbon:RibbonGallery SelectedValuePath="Tag" Name="aggregationGallery">
+                            <ribbon:RibbonGalleryCategory>
+                                <ribbon:RibbonGalleryItem Tag="average" Content="Average" IsSelected="True"/>
+                                <ribbon:RibbonGalleryItem Tag="median" Content="Median" />
+                                <ribbon:RibbonGalleryItem Tag="fifth" Content="5th Percentile" />
+                                <ribbon:RibbonGalleryItem Tag="twentyfifth" Content="25th Percentile" />
+                                <ribbon:RibbonGalleryItem Tag="seventyfifth" Content="75th Percentile" />
+                                <ribbon:RibbonGalleryItem Tag="ninetyfifth" Content="95th Percentile" />
+                                <ribbon:RibbonGalleryItem Tag="maximum" Content="Maximum" />
+                            </ribbon:RibbonGalleryCategory>
+                        </ribbon:RibbonGallery>
+                    </ribbon:RibbonComboBox>
+
+                    <ribbon:RibbonComboBox Label="Auto Refresh on" Name="comboRefresh">
+                        <ribbon:RibbonGallery SelectedValuePath="Tag" Name="refreshGallery">
+                            <ribbon:RibbonGalleryCategory>
+                                <ribbon:RibbonGalleryItem Tag="manual" Content="Manual" />
+                                <ribbon:RibbonGalleryItem Tag="change" Content="Model Change" IsSelected="True"/>
+                            </ribbon:RibbonGalleryCategory>
+                        </ribbon:RibbonGallery>
+                    </ribbon:RibbonComboBox>
+
+                    <!--
+                <ribbon:RibbonComboBox Label="Board zoom level" Name="comboZoom" Visibility="Hidden">
+                        <ribbon:RibbonGallery SelectedValuePath="Tag" Name="zoomGallery">
+                            <ribbon:RibbonGalleryCategory>
+                                <ribbon:RibbonGalleryItem Tag="1" Content="100%" IsSelected="True"/>
+                                <ribbon:RibbonGalleryItem Tag="1.5" Content="150%" />
+                                <ribbon:RibbonGalleryItem Tag="2" Content="150%" />
+                            </ribbon:RibbonGalleryCategory>
+                        </ribbon:RibbonGallery>
+                    </ribbon:RibbonComboBox>
+                -->
+                    
+                    </ribbon:RibbonGroup>
+
+
+            </ribbon:RibbonTab>
+
+            <ribbon:RibbonTab x:Name="KanbanExamplesTab" 
+                              Header="Kanban Examples"
+                              KeyTip="K">
+                
+                
+                
+            </ribbon:RibbonTab>
+
+            <ribbon:RibbonTab x:Name="ScrumExamplesTab" 
+                              Header="Scrum Examples"
+                              KeyTip="S">
+
+            </ribbon:RibbonTab>
+
+            <!--
+            <ribbon:RibbonTab x:Name="SnippetsTab" 
+                              Header="Snippets"
+                              KeyTip="S">
+
+            </ribbon:RibbonTab>
+-->
+
+            <ribbon:RibbonTab x:Name="ResourcesTab" 
+                              Header="Resources"
+                              KeyTip="R">
+
+            </ribbon:RibbonTab>
+           
+                <ribbon:RibbonTab x:Name="HelpTab" 
+                              Header="Help"
+                              KeyTip="H">
+
+               
+                
+            </ribbon:RibbonTab>
+            
+        </ribbon:Ribbon> 
+        
+        <Grid Name="ContentGrid" Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+            </Grid.RowDefinitions>
+                <TextBlock  Grid.Row="0" Name="ErrorBar" VerticalAlignment="Top"  Background="LightGoldenrodYellow" Visibility="Collapsed" Width="{Binding ElementName=MainTabControl, Path=Width}" FontWeight="Bold" MouseLeftButtonDown="ErrorBar_MouseLeftButtonDown" TextWrapping="Wrap" />
+                <TabControl Grid.Row="1"  Name="MainTabControl">
+                    <TabControl.ItemContainerStyle>
+                        <Style TargetType="{x:Type TabItem}">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </Style>
+                    </TabControl.ItemContainerStyle>
+                    <TabItem Name="BoardTab" Header="1">
+                      <ScrollViewer Name="BoardScroller" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                        
+                        <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center">
+                            To begin, choose an example file from the Example ribbon tab.
+                        </TextBlock>
+                        
+                    </ScrollViewer>
+                </TabItem>
+                    <TabItem Name="ChartTab" Header="2">
+                    <ScrollViewer Name="ChartScroller" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                        <my:ChartsUserControl x:Name="chartUserControl" />
+                    </ScrollViewer>
+                </TabItem>
+                    <TabItem Name="ModelEditorTab" Header="3">
+                           <my:ModelEditorUserControl x:Name="modelEditorUserControl"  />
+                </TabItem>
+                </TabControl>
+
+        </Grid>
+    </Grid>
+</ribbon:RibbonWindow>

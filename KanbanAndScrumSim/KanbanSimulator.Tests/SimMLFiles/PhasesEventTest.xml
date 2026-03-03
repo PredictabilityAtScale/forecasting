@@ -1,0 +1,60 @@
+﻿<simulation name="Phases"  >
+  <execute limitIntervalsTo="100000">
+    <visual showVisualizer="false" />
+    <monteCarlo cycles="1" />
+  </execute>
+
+  <setup>
+
+    <phases>
+      <phase startPercentage="0" endPercentage="20">phase1</phase>
+      <phase startPercentage="26" endPercentage="75">phase2</phase>
+      <phase startPercentage="80" endPercentage="100">phase3</phase>
+    </phases>
+
+    <backlog type="simple" simpleCount="100" shuffle="false"/>
+
+    <columns>
+      <column id="1" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Column1</column>
+      <column id="2" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Column2</column>
+      <column id="3" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Column3</column>
+      <column id="4" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Column4</column>
+      <column id="5" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Column5</column>
+    </columns>
+
+    <!-- 
+    
+    <blockedPositions count="189" minimum="0" average="0.265" maximum="1" populationStandardDeviation="0.441" sampleStandardDeviation="0.442" median="0" mode="0" fifthPercentile="0" twentyFifthPercentile="0" seventyFifthPercentile="1" ninetyFifthPercentile="1">
+        <histogram>
+          <group bin="1" value="0" count="139" />
+          <group bin="2" value="1" count="50" />
+    
+    -->
+
+    <blockingEvents>
+      <blockingEvent
+      phases="phase2"
+      columnId ="1"
+      occurrenceLowBound="1" occurrenceHighBound="1"
+      estimateLowBound="1" estimateHighBound="1">Blocking event</blockingEvent>
+    </blockingEvents>
+
+    <!-- 1 in 2 for 40% time  = 20 total 
+    
+    <defect value="20">
+    
+    -->
+    <defects>
+      <defect phases="phase1|phase3" columnId="3" startsInColumnId="1" occurrenceLowBound="2" occurrenceHighBound="2">Defect</defect>
+    </defects>
+
+    <!-- 1 in 1 for 20% time with 5 cards on board and 20 in backlog total = 25 
+    
+    <addedScope value="25">
+    
+    -->
+    <addedScopes>
+      <addedScope phases="phase3" occurrenceLowBound="1" occurrenceHighBound="1">Added scope</addedScope>
+    </addedScopes>
+  </setup>
+</simulation>

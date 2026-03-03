@@ -1,0 +1,4 @@
+﻿<custom name="[Title] {0}" count="[count]">
+	 <column id="[column id]" estimateLowBound="[column override low estimate]" estimateHighBound="[column override high estimate]" />
+	 <column id="[column id]" estimateLowBound="[column override low estimate]" estimateHighBound="[column override high estimate]" />
+</custom>

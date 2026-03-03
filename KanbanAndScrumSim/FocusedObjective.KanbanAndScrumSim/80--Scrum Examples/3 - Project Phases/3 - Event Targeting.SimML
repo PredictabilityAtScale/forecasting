@@ -1,0 +1,49 @@
+<simulation name="ScrumPhase Event Targeting Example" locale="en-US">
+  
+<example>This example shows how tomake events active only during certain project phases.
+This allows you to model what events are appropriate at various stages of a project.</example>
+    
+  <execute type="Scrum" dateFormat="dd-MMM-yyyy">
+    	<visual />
+  </execute>
+
+  <setup>
+  
+    	<iteration storyPointsPerIterationLowBound="25" storyPointsPerIterationHighBound="35"  />
+    
+    	<forecastDate startDate="01-Jan-2012" costPerDay="2000" /> 
+
+    	<backlog type="custom" shuffle="true">
+	      <custom name="small" count="15" estimateLowBound="2" estimateHighBound="5" valueLowBound="100" valueHighBound="500" />
+	      <custom name="medium" count="10" estimateLowBound="5" estimateHighBound="10" valueLowBound="500" valueHighBound="1000" />
+	      <custom name="large" count="10" estimateLowBound="10" estimateHighBound="20" valueLowBound="1000" valueHighBound="1500" />
+	</backlog>
+
+	<phases>
+		<phase startPercentage="0" endPercentage="25">Ramp up</phase>
+		<phase startPercentage="60" endPercentage="80">Alpha-live</phase>
+		<phase startPercentage="81" endPercentage="100">Beta-live</phase>
+	</phases>
+
+    	<defects>
+      		<defect  count="2" occurrenceLowBound="4" occurrenceHighBound="10"
+          		estimateLowBound="1" estimateHighBound="3" >Bug found in Testing ({0})</defect>
+          		
+		<!-- This event will ONLY occur during the beta period -->
+      		<defect  occurrenceType="size" occurrenceLowBound="10" occurrenceHighBound="20"
+   			estimateLowBound="1" estimateHighBound="2" phases="Beta-live">Bug in DevOps ({0})</defect>
+    	</defects>
+
+    	<addedScopes>
+      		<addedScope  count="2" occurrenceType="count" occurrenceLowBound="4" occurrenceHighBound="10"
+                 	estimateLowBound="3" estimateHighBound="5">Scope Creep {0}</addedScope>
+
+		<!-- This event will occur during the alpha AND beta period (combine phase names with the | character) -->
+		<addedScope  occurrenceType="percentage" occurrenceLowBound="25" occurrenceHighBound="50"
+                 	estimateLowBound="3" estimateHighBound="5" phases="Alpha-live|Beta-live">Beta Prod Issues {0}</addedScope>
+
+    	</addedScopes>
+
+    </setup>
+
+</simulation>

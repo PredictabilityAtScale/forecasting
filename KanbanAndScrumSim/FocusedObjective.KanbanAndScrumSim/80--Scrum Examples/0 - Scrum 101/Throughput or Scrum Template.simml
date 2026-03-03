@@ -1,0 +1,67 @@
+﻿<simulation name="Scrum Template" locale="en-US">
+
+  <!-- TODO: Set these parameters (any value can be made a parameter for the Interactive window) -->
+  <?parameter name="StartDate" value="01-Jan-2016" type="date" ?>
+  <?parameter name="TargetDate" value="01-Jul-2016" type="date" ?>
+
+  <setup>
+
+    <forecastDate startDate="@StartDate" targetDate="@TargetDate" />
+
+    <!-- TODO: Set the iteration velocity (or throughput) estimates -->
+    <iteration storyPointsPerIterationLowBound="10" storyPointsPerIterationHighBound="20"  />
+
+    <!-- TODO: Add your work. Split it into separate deliverables. -->
+    <backlog type="custom"  nameFormat="{1}" shuffle="true">
+
+      <deliverable name="Feature 1">
+        <custom name="Story"    count="1" estimateLowBound="5" estimateHighBound="8" />
+        <custom name="Story 2" count="1" estimateLowBound="2" estimateHighBound="5"/>
+        <custom name="Epic 1"   count="5" estimateLowBound="5" estimateHighBound="8"/>
+      </deliverable>
+
+      <deliverable name="Feature 2">
+        <custom name="Epic 2" count="5"  estimateLowBound="1" estimateHighBound="8"/>
+        <custom name="Epic 3" count="5"  estimateLowBound="5" estimateHighBound="13"/>
+        <custom name="Epic 4" count="5"  estimateLowBound="1" estimateHighBound="5"/>
+      </deliverable>
+
+    </backlog>
+
+    <!-- TODO: Define project phases allow event targeting and iteration friction to be modeled -->
+    <phases>
+      <phase startPercentage="0" endPercentage="25" iterationMultiplier="0.5">Ramp up</phase>
+    </phases>
+
+    <!-- TODO: BlockingEvents; Add any number of events that inhibit progress of a card -->
+    <!-- Cards that are blocked will have extra points added to them. -->
+    <blockingEvents>
+      <blockingEvent columnId="4" occurrenceType="percentage" occurrenceLowBound="10" occurrenceHighBound="25"
+            estimateLowBound="1" estimateHighBound="2">
+        Block verification (environment down)
+      </blockingEvent>
+    </blockingEvents>
+
+    <!-- TODO: Defects; Add any number of defect categories. Defects cause added scope as part of completing other work at a give occurrence rate. -->
+    <defects>
+      <defect occurrenceType="percentage" occurrenceLowBound="20" occurrenceHighBound="50" estimateLowBound="1" estimateHighBound="8" >
+        Bug found in Verification ({0})
+      </defect>
+    </defects>
+
+    <!-- TODO: AddedScopes; Add any number of added scope categories. Added scope is any increase in scope once a project begins. -->
+    <!-- Added scope will cause cards to be added to the backlog at a given occurrence rate. These cards will be executed last. -->
+    <addedScopes>
+      <addedScope occurrenceType="percentage" occurrenceLowBound="10" occurrenceHighBound="25"  estimateLowBound="3" estimateHighBound="8">
+        Split stories {0}
+      </addedScope>
+    </addedScopes>
+
+
+  </setup>
+
+
+  <execute type="Scrum" dateFormat="dd-MMM-yyyy" currencyFormat="C0" >
+    <visual />
+  </execute>
+</simulation>

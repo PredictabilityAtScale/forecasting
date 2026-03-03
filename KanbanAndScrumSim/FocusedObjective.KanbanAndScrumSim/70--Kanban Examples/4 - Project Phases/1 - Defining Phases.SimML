@@ -1,0 +1,35 @@
+<simulation name="Defining Phases" locale="en-US">
+
+  <example>This example shows how to define multiple project phases. These are displayed in the header of the Kanban board.
+See the resources ribbon tab for documentation, exercises and tutorials.</example>
+
+  <execute intervalUnit="days">
+    	<visual />
+  </execute>
+  
+  <setup>
+  	
+  	<!-- Define four project phases. See the name displayed in the header of the Kanban board as you move the time slider control.
+  	
+  	Exercises -
+  		1. Move the time slider on the Kanban board and notice the number of cards in the backlog when each phase changes.
+  		    (e.g. interval 20 is where the backlog moves from 80 to 79 cards remaining (100 originally), this is 20% of the original backlog).
+  		2. Try overlapping the percentages and seeing the error that is reported.
+    	-->
+ 	<phases>
+ 		<phase startPercentage="0" endPercentage="20">Ramp-up</phase>
+ 		<phase startPercentage="21" endPercentage="50">Alpha Live</phase>
+ 		<phase startPercentage="51" endPercentage="79">Beta Live</phase>
+ 		<phase startPercentage="80" endPercentage="100">Final Release</phase>
+ 	</phases>
+ 
+    	<columns>
+       		<column id="2" estimateLowBound="1" estimateHighBound="2" wipLimit="3">Design</column>
+       		<column id="3" estimateLowBound="2" estimateHighBound="5" wipLimit="4" displayWidth="2">Development</column>
+       		<column id="4" estimateLowBound="1" estimateHighBound="3" wipLimit="2">Test</column>
+   	</columns>
+  	
+  	<backlog type="simple" simpleCount="100" />
+  	
+  </setup>
+</simulation>

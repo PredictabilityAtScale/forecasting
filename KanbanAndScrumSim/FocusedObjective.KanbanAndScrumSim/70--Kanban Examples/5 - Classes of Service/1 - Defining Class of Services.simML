@@ -1,0 +1,52 @@
+<simulation name="Classes of Service" locale="en-US">
+
+  <example>This example shows how to define multiple class of service types for cards.
+Class of service can be used to control the order cards are pulled from the backlog, and to apply special treatment for important (time and date sensitive) or less important (intangibles that can be delayed) stories. 
+See the resources ribbon tab for documentation, exercises and tutorials.</example>
+
+  <execute intervalUnit="days">
+    	<visual />
+  </execute>
+  
+  <setup>
+  	
+  	<!-- Define foure levels of class of service stories can have.
+  	
+  	Exercises -
+  		1. Simulate and notice the Expedite cards violating WIP limits.
+  		2. Observe the order cards are pulled from the backlog.
+  		3. Make the order of Standard equal to Urgent  - <classOfService order="2" default="true">Standard</classOfService>, observe the order now
+  	
+  	
+  	Tip -
+  		1. Defining class of service is optional. When not defined all cards are classified as "Default"
+  		2. Once you add a classOfServices section, one entry MUST be marked as the default using the default="true" attribute
+  		3. Careful of case "violateWIP" NOT "violateWip"
+    	-->
+
+ 	<classOfServices>
+ 		<classOfService order="1" violateWIP="true" maximumAllowedOnBoard="1">Expedite</classOfService>
+ 		<classOfService order="2">Urgent</classOfService>
+ 		<classOfService order="3" default="true">Standard</classOfService>
+ 		<classOfService order="4" skipPercentage="50">Intangible</classOfService>
+	</classOfServices>
+
+  	<backlog type="custom" nameFormat="{1}" shuffle="true">
+  		<custom count="20" classOfService="Urgent" name="Urgent {0}" />
+  		<custom count="30"  name="Default {0}" />
+	</backlog>
+	
+	<addedScopes>
+		<addedScope occurrenceLowBound="5" occurrenceHighBound="10" classOfService="Expedite">Expedite!</addedScope>
+		<addedScope occurrenceLowBound="5" occurrenceHighBound="10" classOfService="Intangible">Refactoring</addedScope>
+	</addedScopes>
+
+    	<columns>
+       		<column id="1" estimateLowBound="1" estimateHighBound="2" wipLimit="2">Design</column>
+       		<column id="2" estimateLowBound="2" estimateHighBound="5" wipLimit="4" displayWidth="2">Development</column>
+       		<column id="3" estimateLowBound="1" estimateHighBound="3" wipLimit="2">Test</column>
+   	</columns>
+  	
+  	
+  </setup>
+</simulation>

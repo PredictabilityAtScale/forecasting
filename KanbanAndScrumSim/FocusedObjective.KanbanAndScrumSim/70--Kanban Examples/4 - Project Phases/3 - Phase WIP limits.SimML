@@ -1,0 +1,45 @@
+<simulation name="Phase WIP Limit Changes" locale="en-US">
+
+  <example>This example shows how to define multiple project phases that alter the default column WIP limits.
+These can be used to model teamchanges throughout the project.
+See the resources ribbon tab for documentation, exercises and tutorials.</example>
+
+  <execute intervalUnit="days">
+    	<visual />
+  </execute>
+  
+  <setup>
+  	
+  	<!-- Define two project phases where the team has more designers and more testers.
+  	
+  	Exercises -
+  		1. Look at the Kanban board columns over the project timeline. Observe the WIP limits change, and the WIP limit header for each column.
+  		2. Notice that during the transition periods, some WIP limits are violated.
+  		
+  	Tips -
+  		1. For this board, the changes in column WIPs make little difference, but when we alter the defect events in an upcoming example, it makes more sense.
+
+    	-->
+ 	<phases>
+ 		
+ 		<phase startPercentage="0" endPercentage="10" >Design Heavy Period
+ 			<column id="1" wipLimit="4" />
+ 		</phase>
+ 		
+ 		<phase startPercentage="70" endPercentage="100" >Test Heavy Period
+ 			<column id="1" wipLimit="1" />
+ 			<column id="3" wipLimit="4" />
+		</phase>
+		
+ 	</phases>
+ 
+    	<columns>
+       		<column id="1" estimateLowBound="1" estimateHighBound="2" wipLimit="2">Design</column>
+       		<column id="2" estimateLowBound="2" estimateHighBound="5" wipLimit="4" displayWidth="2">Development</column>
+       		<column id="3" estimateLowBound="1" estimateHighBound="3" wipLimit="2">Test</column>
+   	</columns>
+  	
+  	<backlog type="simple" simpleCount="100" />
+  	
+  </setup>
+</simulation>

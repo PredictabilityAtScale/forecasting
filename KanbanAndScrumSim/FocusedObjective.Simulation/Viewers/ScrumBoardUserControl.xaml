@@ -1,0 +1,75 @@
+﻿<UserControl x:Class="FocusedObjective.Simulation.Viewers.ScrumBoardUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="480" d:DesignWidth="600">
+    <!-- The main outside grid. Three columns: Backlog, the main content, and Complete -->
+    <Grid>
+
+        <DockPanel>
+            <StackPanel DockPanel.Dock="Left" Width="50" Name="backlogPanel" Background="LightGoldenrodYellow" >
+                <TextBlock Text="Backlog" Name="labelBacklog" Height="50" Width="200">
+                    
+                    <TextBlock.RenderTransform>
+                        <TransformGroup>
+                            <RotateTransform Angle="-90" />
+                            <TranslateTransform Y="150" />
+                            <TranslateTransform X="10" />
+
+                        </TransformGroup>
+                    </TextBlock.RenderTransform>
+                </TextBlock>
+
+            </StackPanel>
+
+            <StackPanel DockPanel.Dock="Right" Width="50" Background="LightGoldenrodYellow" >
+                <TextBlock Text="Completed Cards" Name="labelComplete" Height="50" Width="200" TextWrapping="Wrap">
+                    <TextBlock.RenderTransform>
+                        <TransformGroup>
+                            <RotateTransform Angle="-90" />
+                            <TranslateTransform Y="150" />
+                            <TranslateTransform X="10" />
+
+                        </TransformGroup>
+                    </TextBlock.RenderTransform>
+                </TextBlock>
+            </StackPanel>
+
+
+            <TextBlock DockPanel.Dock="Top" Height="20" HorizontalAlignment="Stretch" Name="textBlockCurrentlyShowing" Text="TextBlock" VerticalAlignment="Top" TextAlignment="Center" Background="LightGoldenrodYellow"/>
+            <Slider DockPanel.Dock="Top" Name="sliderTimelineTop" Maximum="100" AutoToolTipPlacement="TopLeft" ValueChanged="sliderTimeline_ValueChanged" SmallChange="1" LargeChange="10" Margin="0,0,0,2" Height="23" VerticalAlignment="Bottom" Background="LightGoldenrodYellow" />
+
+            <ScrollViewer DockPanel.Dock="Top" Name="scrollViewerBoard"  HorizontalScrollBarVisibility="Auto" CanContentScroll="True" VerticalScrollBarVisibility="Auto">
+                <Grid Name="StatusGridHolder" Grid.Column="1" Grid.Row="1">
+                    <WrapPanel Name="BoardWrapPanel" Orientation="Horizontal" ItemWidth="100" ItemHeight="100">
+
+                    </WrapPanel>
+                </Grid>
+
+            </ScrollViewer>
+
+
+            <!-- <Slider Visibility="Collapsed" DockPanel.Dock="Bottom" Name="sliderTimelineBottom" Maximum="100" AutoToolTipPlacement="TopLeft" ValueChanged="sliderTimeline_ValueChanged" SmallChange="1" LargeChange="10" Margin="0,0,0,2" Height="23" VerticalAlignment="Bottom" /> -->
+
+            <Canvas DockPanel.Dock="Bottom" Height="50" VerticalAlignment="Bottom">
+                <Image Height="15" HorizontalAlignment="Left" Margin="8,6,0,0" Name="image1" Stretch="Fill" VerticalAlignment="Top" Width="15" Source="/FocusedObjective.Simulation;component/Viewers/images/yellow_initial_2.png" />
+                <Label Content="Story" Height="28" HorizontalAlignment="Left" Margin="29,0,0,0" Name="label1" VerticalAlignment="Top" />
+                <Image Height="15" Name="image2" Source="/FocusedObjective.Simulation;component/Viewers/images/green_initial_2.png" Stretch="Fill" Width="15" Margin="161,6,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" />
+                <Label Content="Added Scope" Height="28" Name="label2" Margin="182,0,0,0" HorizontalAlignment="Left" Width="86" VerticalAlignment="Top" />
+                <Image Height="15" Name="image3" Source="/FocusedObjective.Simulation;component/Viewers/images/blue_initial_2.png" Stretch="Fill" Width="15" Margin="81,6,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" />
+                <Label Content="Defect" Height="28" Name="label3" Margin="102,0,0,0" HorizontalAlignment="Left" Width="86" VerticalAlignment="Top" />
+                <Image Height="15" Name="image4" Source="/FocusedObjective.Simulation;component/Viewers/images/yellow_blocked_2.png" Stretch="Fill" Width="15" Margin="274,6,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" />
+                <Image Height="15" Name="image5" Source="/FocusedObjective.Simulation;component/Viewers/images/yellow_queued_2.png" Stretch="Fill" Width="15" Margin="358,6,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" />
+                <Label Content="Blocked" Height="28" Name="label4" Margin="245,0,0,0" HorizontalAlignment="Left" Width="86" VerticalAlignment="Top" Grid.Column="1" Grid.RowSpan="2" Canvas.Left="50" Canvas.Top="0" />
+                <Label Content="Queued" Height="28" Name="label5" Margin="329,0,97,0" VerticalAlignment="Top" Grid.Column="1" Grid.RowSpan="2" Canvas.Left="50" Canvas.Top="0" />
+            </Canvas>
+
+        </DockPanel>
+
+
+
+
+    </Grid>
+</UserControl>

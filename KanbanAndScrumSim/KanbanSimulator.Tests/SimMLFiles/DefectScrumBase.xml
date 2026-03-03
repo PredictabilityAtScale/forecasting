@@ -1,0 +1,30 @@
+﻿<simulation name="Simple test">
+  <execute type="Scrum" >
+    <monteCarlo cycles="1"  />
+    <visual showVisualizer="false" />
+  </execute>
+  <setup>
+    <iteration storyPointsPerIterationLowBound="10" storyPointsPerIterationHighBound="10" />
+    <backlog type="custom">
+      <custom count="100" estimateLowBound="10" estimateHighBound="10">Story {0}</custom>
+    </backlog>
+
+    <defects>
+      <defect occurrenceDistribution="occurrence" estimateDistribution="estimate">Defect</defect>
+    </defects>
+
+    <distributions>
+      <distribution name="occurrence"
+                shape="custom"
+                parameters="2|1"
+                numberType="integer"
+                count="1000"/>
+
+      <distribution name="estimate"
+      shape="custom"
+      parameters="10|1"
+      numberType="double"/>
+      
+    </distributions>
+  </setup>
+</simulation>

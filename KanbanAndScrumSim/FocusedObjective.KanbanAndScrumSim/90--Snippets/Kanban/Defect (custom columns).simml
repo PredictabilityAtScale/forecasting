@@ -1,0 +1,8 @@
+﻿<defect columnId="[column id where triggered]" startsInColumnId="[column id where defects will start]" count="1" 
+	occurrenceType="percentage"	occurrenceLowBound="[low occurrence rate estimate]" occurrenceHighBound="[high occurrence rate estimate]">
+   [Title]
+
+   <column id="[column id to override]" estimateLowBound="[low cycle time override estimate]" estimateHighBound="[high cycle time override estimate]" />
+   <column id="[column id to override]" estimateLowBound="[low cycle time override estimate]" estimateHighBound="[high cycle time override estimate]" />
+
+</defect>

@@ -1,0 +1,90 @@
+<simulation name="Event Deliverable and Custom Backlog Target Example" locale="en-US">
+
+<example>This example shows how events can target only certain deliverables and/or custom backlogs. 
+This means that only backlog items of those deliverable and custom backlog types will have THIS event applied to it.
+A common use for this capability is to have a different blocking rate, scope creep or defect rate for different types, difficulty or risk of work.</example>
+
+  	<execute>
+    		<visual  />
+  	</execute>
+
+  	<setup>
+
+
+		<!-- Define 3 deliverables, each with two custom backlog entries for testing --> 
+    		<backlog type="custom"  nameFormat="{1}" shuffle="false">
+
+      			<deliverable name="A" order="1">
+        			<custom name="A1" count="6"  />
+        			<custom name="A2" count="4"  />
+      			</deliverable>
+
+      			<deliverable name="B" order="1" preRequisiteDeliverables="A">
+        			<custom name="B1" count="6"  />
+        			<custom name="B2" count="4"  />
+      			</deliverable>
+
+      			<deliverable name="C" order="2">
+        			<custom name="C1" count="6" >
+          				<column id="2" estimateLowBound="2" estimateHighBound="2" />
+        			</custom>
+        			<custom name="C2" count="4"  />
+      			</deliverable>
+
+    		</backlog>
+
+
+	<!-- Events can be set to target only certain deliverables and/or custom backlogs. 
+		This means that only backlog items of those deliverable and custom backlog types will have THIS event applied to it.
+
+		Two optional attributes are added to the defect, blockingEvent and addedScope events -
+		
+			targetDeliverable="name" means that only items part of this deliverable are counted as occurrences, or blocked for blocking events.
+			targetCustomBacklog="name" manes that only items part of this custom backlog are counted as occurrences, or blocked for blocking events.
+	-->
+	
+    		<blockingEvents>
+    
+    			<!-- blocking event will only apply to the 6 B1 custom backlog items. They will ALL block -->
+      				<blockingEvent columnId="2" occurrenceType="percentage" occurrenceLowBound="100" occurrenceHighBound="100"
+        				estimateLowBound="4" estimateHighBound="4"
+        				targetDeliverable="B" targetCustomBacklog="B1">Blocking event name
+      				</blockingEvent>
+      		
+    			<!-- blocking event will only apply to ANY story from any deliverable from any custom backlog -->
+      			<blockingEvent columnId="3" occurrenceType="percentage" occurrenceLowBound="10" occurrenceHighBound="20"
+        				estimateLowBound="1" estimateHighBound="1">Blocking event name
+      			</blockingEvent>
+
+    		</blockingEvents>
+
+    		<defects>
+    		
+      			<!-- Causes 6 defects to be placed in deliverable C with a column 2 cycle time of 2 (6 defects because one defect for every B1 custom backlog is created) -->
+      			<defect columnId="3" startsInColumnId="1" occurrenceType="percentage" occurrenceLowBound="100" occurrenceHighBound="100"
+        			targetDeliverable="B" targetCustomBacklog="B1">Defect
+        			<column id="2" estimateLowBound="2" estimateHighBound="2" />
+      			</defect>
+      			
+    		</defects>
+
+
+    		<addedScopes>
+    		
+    			<!-- Cause 6 added scopes to be placed in deliverable C with a column 2 cycle time of 2 (6 new cards because one card for every B1 custom backlog is created)
+    			      This example also demonstrates how to have the scope added to a DIFFERENT deliverable and backlog than the triggering cards. In this case, the cards will be part of the
+    			      C1 custom backlog and this card will exhibit the overridden cycle times for column 2. -->
+        		<addedScope occurrenceType="percentage" occurrenceLowBound="100" occurrenceHighBound="100" 
+    					targetDeliverable="B" targetCustomBacklog="B1"
+    					deliverable="C" customBacklog="C1">Added scope</addedScope>
+ 
+		 </addedScopes>
+
+    		<columns>
+      			<column id="1" estimateLowBound="1" estimateHighBound="1" wipLimit="2">Col1</column>
+      			<column id="2" estimateLowBound="1" estimateHighBound="1" wipLimit="2">Col2</column>
+      			<column id="3" estimateLowBound="1" estimateHighBound="1" wipLimit="2">Col3</column>
+    		</columns>
+
+  	</setup>
+</simulation>

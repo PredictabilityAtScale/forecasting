@@ -1,0 +1,72 @@
+﻿<simulation name="Kanban Template" locale="en-US">
+
+  <!-- TODO: Set these parameters (any value can be made a parameter for the Interactive window) -->
+  <?parameter name="StartDate" value="01-Jan-2016" type="date" ?>
+  <?parameter name="TargetDate" value="01-Mar-2016" type="date" ?>
+
+  <setup>
+
+    <forecastDate startDate="@StartDate" targetDate="@TargetDate" />
+
+    <!-- TODO: Add your work. Split it into separate deliverables. -->
+    <backlog type="custom"  nameFormat="{1}" shuffle="true">
+
+      <deliverable name="Feature 1" order="1">
+        <custom name="Story 1" count="1" />
+        <custom name="Story 2" count="1" />
+        <custom name="Epic  3" count="5" />
+      </deliverable>
+
+      <deliverable name="Feature 2" order="2">
+        <custom name="Epic 4"  count="2" />
+        <custom name="Epic 5"  count="5" />
+        <custom name="Epic 6"  count="10" />
+      </deliverable>
+
+    </backlog>
+
+    <!-- TODO: Define process and columns -->
+    <columns>
+      <column id="1" estimateLowBound="1" estimateHighBound="2" wipLimit="2" >Design</column>
+      <column id="2" estimateLowBound="1" estimateHighBound="4" wipLimit="4" displayWidth="2" >Develop</column>
+      <column id="3" estimateLowBound="1" estimateHighBound="2" wipLimit="2" >Verify</column>
+    </columns>
+
+    <!-- TODO: Define project phases allow event targeting -->
+    <phases>
+      <phase startPercentage="0" endPercentage="25"
+            estimateMultiplier="1.5" occurrenceMultiplier="0.8">Ramp up</phase>
+    </phases>
+
+    <!-- TODO: BlockingEvents; Add any number of events that inhibit progress of a card -->
+    <blockingEvents>
+      <blockingEvent columnId="3" occurrenceType="percentage" occurrenceLowBound="10" occurrenceHighBound="25"
+            estimateLowBound="1" estimateHighBound="2">
+        Block verification (environment down)
+      </blockingEvent>
+    </blockingEvents>
+
+    <!-- TODO: Defects; Add any number of defect categories. Defects cause added scope as part of completing other work at a give occurrence rate. -->
+    <defects>
+      <defect columnId="3" startsInColumnId="2" occurrenceType="percentage" occurrenceLowBound="20" occurrenceHighBound="50">
+        Bug found in Verification ({0})
+
+        <column  id="2"  estimateLowBound="1" estimateHighBound="3" />
+        <column  id="3" estimateLowBound="1" estimateHighBound="1" />
+      </defect>
+    </defects>
+
+    <!-- TODO: AddedScopes; Add any number of added scope categories. Added scope is any increase in scope once a project begins. -->
+    <!-- Added scope will cause cards to be added to the backlog at a given occurrence rate. These cards will be executed last. -->
+    <addedScopes>
+      <addedScope occurrenceType="percentage" occurrenceLowBound="50" occurrenceHighBound="60">
+        Split stories {0}
+      </addedScope>
+    </addedScopes>
+
+  </setup>
+
+  <execute dateFormat="dd-MMM-yyyy" currencyFormat="C0" >
+    <visual />
+  </execute>
+</simulation>

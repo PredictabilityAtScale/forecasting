@@ -1,0 +1,4 @@
+﻿<deliverable name="[name]" order="1">
+	<custom name="[Title] {0}" count="[count]" estimateLowBound="[low story point estimate]" estimateHighBound="[high story point estimate]" />
+	<custom name="[Title] {0}" count="[count]" estimateLowBound="[low story point estimate]" estimateHighBound="[high story point estimate]" />      
+</deliverable>

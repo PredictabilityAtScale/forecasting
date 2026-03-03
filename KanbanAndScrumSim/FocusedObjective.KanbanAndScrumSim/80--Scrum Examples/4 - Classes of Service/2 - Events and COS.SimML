@@ -1,0 +1,40 @@
+<simulation name="Scrum Class of Service and Events Example" locale="en-US">
+  
+<example>This example shows how to added scope and defect events can assign a class of service.
+This allows you to model the priority of defects and added scope stories once in the backlog.</example>
+    
+  <execute type="Scrum" dateFormat="dd-MMM-yyyy">
+    	<visual />
+  </execute>
+
+  <setup>
+  
+    	<iteration storyPointsPerIterationLowBound="25" storyPointsPerIterationHighBound="35"  />
+    
+    	<forecastDate startDate="01-Jan-2012" costPerDay="2000" /> 
+
+    	<backlog type="custom" shuffle="true">
+	      <custom name="small" count="15" estimateLowBound="2" estimateHighBound="5" valueLowBound="100" valueHighBound="500" />
+	      <custom name="medium" count="10" estimateLowBound="5" estimateHighBound="10" valueLowBound="500" valueHighBound="1000" />
+	      <custom name="large" count="10" estimateLowBound="10" estimateHighBound="20" valueLowBound="1000" valueHighBound="1500" />
+	</backlog>
+
+	<!-- these classes of service allow different severities and story start ordering -->
+	<classOfServices>
+		<classOfService order="1" maximumAllowedOnBoard="2">Expedite</classOfService>
+		<classOfService order="2" default="true">Standard</classOfService>
+		<classOfService order="3" skipPercentage="50">Intangible</classOfService>
+	</classOfServices>
+
+    	<addedScopes>
+		<!-- Added as expedite COS - done first once in the backlog -->
+      		<addedScope  occurrenceType="percentage" occurrenceLowBound="10" occurrenceHighBound="25"
+                 	estimateLowBound="3" estimateHighBound="5" classOfService="Expedite">Beta Prod Issues {0}</addedScope>
+
+		<!-- Added as intangible COS - done last once in the backlog, and skipped 50% of the time (tomodel carry over work) -->
+      		<addedScope   occurrenceType="size" occurrenceLowBound="20" occurrenceHighBound="40"
+                 	estimateLowBound="2" estimateHighBound="5" classOfService="Intangible">Refactoring {0}</addedScope>
+    	</addedScopes>
+    </setup>
+
+</simulation>

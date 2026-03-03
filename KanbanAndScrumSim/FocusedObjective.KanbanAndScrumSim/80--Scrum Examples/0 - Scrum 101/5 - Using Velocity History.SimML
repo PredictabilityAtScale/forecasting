@@ -1,0 +1,37 @@
+<simulation name="Scrum Velocity From Historical Data Example" locale="en-US">
+
+  <example>This example shows a how to use historical velocity data to forecast.
+  By using historical story point velocity samples, future iterations will follow a similar velocity occurrence pattern when simulating future iterations.</example>
+
+  <execute type="Scrum" dateFormat="dd-MMM-yyyy" >
+    <visual />
+  </execute>
+
+  <setup>
+    	<iteration storyPointsPerIterationDistribution="Velocity History" allowedToOverAllocate="false"  />
+    
+    	<forecastDate startDate="01-Jan-2012" costPerDay="$2000" /> 
+
+    	<backlog type="custom">
+      		<custom name="small" count="10" estimateLowBound="1" estimateHighBound="3" />
+      		<custom name="medium" count="8" estimateLowBound="5" estimateHighBound="11" />
+      		<custom name="large" count="5" estimateLowBound="11" estimateHighBound="21" />
+    	</backlog>
+    	
+    	<distributions>
+    		<distribution name="Velocity History" numberType="integer" shape="fromSamples">
+    			23,21,23,23,18,19,21,20,19,23,10, 21,21,23,19,23,23,18,20,19,21</distribution>    		
+
+		<!--How does fromSamples distribution work?
+		
+			The fromSamples distribution type fits the given samples into a histogram (value versus frequency of occurence)
+			and then generates random numbers that fit that distribution shape. The samples you provide are ONLY
+			used as a seed for building shape, meaning the order of samples is irrelavent, and returned data will follow
+			a distribution pattern based on occurrence rate and values. -->		
+
+	</distributions>
+
+
+  </setup>
+
+</simulation>

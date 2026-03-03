@@ -1,0 +1,33 @@
+<simulation name="Scrum Deliverable Backlog Example" locale="en-US">
+
+  <example>This example shows a how to define multiple deliverables and control the order work is performed. 
+Once defined, you can simulate all or just some of the deliverables using the 'deliverables' attribute in the 'execute' section..</example>
+  
+  <execute type="Scrum" dateFormat="dd-MMM-yyyy" deliverables="Beta|Release" >
+    <visual />
+  </execute>
+
+  <setup>
+    	<iteration storyPointsPerIterationLowBound="15" storyPointsPerIterationHighBound="25"  />
+    
+    	<forecastDate startDate="01-Jan-2012" costPerDay="2000" /> 
+
+    	<backlog type="custom" shuffle="true">
+    	
+    		<deliverable name="Beta" order="1" >
+      			<custom name="Beta small" count="5" estimateLowBound="5" estimateHighBound="8" />
+      			<custom name="Beta medium" count="7" estimateLowBound="8" estimateHighBound="10" />
+      			<custom name="Beta large" count="8" estimateLowBound="10" estimateHighBound="20" />
+      		</deliverable>
+
+    		<deliverable name="Release" order="2" >
+      			<custom name="Rel small" count="6" estimateLowBound="5" estimateHighBound="8" />
+      			<custom name="Rel medium" count="4" estimateLowBound="8" estimateHighBound="10" />
+      			<custom name="Rel large" count="5" estimateLowBound="10" estimateHighBound="20" />
+      		</deliverable>
+
+	</backlog>
+
+  </setup>
+
+</simulation>

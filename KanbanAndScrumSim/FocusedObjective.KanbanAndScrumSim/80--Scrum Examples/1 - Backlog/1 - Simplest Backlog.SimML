@@ -1,0 +1,21 @@
+<simulation name="Scrum Simplest Backlog Example" locale="en-US">
+
+  <example>This example shows a how to define a simple backlog in a Scrum project</example>
+
+  <execute type="Scrum" dateFormat="dd-MMM-yyyy" >
+    	<visual />
+  </execute>
+
+  <setup>
+
+	<iteration storyPointsPerIterationLowBound="15" storyPointsPerIterationHighBound="25"  />
+    
+    	<forecastDate startDate="01-Jan-2012" costPerDay="2000" /> 
+
+    	<backlog type="custom" shuffle="false">
+      		<custom name="Story" count="15" estimateLowBound="5" estimateHighBound="8" />
+    	</backlog>
+
+  </setup>
+
+</simulation>

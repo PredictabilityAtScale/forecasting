@@ -1,0 +1,27 @@
+﻿<simulation name="Simplest Permutation Board" locale="en-US">
+  <execute dateFormat="dd-MMM-yyyy" >
+    <forecastDate cycles="1" permutations="sequentialBacklog" />
+  </execute>
+
+  <setup>
+
+    <backlog>
+      <deliverable name="D1">
+        <custom name="C1" count="10" />
+        <custom name="C2" count="10" />
+      </deliverable>
+      <deliverable name="D2">
+        <custom name="C1" count="10" />
+        <custom name="C2" count="10" />
+      </deliverable>
+    </backlog>
+
+    <!-- defined three columns -->
+    <columns>
+      <column id="1" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Work</column>
+    </columns>
+
+    <forecastDate startDate="01-Jan-2013"  />
+
+  </setup>
+</simulation>

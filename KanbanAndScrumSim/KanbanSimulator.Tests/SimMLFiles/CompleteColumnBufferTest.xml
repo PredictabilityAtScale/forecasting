@@ -1,0 +1,17 @@
+﻿<simulation name="Complete Interval Column Test"  >
+  <execute>
+    <visual showVisualizer="false" />
+    <monteCarlo cycles="1" />
+  </execute>
+
+  <setup>
+
+    <backlog type="simple" simpleCount="25" />
+
+    <columns>
+      <column id="1" estimateLowBound="1" estimateHighBound="1" wipLimit="5">Column1</column>
+      <column id="2" completeInterval="5" buffer="true" wipLimit="3">Column2</column>
+      <column id="3" estimateLowBound="1" estimateHighBound="1" wipLimit="3">Column3</column>
+    </columns>
+  </setup>
+</simulation>

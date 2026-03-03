@@ -1,0 +1,102 @@
+<simulation name="Scrum Typical Board Example" locale="en-US">
+  
+<example>This example shows a typical scrum project.
+All event types and most of the common SimML features are demonstrated.</example>
+
+  <!-- Staffing numbers for each skillset -->
+  <?parameter name="Designers" value="1" ?>
+  <?parameter name="Developers" value="2" ?>
+  <?parameter name="Testers" value="2" ?>
+  <?parameter name="DevOps" value="1" ?>
+  
+  <!-- cost per day used to calculate running project staff cost -->
+  <?parameter name="StartDate" value="01-Jan-2012" ?>
+  <?parameter name="TargetDate" value="01-Jul-2012" ?>
+  <?parameter name="CostPerDayPerPerson" value="800" ?>
+  <?parameter name="RevenuePerMonth" value="$10000" ?>
+
+  <execute type="Scrum" dateFormat="dd-MMM-yyyy" currencyFormat="C0" >
+    	<visual />
+  </execute>
+
+  <setup>
+  
+    	<iteration storyPointsPerIterationLowBound="25" storyPointsPerIterationHighBound="35"  />
+    
+	<forecastDate startDate="@StartDate" targetDate="@TargetDate" 
+		costPerDay="=@CostPerDayPerPerson * (@Designers + @Developers + @Testers + @DevOps)" 
+		revenue="@RevenuePerMonth" revenueUnit="month" />
+
+    	<backlog type="custom" shuffle="true">
+
+		<!-- Features for version 1.0 -->
+	     	<deliverable order="1" name="Features">
+		      <custom name="small" count="15" estimateLowBound="2" estimateHighBound="5" valueLowBound="$100" valueHighBound="$500" />
+		      <custom name="medium" count="10" estimateLowBound="5" estimateHighBound="10" valueLowBound="$500" valueHighBound="$1000" />
+		      <custom name="large" count="10" estimateLowBound="10" estimateHighBound="20" valueLowBound="$1000" valueHighBound="$1500" />
+		  </deliverable>
+	
+		<!-- Risk: Performance and memory issues are too major to ship -->
+	     	<deliverable order="2" name="RISK: Performance/Memory Issues" skipPercentage="50">
+		      <custom name="perf small" count="6" estimateLowBound="2" estimateHighBound="5" />
+		      <custom name="perf medium" count="2" estimateLowBound="8" estimateHighBound="10" />
+		 </deliverable>
+	
+		<!-- Risk: Chance the off-the-shelf charting component isn't adequate and we have to write our own -->
+	     	<deliverable order="2" name="RISK: Write Custom Charting component " skipPercentage="70">
+		      <custom name="chart small" count="8" estimateLowBound="2" estimateHighBound="5" />
+		      <custom name="chart medium" count="5" estimateLowBound="8" estimateHighBound="10" />
+		 </deliverable>
+	
+	</backlog>
+
+	<!-- project phases allow event targeting and iteration friction to be modeled -->
+	<phases>
+		<phase startPercentage="0" endPercentage="25" iterationMultiplier="0.5">Ramp up</phase>
+		<phase startPercentage="80" endPercentage="100" iterationMultiplier="0.75">Beta-live</phase>
+	</phases>
+
+	<!-- these classes of service allow different severities and story start ordering -->
+	<classOfServices>
+		<classOfService order="1" maximumAllowedOnBoard="2">Expedite</classOfService>
+		<classOfService order="2" default="true">Standard</classOfService>
+		<classOfService order="2" skipPercentage="50">Intangible</classOfService>
+	</classOfServices>
+
+    	<defects>
+      		<defect  count="2" occurrenceLowBound="4" occurrenceHighBound="10"
+          		estimateLowBound="1" estimateHighBound="3" >Bug found in Testing ({0})</defect>
+
+      		<defect  occurrenceType="percentage" occurrenceLowBound="10" occurrenceHighBound="25"
+                	estimateLowBound="1" estimateHighBound="1" >Bug in CSS Code ({0})</defect>
+
+      		<defect  occurrenceType="size" occurrenceLowBound="10" occurrenceHighBound="20"
+   			estimateLowBound="1" estimateHighBound="2" classOfService="Expedite" phases="Beta-live">Bug in DevOps ({0})</defect>
+    	</defects>
+
+    	<addedScopes>
+      		<addedScope  count="2" occurrenceType="count" occurrenceLowBound="4" occurrenceHighBound="10"
+                 	estimateLowBound="3" estimateHighBound="5">Scope Creep {0}</addedScope>
+
+		<!-- prod issues during beta period -->
+      		<addedScope  occurrenceType="percentage" occurrenceLowBound="10" occurrenceHighBound="25"
+                 	estimateLowBound="3" estimateHighBound="5" classOfService="Expedite" phases="Beta-live">Beta Prod Issues {0}</addedScope>
+
+      		<addedScope   occurrenceType="size" occurrenceLowBound="20" occurrenceHighBound="40"
+                 	estimateLowBound="2" estimateHighBound="5" classOfService="Intangible">Refactoring {0}</addedScope>
+    	</addedScopes>
+
+	<blockingEvents>    
+      		<blockingEvent  occurrenceType="count" occurrenceLowBound="8" occurrenceHighBound="15"
+    			estimateLowBound="1" estimateHighBound="3">Block - Question</blockingEvent>
+
+      		<blockingEvent  occurrenceType="percentage" occurrenceLowBound="5" occurrenceHighBound="15"
+                	estimateLowBound="1" estimateHighBound="2">Block - Vacation/Illness</blockingEvent>
+
+      		<blockingEvent  occurrenceType="size" occurrenceLowBound="75" occurrenceHighBound="100"
+                  	estimateLowBound="1" estimateHighBound="2">Block - No test envir.</blockingEvent>
+    	</blockingEvents>
+
+    </setup>
+
+</simulation>

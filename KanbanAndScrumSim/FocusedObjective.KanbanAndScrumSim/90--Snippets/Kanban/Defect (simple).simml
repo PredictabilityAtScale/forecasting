@@ -1,0 +1,4 @@
+﻿<defect columnId="[column id where triggered]" startsInColumnId="[column id where defects start]" count="1" 
+	occurrenceType="percentage"	occurrenceLowBound="[low occurrence rate estimate]" occurrenceHighBound="[high occurrence rate estimate]">
+   [Title]
+</defect>

@@ -1,0 +1,59 @@
+﻿<Window x:Class="FocusedObjective.Simulation.Viewers.KanbanBoard"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Focused Objective - Kanban Board Viewer" Icon="/FocusedObjective.Simulation;component/Viewers/Icon1.ico" mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" Height="480" Width="600">
+    
+    <!-- The main outside grid. Three columns: Backlog, the main content, and Complete -->
+    <Grid Name="KanbanGrid">
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="50" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="50" />
+        </Grid.ColumnDefinitions>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="20" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="50" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="2" Text="Backlog" TextAlignment="Center" Background="LightGoldenrodYellow" Name="labelBacklog" Margin="0,0,138,0" Grid.ColumnSpan="2">
+            <TextBlock.RenderTransform>
+                <RotateTransform Angle="-90"></RotateTransform>
+            </TextBlock.RenderTransform>
+        </TextBlock>
+
+        <TextBlock HorizontalAlignment="Stretch" Grid.Row="2" Grid.Column="2" TextAlignment="Center" Text="Complete" Name="labelComplete" Background="LightGoldenrodYellow" Margin="0,0,-341,0">
+            <TextBlock.RenderTransform>
+                <RotateTransform Angle="-90"></RotateTransform>
+            </TextBlock.RenderTransform>
+        </TextBlock>
+
+        <ScrollViewer Name="scrollViewerBoard" Grid.Column="1" Grid.Row="1" HorizontalScrollBarVisibility="Auto" CanContentScroll="True" VerticalScrollBarVisibility="Auto">
+            <Grid Name="StatusGridHolder" Grid.Column="1" Grid.Row="1">
+                <StackPanel Name="columnsPanel" Orientation="Horizontal">
+                    
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
+        
+        <Slider Grid.Row="2" Grid.ColumnSpan="3" Name="sliderTimeline" Maximum="100" AutoToolTipPlacement="TopLeft" ValueChanged="sliderTimeline_ValueChanged" SmallChange="1" LargeChange="10" Margin="0,0,0,2" Height="23" VerticalAlignment="Bottom" />
+        <TextBlock Height="20" HorizontalAlignment="Stretch" Name="textBlockCurrentlyShowing" Text="TextBlock" VerticalAlignment="Top" Width="578" Grid.ColumnSpan="3" TextAlignment="Center" />
+        
+    <Canvas Grid.ColumnSpan="3" Grid.Row="2" Height="50" VerticalAlignment="Bottom">
+        <Image Height="15" HorizontalAlignment="Left" Margin="8,6,0,0" Name="image1" Stretch="Fill" VerticalAlignment="Top" Width="15" Source="/FocusedObjective.Simulation;component/Viewers/images/yellow_initial_2.png" />
+        <Label Content="Story" Height="28" HorizontalAlignment="Left" Margin="29,0,0,0" Name="label1" VerticalAlignment="Top" />
+        <Image Height="15" Name="image2" Source="/FocusedObjective.Simulation;component/Viewers/images/green_initial_2.png" Stretch="Fill" Width="15" Margin="161,6,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" />
+        <Label Content="Added Scope" Height="28" Name="label2" Margin="182,0,0,0" HorizontalAlignment="Left" Width="86" VerticalAlignment="Top" />
+        <Image Height="15" Name="image3" Source="/FocusedObjective.Simulation;component/Viewers/images/blue_initial_2.png" Stretch="Fill" Width="15" Margin="81,6,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" />
+        <Label Content="Defect" Height="28" Name="label3" Margin="102,0,0,0" HorizontalAlignment="Left" Width="86" VerticalAlignment="Top" />
+        <Image Height="15" Name="image4" Source="/FocusedObjective.Simulation;component/Viewers/images/yellow_blocked_2.png" Stretch="Fill" Width="15" Margin="274,6,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" />
+            <Image Height="15" Name="image5" Source="/FocusedObjective.Simulation;component/Viewers/images/yellow_queued_2.png" Stretch="Fill" Width="15" Margin="358,6,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" />
+
+        <Label Content="Blocked" Height="28" Name="label4" Margin="245,0,0,0" HorizontalAlignment="Left" Width="86" VerticalAlignment="Top" Grid.Column="1" Grid.RowSpan="2" Canvas.Left="50" Canvas.Top="0" />
+        <Label Content="Queued" Height="28" Name="label5" Margin="329,0,97,0" VerticalAlignment="Top" Grid.Column="1" Grid.RowSpan="2" Canvas.Left="50" Canvas.Top="0" />
+        </Canvas>
+    </Grid>
+    
+</Window>

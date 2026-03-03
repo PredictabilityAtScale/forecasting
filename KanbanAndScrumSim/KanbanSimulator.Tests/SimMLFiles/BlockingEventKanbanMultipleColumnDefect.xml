@@ -1,0 +1,21 @@
+﻿<simulation name="Defect where only one blocking card could occur in a column">
+  <execute>
+    <visual showVisualizer="false"/>
+    <monteCarlo cycles="1" />
+  </execute>
+  <setup>
+    <backlog type="simple" simpleCount="10" />
+    <columns>
+      <column id="0" estimateLowBound="1" estimateHighBound="1" wipLimit="2">Column 1</column>
+      <column id="1" estimateLowBound="1" estimateHighBound="1" wipLimit="2">Column 2</column>
+      <column id="2" estimateLowBound="1" estimateHighBound="1" wipLimit="2">Column 3</column>
+    </columns>
+
+    <blockingEvents>
+      <blockingEvent columnId="1"
+      occurrenceLowBound="1" occurrenceHighBound="1"
+      estimateLowBound="1" estimateHighBound="1">Block</blockingEvent>
+    </blockingEvents>
+
+  </setup>
+</simulation>

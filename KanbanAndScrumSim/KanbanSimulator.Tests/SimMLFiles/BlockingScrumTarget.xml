@@ -1,0 +1,36 @@
+﻿<simulation name="Added Scope Target test">
+  <execute type="Scrum">
+    <monteCarlo cycles="1"  />
+  </execute>
+  <setup>
+    <iteration storyPointsPerIterationLowBound="10" storyPointsPerIterationHighBound="10" />
+
+    <backlog type="custom"  nameFormat="{1}" shuffle="true">
+
+
+      <deliverable name="A" order="1">
+        <custom name="A1" count="6" estimateLowBound="10" estimateHighBound="10" />
+        <custom name="A2" count="4"  estimateLowBound="10" estimateHighBound="10" />
+      </deliverable>
+
+      <!-- todo: scrum doesn't do preRequsisiteDeliverables yet -->
+      <deliverable name="B" order="1" preRequisiteDeliverables="A">
+        <custom name="B1" count="6"  estimateLowBound="10" estimateHighBound="10" />
+        <custom name="B2" count="4"   estimateLowBound="10" estimateHighBound="10"/>
+      </deliverable>
+
+      <deliverable name="C" order="2">
+        <custom name="C1" count="6"  estimateLowBound="10" estimateHighBound="10">
+        </custom>
+        <custom name="C2" count="4"  estimateLowBound="10" estimateHighBound="10" />
+      </deliverable>
+
+    </backlog>
+
+    <blockingEvents>
+      <blockingEvent occurrenceType="percentage" occurrenceLowBound="100" occurrenceHighBound="100" estimateLowBound="20" estimateHighBound="20"
+      targetDeliverable="B"  targetCustomBacklog="B1">Added scope</blockingEvent>
+    </blockingEvents>
+
+  </setup>
+</simulation>

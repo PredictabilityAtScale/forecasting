@@ -1,0 +1,30 @@
+﻿<simulation name="Simple test">
+  <execute type="scrum">
+    <monteCarlo cycles="1"  />
+    <visual showVisualizer="false" />
+  </execute>
+  <setup>
+
+    <iteration storyPointsPerIterationLowBound="10" storyPointsPerIterationHighBound="10" />
+
+    <backlog type="custom">
+      <custom count="100" estimateLowBound="10" estimateHighBound="10">Story {0}</custom>
+    </backlog>
+
+    <blockingEvents>
+      <blockingEvent occurrenceDistribution="occurrence" estimateDistribution="estimate">Blocking Event</blockingEvent>
+    </blockingEvents>
+
+    <distributions>
+      <distribution name="occurrence"
+                shape="custom"
+                parameters="2,1"
+                numberType="integer" />
+
+      <distribution name="estimate"
+          shape="custom"
+          parameters="2.0,1"
+          numberType="double"/>
+    </distributions>
+  </setup>
+</simulation>

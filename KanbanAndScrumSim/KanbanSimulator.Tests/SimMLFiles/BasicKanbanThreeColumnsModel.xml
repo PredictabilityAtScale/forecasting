@@ -1,0 +1,22 @@
+﻿<simulation name="Basic Test Template" locale="en-US">
+
+  <execute dateFormat="dd-MMM-yyyy">
+    <visual showVisualizer="false"/>
+    <monteCarlo cycles="1" />
+  </execute>
+
+  <setup>
+    <!-- start by putting 50 items into the backlog -->
+    <backlog type="simple" simpleCount="100" />
+
+    <!-- defined three columns -->
+    <columns>
+      <column id="1" estimateLowBound="1" estimateHighBound="1" wipLimit="2">Design</column>
+      <column id="2" estimateLowBound="1" estimateHighBound="1" wipLimit="4" displayWidth="2">Development</column>
+      <column id="3" estimateLowBound="1" estimateHighBound="1" wipLimit="2">Test</column>
+    </columns>
+
+    <forecastDate startDate="01-May-2012" costPerDay="2500" />
+
+  </setup>
+</simulation>

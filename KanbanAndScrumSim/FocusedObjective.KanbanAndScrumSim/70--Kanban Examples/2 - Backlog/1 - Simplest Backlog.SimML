@@ -1,0 +1,22 @@
+<simulation name="Simplest Backlog" locale="en-US">
+
+  <example>This example shows the most basic Kanban backlog definition. A given number of cards are placed in the backlog, and these cards use the cycle-times defined in each column.
+See the resources ribbon tab for documentation, exercises and tutorials.</example>
+
+  <execute>
+    <visual />
+  </execute>
+  
+  <setup>
+  	
+  	<!-- The simplest backlog. Starts with 50 cards in the backlog in this case. -->
+  	<backlog type="simple" simpleCount="50" />
+ 
+    	<columns>
+       		<column id="1" estimateLowBound="1" estimateHighBound="3" wipLimit="2">Design</column>
+       		<column id="2" estimateLowBound="2" estimateHighBound="5" wipLimit="4" displayWidth="2">Development</column>
+       		<column id="3" estimateLowBound="1" estimateHighBound="3" wipLimit="2">Test</column>
+    </columns>
+    
+  </setup>
+</simulation>

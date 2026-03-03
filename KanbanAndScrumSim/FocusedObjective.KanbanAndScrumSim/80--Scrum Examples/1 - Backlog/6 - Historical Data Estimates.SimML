@@ -1,0 +1,50 @@
+<simulation name="Scrum Fib Backlog Example" locale="en-US">
+
+  <example>This example shows a how to use historical data and approximations to reflect different story size estimates.
+Distributions improve the accuracy of simulations when used for sensitive model inputs.</example>
+
+  <execute type="Scrum" dateFormat="dd-MMM-yyyy" >
+    <visual />
+  </execute>
+
+  <setup>
+    	<iteration storyPointsPerIterationLowBound="15" storyPointsPerIterationHighBound="35"  />
+    
+    	<forecastDate startDate="01-Jan-2012" costPerDay="2000" /> 
+
+    	<backlog type="custom">
+
+		<!-- common built-in ranges can be an intermediate step. -->
+      		<custom name="1" count="5" estimateDistribution="Fib1" />
+      		<custom name="2" count="12" estimateDistribution="Fib2" />
+
+    		<!--When there is enough historical data, a distribution can be created -->
+		<custom name="3" count="15" estimateDistribution="Fib3" />
+      		<custom name="5" count="10" estimateDistribution="Fib5" />
+
+		<!-- When there is NOT enough or any samples, a range can still be used. -->
+      		<custom name="8" count="5"  estimateLowBound="5" estimateHighBound="16" />
+      		<custom name="13" count="2" estimateLowBound="8" estimateHighBound="26" />
+      		<custom name="21" count="1" estimateLowBound="13" estimateHighBound="42" />
+      		
+	</backlog>
+
+	<distributions>
+		<!-- these distributions are approximations using one of the 20+ built-in distributions -->	
+		
+		<distribution name="Fib1" numberType="double" shape="triangle" parameters="0.75,3,1.5" />
+		<distribution name="Fib2" numberType="double" shape="normal" lowBound="1" highBound="5" parameters="2.5,0.5" />
+	
+		<!-- these samples were mined from previously completed cards -->
+		<!-- the simulator builds random numbers following the histogram mined from these samples (NOT the samples themselves) -->
+		<distribution name="Fib3" numberType="double" shape="fromSamples" >
+			5,5,4,3,5,3,5,5,6,8,3,8,3,4,3</distribution>		
+		
+		<distribution name="Fib5" numberType="double" shape="fromSamples" >
+			5,7,5,10,5,7,5,7,6,4,6,9,6,5,6</distribution>
+
+	</distributions>
+
+  </setup>
+
+</simulation>

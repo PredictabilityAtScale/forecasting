@@ -1,0 +1,34 @@
+<simulation name="Batch Replenish or Completion" locale="en-US">
+
+  <example>This example shows how to define a buffer (or queue) column on a Kanban board that is only filled at certain intervals, or only completed at certain intervals.
+Often work is only prioritized at regular intervals, and work is only deployed as a batch at regular intervals.
+See the resources ribbon tab for documentation, exercises and tutorials.</example>
+
+  <execute intervalUnit="days">
+    	<visual />
+  </execute>
+  
+  <setup>
+  	
+  	<!-- Define a buffer/queue columns that replenish at regular intervals and complete at regular intervals.
+  	
+  	Input queue: filled every 5 days
+  	Ready to Deploy: cleared every 10 days
+  	
+  	Exercises -
+  		1. Change the Input Queue WIP limit and see the impact of available work moving through the system.
+  		2. Change the Ready To Deploy WIP limit and see the impact on queued positions in the system.
+    	-->
+ 
+    	<columns>
+       		<column id="1" buffer="true" replenishInterval="5" wipLimit="3">Input Queue</column>
+       		<column id="2" estimateLowBound="1" estimateHighBound="2" wipLimit="3">Design</column>
+       		<column id="3" estimateLowBound="2" estimateHighBound="5" wipLimit="4" displayWidth="2">Development</column>
+       		<column id="4" estimateLowBound="1" estimateHighBound="3" wipLimit="2">Test</column>
+       		<column id="5" buffer="true" completeInterval="10" wipLimit="10">Ready to Deploy</column>
+   	</columns>
+  	
+  	<backlog type="simple" simpleCount="50" />
+  	
+  </setup>
+</simulation>
