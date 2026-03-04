@@ -26,6 +26,8 @@ export interface SimWorkItemTemplate {
   order: number
   estimateLowBound?: number
   estimateHighBound?: number
+  valueLowBound: number
+  valueHighBound: number
   percentageLowBound: number
   percentageHighBound: number
   initialColumn?: number
@@ -36,10 +38,14 @@ export interface SimWorkItemTemplate {
   columnOverrides: SimColumnOverride[]
 }
 
+export type SimOccurrenceType = 'count' | 'percentage' | 'points'
+export type SimAggregationValue = 'Average' | 'Median' | 'Fifth' | 'NinetyFifth' | 'Max' | 'Min'
+
 export type SimPullOrder = 'randomAfterOrdering' | 'random' | 'indexSequence' | 'FIFO' | 'FIFOStrict'
 
 export interface SimBacklog {
   type: 'simple' | 'custom'
+  nameFormat?: string
   simpleCount: number
   shuffle: boolean
   items: SimWorkItemTemplate[]
@@ -65,6 +71,10 @@ export interface SimForecastDate {
   intervalsToOneDay: number
   costPerDay: number
   targetLikelihood: number
+  targetDate?: string
+  revenue: number
+  revenueUnit: 'day' | 'week' | 'month' | 'year'
+  actuals: { date: string; count: number; annotation?: string }[]
   excludedDates: string[]
 }
 
@@ -76,6 +86,7 @@ export interface SimExecute {
   activePositionsCompletePercentage: number
   limitIntervalsTo: number
   monteCarloCycles: number
+  aggregationValue: SimAggregationValue
   sensitivityCycles: number
   sensitivityEstimateMultiplier: number
   sensitivityOccurrenceMultiplier: number
@@ -108,6 +119,8 @@ export interface SimBlockingEvent {
   occurrenceHighBound: number
   estimateLowBound: number
   estimateHighBound: number
+  occurrenceType: SimOccurrenceType
+  scale: number
   phases: string[]
   targetCustomBacklog?: string
   targetDeliverable?: string
@@ -214,6 +227,7 @@ export interface MonteCarloResult {
   percentileSteps: MonteCarloPercentile[]
   histogram: { step: number; count: number }[]
   rawSteps: number[]
+  summarySteps: number
 }
 
 export interface SensitivityResult {
@@ -234,6 +248,9 @@ export interface SimulationRunResult {
   completedItems: number
   completionDate: string | null
   totalCost: number
+  costOfDelay: number
+  valueDeliveredByStep: { step: number; cumulativeValue: number }[]
+  cumulativeFlow: Array<{ step: number; backlog: number; done: number; columns: Record<string, number> }>
 }
 
 const RAW_EXAMPLES: Record<string, string> = import.meta.glob(
@@ -333,6 +350,7 @@ export function parseSimMl(xmlSource: string): SimModel {
       activePositionsCompletePercentage: readNumber(execute, 'activePositionsCompletePercentage', 0),
       limitIntervalsTo: readNumber(execute, 'limitIntervalsTo', 9000),
       monteCarloCycles: readNumber(execute.querySelector(':scope > monteCarlo'), 'cycles', 500),
+      aggregationValue: parseAggregationValue(readAttr(execute.querySelector(':scope > monteCarlo'), 'aggregationValue')),
       sensitivityCycles: readNumber(execute.querySelector(':scope > sensitivity'), 'cycles', 300),
       sensitivityEstimateMultiplier: readNumber(
         execute.querySelector(':scope > sensitivity'),
@@ -377,12 +395,14 @@ function parseBacklog(setup: Element, simulationType: SimulationKind): SimBacklo
     : 'simple'
 
   const shuffle = readBoolean(backlog, 'shuffle', true)
+  const nameFormat = readAttr(backlog, 'nameFormat') || undefined
 
   if (backlogType === 'simple') {
     const count = readNumber(backlog, 'simpleCount', 0)
     return {
       type: 'simple',
       simpleCount: count,
+      nameFormat,
       shuffle,
       items: Array.from({ length: count }, (_, index) => ({
         id: `simple-${index + 1}`,
@@ -390,6 +410,8 @@ function parseBacklog(setup: Element, simulationType: SimulationKind): SimBacklo
         count: 1,
         completed: false,
         order: index + 1,
+        valueLowBound: 0,
+        valueHighBound: 0,
         percentageLowBound: 0,
         percentageHighBound: 100,
         preRequisiteDeliverables: [],
@@ -422,6 +444,8 @@ function parseBacklog(setup: Element, simulationType: SimulationKind): SimBacklo
       order: readNumber(node, 'order', Number.MAX_SAFE_INTEGER),
       estimateLowBound: readOptionalNumber(node, 'estimateLowBound'),
       estimateHighBound: readOptionalNumber(node, 'estimateHighBound'),
+      valueLowBound: readNumber(node, 'valueLowBound', 0),
+      valueHighBound: readNumber(node, 'valueHighBound', 0),
       percentageLowBound: readNumber(node, 'percentageLowBound', 0),
       percentageHighBound: readNumber(node, 'percentageHighBound', 100),
       initialColumn: readOptionalNumber(node, 'initialColumn'),
@@ -464,6 +488,7 @@ function parseBacklog(setup: Element, simulationType: SimulationKind): SimBacklo
   return {
     type: 'custom',
     simpleCount: 0,
+    nameFormat,
     shuffle,
     items: items.sort(compareTemplatePriority),
   }
@@ -519,6 +544,10 @@ function parseForecastDate(setup: Element): SimForecastDate | undefined {
     intervalsToOneDay: readNumber(node, 'intervalsToOneDay', 1),
     costPerDay: readCurrency(node, 'costPerDay', 0),
     targetLikelihood: readNumber(node, 'targetLikelihood', 85),
+    targetDate: readAttr(node, 'targetDate') || undefined,
+    revenue: readCurrency(node, 'revenue', 0),
+    revenueUnit: parseRevenueUnit(readAttr(node, 'revenueUnit')),
+    actuals: parseForecastActuals(node),
     excludedDates: Array.from(node.querySelectorAll(':scope > excludeDate'))
       .map((ed) => readAttr(ed, 'date') || ed.textContent.trim() || '')
       .filter(Boolean),
@@ -598,6 +627,42 @@ function parsePullOrder(value: string): SimPullOrder {
   return 'randomAfterOrdering'
 }
 
+
+function parseAggregationValue(value: string): SimAggregationValue {
+  const normalized = value.trim().toLowerCase()
+  if (normalized === 'median') return 'Median'
+  if (normalized === 'fifth' || normalized === '5th') return 'Fifth'
+  if (normalized === 'ninetyfifth' || normalized === '95th') return 'NinetyFifth'
+  if (normalized === 'max' || normalized === 'maximum') return 'Max'
+  if (normalized === 'min' || normalized === 'minimum') return 'Min'
+  return 'Average'
+}
+
+function parseOccurrenceType(value: string): SimOccurrenceType {
+  const normalized = value.trim().toLowerCase()
+  if (normalized === 'percentage') return 'percentage'
+  if (normalized === 'size' || normalized === 'points') return 'points'
+  return 'count'
+}
+
+function parseRevenueUnit(value: string): 'day' | 'week' | 'month' | 'year' {
+  const normalized = value.trim().toLowerCase()
+  if (normalized === 'day' || normalized === 'days') return 'day'
+  if (normalized === 'week' || normalized === 'weeks') return 'week'
+  if (normalized === 'year' || normalized === 'years') return 'year'
+  return 'month'
+}
+
+function parseForecastActuals(node: Element) {
+  const containers = Array.from(node.querySelectorAll(':scope > actuals > actual'))
+  const direct = Array.from(node.querySelectorAll(':scope > actual'))
+  return [...containers, ...direct].map((actual) => ({
+    date: readAttr(actual, 'date') || '',
+    count: readNumber(actual, 'count', 0),
+    annotation: readAttr(actual, 'annotation') || actual.textContent?.trim() || undefined,
+  })).filter((a) => a.date)
+}
+
 function readChildText(node: Element | null, selector: string) {
   return node?.querySelector(`:scope > ${selector}`)?.textContent.trim() || undefined
 }
@@ -657,6 +722,8 @@ function parseBlockingEvents(setup: Element): SimBlockingEvent[] {
       occurrenceHighBound: readNumber(node, 'occurrenceHighBound', 6),
       estimateLowBound: readNumber(node, 'estimateLowBound', 1),
       estimateHighBound: readNumber(node, 'estimateHighBound', 5),
+      occurrenceType: parseOccurrenceType(readAttr(node, 'occurrenceType')),
+      scale: readNumber(node, 'scale', 1),
       phases: (readAttr(node, 'phases') || '')
         .split(/[|,]/)
         .map((value) => value.trim())
@@ -761,6 +828,7 @@ interface KanbanItem {
   pullOrder: number
   preRequisiteDeliverables: string[]
   earliestStartDate?: string
+  businessValue: number
 }
 
 interface ScrumItem {
@@ -783,6 +851,7 @@ interface ScrumItem {
   dueDate?: string
   order: number
   sortOrder: number
+  businessValue: number
 }
 
 export function runVisualSimulation(model: SimModel): SimulationRunResult {
@@ -821,6 +890,7 @@ export function runMonteCarlo(model: SimModel, cycles = model.execute.monteCarlo
       .map(([step, count]) => ({ step, count }))
       .sort((a, b) => a.step - b.step),
     rawSteps: steps,
+    summarySteps: selectAggregationValue(steps, model.execute.aggregationValue),
   }
 }
 
@@ -990,6 +1060,7 @@ function runKanbanSimulation(model: SimModel): SimulationRunResult {
   let itemsPulled = 0
   let currentPhase: SimPhase | null = null
   let accumulatedCost = 0
+  const valueDeliveredByStep: { step: number; cumulativeValue: number }[] = []
 
   // -- Event processor state -------------------------------------------------
   const defectProcessors = model.setup.defects.map((d) => ({
@@ -999,8 +1070,8 @@ function runKanbanSimulation(model: SimModel): SimulationRunResult {
   }))
   const blockingProcessors = model.setup.blockingEvents.map((b) => ({
     def: b,
-    cardsSeen: 0,
-    trigger: Math.round(sampleBetween(b.occurrenceLowBound, b.occurrenceHighBound)),
+    occurrenceProgress: 0,
+    trigger: 1,
   }))
   const addedScopeProcessors = model.setup.addedScopes.map((a) => ({
     def: a,
@@ -1017,6 +1088,7 @@ function runKanbanSimulation(model: SimModel): SimulationRunResult {
 
   const phaseEstMult = () => currentPhase?.estimateMultiplier ?? 1
   const phaseOccMult = () => currentPhase?.occurrenceMultiplier ?? 1
+  blockingProcessors.forEach((bp) => { bp.trigger = sampleOccurrenceTrigger(bp.def, phaseOccMult()) })
 
   // Place items with initialColumn
   items.forEach((item) => {
@@ -1030,6 +1102,7 @@ function runKanbanSimulation(model: SimModel): SimulationRunResult {
   })
 
   pushKanbanSnapshot(snapshots, step, columns, items, doneItems, currentPhase)
+  valueDeliveredByStep.push({ step, cumulativeValue: round(items.filter((i) => i.done).reduce((sum, i) => sum + i.businessValue, 0)) })
 
   while (step < limit && doneItems.length < items.length) {
     step += 1
@@ -1092,13 +1165,11 @@ function runKanbanSimulation(model: SimModel): SimulationRunResult {
         let isBlocked = false
         for (const bp of blockingProcessors) {
           if (bp.def.columnId === column.id && blockingEventApplies(bp.def, item, currentPhase)) {
-            bp.cardsSeen += 1
-            if (bp.cardsSeen >= bp.trigger) {
-              bp.cardsSeen = 0
-              bp.trigger = Math.round(
-                sampleBetween(bp.def.occurrenceLowBound, bp.def.occurrenceHighBound) * phaseOccMult(),
-              )
-              item.blockedTime += sampleBetween(bp.def.estimateLowBound, bp.def.estimateHighBound) * phaseEstMult()
+            bp.occurrenceProgress += 1
+            if (bp.occurrenceProgress >= bp.trigger) {
+              bp.occurrenceProgress = 0
+              bp.trigger = sampleOccurrenceTrigger(bp.def, phaseOccMult())
+              item.blockedTime += sampleBetween(bp.def.estimateLowBound, bp.def.estimateHighBound) * bp.def.scale * phaseEstMult()
               item.status = 'blocked'
               item.blockerLabel = bp.def.name
               isBlocked = true
@@ -1142,6 +1213,7 @@ function runKanbanSimulation(model: SimModel): SimulationRunResult {
                   pullOrder: nextPullOrder++,
                   preRequisiteDeliverables: [],
                   earliestStartDate: undefined,
+                  businessValue: 0,
                 }
                 items.push(defectItem)
                 if (defectItem.currentColumn >= 0) {
@@ -1184,6 +1256,7 @@ function runKanbanSimulation(model: SimModel): SimulationRunResult {
                   pullOrder: nextPullOrder++,
                   preRequisiteDeliverables: [],
                   earliestStartDate: undefined,
+                  businessValue: 0,
                 })
               }
             }
@@ -1304,6 +1377,7 @@ function runKanbanSimulation(model: SimModel): SimulationRunResult {
     }
 
     pushKanbanSnapshot(snapshots, step, columns, items, doneItems, currentPhase)
+    valueDeliveredByStep.push({ step, cumulativeValue: round(items.filter((i) => i.done).reduce((sum, i) => sum + i.businessValue, 0)) })
 
     const completePct = items.length === 0 ? 100 : (doneItems.length / items.length) * 100
     const totalBoardWip = columns.reduce((sum, column) => sum + getEffectiveWipLimit(column, currentPhase), 0)
@@ -1328,6 +1402,14 @@ function runKanbanSimulation(model: SimModel): SimulationRunResult {
     completedItems: doneItems.length,
     completionDate,
     totalCost,
+    costOfDelay: calculateCostOfDelay(model, completionDate),
+    valueDeliveredByStep,
+    cumulativeFlow: snapshots.map((snapshot) => ({
+      step: snapshot.step,
+      backlog: snapshot.backlogCount,
+      done: snapshot.doneCount,
+      columns: Object.fromEntries(snapshot.columns.map((column) => [column.id, column.cards.length])),
+    })),
   }
 }
 
@@ -1346,6 +1428,7 @@ function runScrumSimulation(model: SimModel): SimulationRunResult {
   let storiesStarted = 0
   let currentPhase: SimPhase | null = null
   let accumulatedCost = 0
+  const valueDeliveredByStep: { step: number; cumulativeValue: number }[] = []
   const cosActive = model.setup.classOfServices.length > 0
 
   // -- Event processors for scrum ------------------------------------------
@@ -1356,8 +1439,8 @@ function runScrumSimulation(model: SimModel): SimulationRunResult {
   }))
   const blockingProcessors = model.setup.blockingEvents.map((b) => ({
     def: b,
-    storiesSeen: 0,
-    trigger: Math.round(sampleBetween(b.occurrenceLowBound, b.occurrenceHighBound)),
+    occurrenceProgress: 0,
+    trigger: 1,
   }))
   const addedScopeProcessors = model.setup.addedScopes.map((a) => ({
     def: a,
@@ -1369,6 +1452,7 @@ function runScrumSimulation(model: SimModel): SimulationRunResult {
   currentPhase = resolvePhase(model.setup.phases, 0, 0, originalStoryCount)
 
   pushScrumSnapshot(snapshots, step, backlog, [], done, 0, currentPhase)
+  valueDeliveredByStep.push({ step, cumulativeValue: round(backlog.filter((i) => i.done).reduce((sum, i) => sum + i.businessValue, 0)) })
 
   // Track stories currently being worked (carried over between iterations)
   let inProgress: ScrumItem[] = []
@@ -1384,6 +1468,7 @@ function runScrumSimulation(model: SimModel): SimulationRunResult {
     const phaseIterMult = currentPhase?.iterationMultiplier ?? 1
     const phaseEstMult = currentPhase?.estimateMultiplier ?? 1
     const phaseOccMult = currentPhase?.occurrenceMultiplier ?? 1
+    if (step === 1) blockingProcessors.forEach((bp) => { bp.trigger = sampleOccurrenceTrigger(bp.def, phaseOccMult) })
 
     // Accumulate cost
     const forecast = model.setup.forecastDate
@@ -1472,13 +1557,11 @@ function runScrumSimulation(model: SimModel): SimulationRunResult {
         // Check blocking events on story start (apply phase occurrence multiplier)
         for (const bp of blockingProcessors) {
           if (!blockingEventApplies(bp.def, story, currentPhase)) continue
-          bp.storiesSeen += 1
-          if (bp.storiesSeen >= bp.trigger) {
-            bp.storiesSeen = 0
-            bp.trigger = Math.round(
-              sampleBetween(bp.def.occurrenceLowBound, bp.def.occurrenceHighBound) * phaseOccMult,
-            )
-            story.blockedPoints += sampleBetween(bp.def.estimateLowBound, bp.def.estimateHighBound) * phaseEstMult
+          bp.occurrenceProgress += bp.def.occurrenceType === 'points' ? story.estimate : 1
+          if (bp.occurrenceProgress >= bp.trigger) {
+            bp.occurrenceProgress = 0
+            bp.trigger = sampleOccurrenceTrigger(bp.def, phaseOccMult)
+            story.blockedPoints += sampleBetween(bp.def.estimateLowBound, bp.def.estimateHighBound) * bp.def.scale * phaseEstMult
             story.blockerLabel = bp.def.name
           }
         }
@@ -1526,6 +1609,7 @@ function runScrumSimulation(model: SimModel): SimulationRunResult {
       Math.min(pointsCapacity, pointsCapacity - pointsRemaining),
       currentPhase,
     )
+    valueDeliveredByStep.push({ step, cumulativeValue: round(backlog.filter((i) => i.done).reduce((sum, i) => sum + i.businessValue, 0)) })
 
     if (done.length >= backlog.length) break
   }
@@ -1540,6 +1624,14 @@ function runScrumSimulation(model: SimModel): SimulationRunResult {
     completedItems: done.length,
     completionDate,
     totalCost,
+    costOfDelay: calculateCostOfDelay(model, completionDate),
+    valueDeliveredByStep,
+    cumulativeFlow: snapshots.map((snapshot) => ({
+      step: snapshot.step,
+      backlog: snapshot.backlogCount,
+      done: snapshot.doneCount,
+      columns: Object.fromEntries(snapshot.columns.map((column) => [column.id, column.cards.length])),
+    })),
   }
 }
 
@@ -1552,7 +1644,7 @@ function createKanbanItems(model: SimModel) {
     for (let count = 0; count < template.count; count += 1) {
       result.push({
         id: `k-${sequence + 1}`,
-        label: template.name.includes('{0}') ? template.name.replace('{0}', String(count + 1)) : `${template.name} ${count + 1}`,
+        label: formatBacklogItemLabel(model.setup.backlog.nameFormat, template, count + 1),
         deliverable: template.deliverable,
         templateName: template.name,
         currentColumn: template.completed
@@ -1577,6 +1669,7 @@ function createKanbanItems(model: SimModel) {
         pullOrder: sequence,
         preRequisiteDeliverables: template.preRequisiteDeliverables,
         earliestStartDate: template.earliestStartDate,
+        businessValue: sampleBetween(template.valueLowBound, template.valueHighBound),
       })
       sequence += 1
     }
@@ -1685,7 +1778,7 @@ function createScrumItems(model: SimModel) {
       )
       result.push({
         id: `s-${sequence + 1}`,
-        label: template.name.includes('{0}') ? template.name.replace('{0}', String(count + 1)) : `${template.name} ${count + 1}`,
+        label: formatBacklogItemLabel(model.setup.backlog.nameFormat, template, count + 1),
         deliverable: template.deliverable,
         templateName: template.name,
         estimate,
@@ -1702,6 +1795,7 @@ function createScrumItems(model: SimModel) {
         dueDate: template.dueDate,
         order: template.order,
         sortOrder: sequence,
+        businessValue: sampleBetween(template.valueLowBound, template.valueHighBound),
       })
       sequence += 1
     }
@@ -1709,6 +1803,28 @@ function createScrumItems(model: SimModel) {
   if (model.setup.backlog.shuffle) shuffleArray(result)
   result.sort(compareWorkItemPriority)
   return result
+}
+
+
+function formatBacklogItemLabel(nameFormat: string | undefined, template: SimWorkItemTemplate, sequence: number) {
+  const fallback = template.name.includes('{0}') ? template.name.replace('{0}', String(sequence)) : `${template.name} ${sequence}`
+  if (!nameFormat) return fallback
+  return nameFormat
+    .replaceAll('{0}', String(sequence))
+    .replaceAll('{1}', template.deliverable ?? '')
+    .replaceAll('{2}', template.classOfService ?? '')
+    .replaceAll('{3}', template.initialColumn != null ? String(template.initialColumn) : '')
+    .replaceAll('{4}', String(Math.max(0, template.count - sequence)))
+}
+
+function selectAggregationValue(values: number[], aggregationValue: SimAggregationValue) {
+  if (values.length === 0) return 0
+  if (aggregationValue === 'Median') return computePercentile(values, 50)
+  if (aggregationValue === 'Fifth') return computePercentile(values, 5)
+  if (aggregationValue === 'NinetyFifth') return computePercentile(values, 95)
+  if (aggregationValue === 'Max') return values[values.length - 1] ?? 0
+  if (aggregationValue === 'Min') return values[0] ?? 0
+  return round(values.reduce((sum, value) => sum + value, 0) / values.length)
 }
 
 function safePriorityDate(value?: string) {
@@ -2011,6 +2127,43 @@ function addWorkDays(startDate: Date, workDaysToAdd: number, allowedDays: number
 function stepMatchesInterval(step: number, interval?: number) {
   if (!interval || interval <= 1) return true
   return step % interval === 0
+}
+
+
+function normalizeOccurrence(scale: number, value: number) {
+  if (value <= 0) return Number.POSITIVE_INFINITY
+  if (scale === 1) return value
+  return scale / value
+}
+
+function sampleOccurrenceTrigger(event: SimBlockingEvent, phaseOccurrenceMultiplier: number) {
+  if (event.occurrenceType === 'percentage') {
+    const pct = Math.max(0, Math.min(100, sampleBetween(event.occurrenceLowBound, event.occurrenceHighBound)))
+    const trigger = normalizeOccurrence(100, pct)
+    return Math.max(1, Math.round(trigger * phaseOccurrenceMultiplier))
+  }
+  const low = normalizeOccurrence(event.scale, event.occurrenceLowBound)
+  const high = normalizeOccurrence(event.scale, event.occurrenceHighBound)
+  const sampled = sampleBetween(Math.min(low, high), Math.max(low, high))
+  return Math.max(1, Math.round(sampled * phaseOccurrenceMultiplier))
+}
+
+function calculateCostOfDelay(model: SimModel, completionDate: string | null) {
+  const forecast = model.setup.forecastDate
+  if (!forecast?.targetDate || !completionDate || forecast.revenue <= 0) return 0
+  const target = parseSimDate(forecast.targetDate)
+  const completion = parseSimDate(completionDate)
+  if (!target || !completion || completion <= target) return 0
+  const daysLate = Math.max(0, Math.ceil((completion.getTime() - target.getTime()) / (1000 * 60 * 60 * 24)))
+  const perDay =
+    forecast.revenueUnit === 'day'
+      ? forecast.revenue
+      : forecast.revenueUnit === 'week'
+      ? forecast.revenue / 7
+      : forecast.revenueUnit === 'year'
+      ? forecast.revenue / 365
+      : forecast.revenue / 30
+  return round(daysLate * perDay)
 }
 
 function sampleBetween(low: number, high: number) {

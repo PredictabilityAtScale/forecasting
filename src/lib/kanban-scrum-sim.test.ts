@@ -1573,3 +1573,126 @@ describe('kanban: pull order parsing defaults and aliases', () => {
     expect(afterOrderingModel.execute.pullOrder).toBe('randomAfterOrdering')
   })
 })
+
+describe('medium parity gaps 9-18', () => {
+  it('tracks backlog value and cumulative flow for visual simulations', () => {
+    const model = parseSimMl(`
+      <simulation name="Value Tracking">
+        <execute><visual /></execute>
+        <setup>
+          <backlog type="custom" shuffle="false">
+            <custom name="Valued" count="1" valueLowBound="10" valueHighBound="10" estimateLowBound="1" estimateHighBound="1" />
+          </backlog>
+          <columns>
+            <column id="1" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Work</column>
+          </columns>
+        </setup>
+      </simulation>
+    `)
+
+    const visual = runVisualSimulation(model)
+    expect(visual.valueDeliveredByStep.at(-1)?.cumulativeValue).toBe(10)
+    expect(visual.cumulativeFlow.at(-1)?.done).toBe(1)
+  })
+
+  it('supports monte carlo aggregation selector', () => {
+    const model = parseSimMl(`
+      <simulation name="Aggregation">
+        <execute>
+          <visual />
+          <monteCarlo cycles="10" aggregationValue="min" />
+        </execute>
+        <setup>
+          <backlog type="simple" simpleCount="2" />
+          <columns>
+            <column id="1" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Work</column>
+          </columns>
+        </setup>
+      </simulation>
+    `)
+
+    const mc = runMonteCarlo(model, 10)
+    expect(model.execute.aggregationValue).toBe('Min')
+    expect(mc.summarySteps).toBe(mc.minSteps)
+  })
+
+  it('applies backlog nameFormat placeholders to card labels', () => {
+    const model = parseSimMl(`
+      <simulation name="Name Format">
+        <execute><visual /></execute>
+        <setup>
+          <backlog type="custom" shuffle="false" nameFormat="{1}-{0}">
+            <deliverable name="API"><custom name="Feature" count="1" estimateLowBound="1" estimateHighBound="1" /></deliverable>
+          </backlog>
+          <columns>
+            <column id="1" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Work</column>
+          </columns>
+        </setup>
+      </simulation>
+    `)
+
+    const visual = runVisualSimulation(model)
+    expect(visual.snapshots.find((s) => s.step === 1)?.columns[0]?.cards[0]?.label).toBe('API-1')
+  })
+
+  it('parses forecast target, revenue, and actuals', () => {
+    const model = parseSimMl(`
+      <simulation name="Forecast extras">
+        <execute><visual /></execute>
+        <setup>
+          <backlog type="simple" simpleCount="1" />
+          <columns>
+            <column id="1" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Work</column>
+          </columns>
+          <forecastDate startDate="01-Jan-2020" targetDate="02-Jan-2020" revenue="3000" revenueUnit="week">
+            <actual date="01-Jan-2020" count="0" annotation="start" />
+          </forecastDate>
+        </setup>
+      </simulation>
+    `)
+
+    expect(model.setup.forecastDate?.targetDate).toBe('02-Jan-2020')
+    expect(model.setup.forecastDate?.revenue).toBe(3000)
+    expect(model.setup.forecastDate?.actuals).toHaveLength(1)
+  })
+
+  it('uses blocking event occurrenceType percentage and scale', () => {
+    const model = parseSimMl(`
+      <simulation name="Blocking Scale">
+        <execute><visual /></execute>
+        <setup>
+          <backlog type="simple" simpleCount="1" />
+          <columns>
+            <column id="1" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Work</column>
+          </columns>
+          <blockingEvents>
+            <blockingEvent columnId="1" occurrenceType="percentage" occurrenceLowBound="100" occurrenceHighBound="100" estimateLowBound="1" estimateHighBound="1" scale="2">Block</blockingEvent>
+          </blockingEvents>
+        </setup>
+      </simulation>
+    `)
+
+    const visual = runVisualSimulation(model)
+    expect(model.setup.blockingEvents[0]?.occurrenceType).toBe('percentage')
+    expect(visual.totalSteps).toBeGreaterThanOrEqual(3)
+  })
+
+  it('applies percentage-based estimates in kanban durations', () => {
+    const model = parseSimMl(`
+      <simulation name="Percentage Estimate">
+        <execute><visual /></execute>
+        <setup>
+          <backlog type="custom" shuffle="false">
+            <custom name="Half" count="1" percentageLowBound="50" percentageHighBound="50" />
+          </backlog>
+          <columns>
+            <column id="1" estimateLowBound="0" estimateHighBound="100" wipLimit="1">Work</column>
+          </columns>
+        </setup>
+      </simulation>
+    `)
+
+    const visual = runVisualSimulation(model)
+    expect(visual.totalSteps).toBe(51)
+  })
+})

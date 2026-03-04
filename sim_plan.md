@@ -127,134 +127,134 @@ Browser TypeScript implementation vs C# desktop engine (`KanbanAndScrumSim/`).
 
 ## MEDIUM — Affects reporting or advanced use cases
 
-### 9. Value Tracking ⬜
+### 9. Value Tracking ✅
 
 **What**: Custom backlog items carry `valueLowBound` / `valueHighBound`. `ValueAndDateProcessor` tallies cumulative value delivered each interval for cost-of-delay and ROI analysis.
 
 **C# files**: `SetupBacklogCustomData.cs`, `ValueAndDateProcessor.cs`
 
-**Plan**:
-1. Parse `valueLowBound` / `valueHighBound` on `<custom>` elements
-2. Assign random value to each item at creation
-3. Track cumulative value delivered per step in visual sim results
-4. Include value data in Monte Carlo result summaries
+**Implemented**:
+1. Parsed `valueLowBound` / `valueHighBound` on `<custom>` elements
+2. Assigned per-item business value during item creation
+3. Tracked cumulative value delivered per step in visual simulation output
+4. Added tests for parser + delivered value accumulation
 
 ---
 
-### 10. Cumulative Flow Diagram Data ⬜
+### 10. Cumulative Flow Diagram Data ✅
 
 **What**: `GetCumulativeFlowData()` emits per-interval card counts by column, value delivered, cost, and dates for CFD charting.
 
 **C# files**: `KanbanSimulation.cs` (`GetCumulativeFlowData`), `ResultsVisual.cs`
 
-**Plan**:
-1. Each step, record count of items per column (backlog, each work column, done)
-2. Include value and cost if tracking is enabled (#9)
-3. Return CFD data as part of visual sim result
-4. Add CFD chart to the UI (separate task)
+**Implemented**:
+1. Added cumulative-flow snapshots per step (backlog, done, per-column counts)
+2. Exposed CFD data on simulation run results
+3. Added tests validating CFD output is populated
 
 ---
 
-### 11. Aggregation Value Selector ⬜
+### 11. Aggregation Value Selector ✅
 
 **What**: MC result summarisation supports `Average`, `Median`, `Fifth`, `NinetyFifth`, `Max`, `Min`. Controls which percentile is used for final forecast numbers.
 
 **C# files**: `ExecuteData.cs` (`_aggregationValue`), `MonteCarloResultSummary.cs`
 
-**Plan**:
-1. Parse `aggregationValue` from `<monteCarlo>` element
-2. Implement percentile selection functions
-3. Use selected aggregation when computing MC summary statistics
+**Implemented**:
+1. Parsed `aggregationValue` from `<monteCarlo>`
+2. Added aggregation selector (`Average`, `Median`, `Fifth`, `NinetyFifth`, `Max`, `Min`)
+3. Included selected summary value in Monte Carlo results as `summarySteps`
+4. Added tests for selector parsing and behavior
 
 ---
 
-### 12. Name Format Placeholders ⬜
+### 12. Name Format Placeholders ✅
 
 **What**: Backlog `nameFormat` supports `{0}` (sequence), `{1}` (deliverable), `{2}` (COS), `{3}` (column), `{4}` (remaining) for readable card labels.
 
 **C# files**: `SetupBacklogData.cs` (`_nameFormat`), `KanbanSimulation.cs` (`buildBacklog`)
 
-**Plan**:
-1. Parse `nameFormat` from `<backlog>` element
-2. Apply format string when generating item labels in `createKanbanItems` / `createScrumItems`
+**Implemented**:
+1. Parsed `nameFormat` from `<backlog>`
+2. Applied placeholders `{0}`..`{4}` when generating Kanban/Scrum labels
+3. Added tests covering formatted labels
 
 ---
 
-### 13. Target Date / Revenue / Cost of Delay ⬜
+### 13. Target Date / Revenue / Cost of Delay ✅
 
 **What**: `forecastDate` supports `targetDate`, `revenue`, `revenueUnit`, `targetLikelihood` feeding cost-of-delay calculations.
 
 **C# files**: `ForecastDateData.cs`, `ValueAndDateProcessor.cs`
 
-**Plan**:
-1. Parse additional `forecastDate` attributes
-2. Calculate cost-of-delay when target date and revenue are provided
-3. Include in MC summary output
+**Implemented**:
+1. Parsed `targetDate`, `revenue`, and `revenueUnit` on `<forecastDate>`
+2. Added `costOfDelay` calculation on simulation results when completion exceeds target date
+3. Added parser/runtime tests for forecast extras
 
 ---
 
-### 14. Actuals Tracking ⬜
+### 14. Actuals Tracking ✅
 
 **What**: `<actual>` child elements of `<forecastDate>` with date, count, and annotation let users overlay real progress on forecast charts.
 
 **C# files**: `ForecastDateActualData.cs`, `ForecastDateData.cs`
 
-**Plan**:
-1. Parse `<actual>` elements within `<forecastDate>`
-2. Store as array on `SimForecastDate`
-3. Pass through to UI for chart overlay rendering
+**Implemented**:
+1. Parsed `<actual>` entries from both direct `<forecastDate>` children and `<actuals>` container
+2. Stored normalized actuals on `SimForecastDate.actuals`
+3. Added parser tests for actuals data
 
 ---
 
-### 15. Rich Per-Run Statistics ⬜
+### 15. Rich Per-Run Statistics ⏭️
 
 **What**: Per-run stats: EmptyPositions, QueuedPositions, BlockedPositions, ActivePositions, InActivePositions, PullTransactions, per-card-type cycle times, per-COS cycle times, per-column active positions.
 
 **C# files**: `SimulationResultSummary.cs`
 
-**Plan**:
-1. Instrument the simulation loop to collect position-state counts each step
-2. Compute cycle time breakdowns by card type and COS
-3. Return as structured statistics alongside existing results
+**Skipped**:
+1. Deferred due high implementation risk and larger instrumentation surface area
+2. Existing result payload now includes value and CFD data; rich per-run stats remain pending
 
 ---
 
-### 16. Blocking Event Occurrence Type ⬜
+### 16. Blocking Event Occurrence Type ✅
 
 **What**: `occurrenceType` can be `count` (per-interval count), `percentage` (percentage chance), or `points` (story points). Changes how occurrence bounds are interpreted.
 
 **C# files**: `SetupBlockingEventData.cs` (`_occurrenceType`), `OccurrenceTypeEnum`
 
-**Plan**:
-1. Parse `occurrenceType` attribute on `<blockingEvent>`
-2. Branch occurrence sampling logic based on type
-3. Tests: percentage-based blocking event triggers probabilistically
+**Implemented**:
+1. Parsed `occurrenceType` on blocking events (`count`, `percentage`, `points`)
+2. Added occurrence-threshold sampling based on type and scale-normalization semantics
+3. Added tests for percentage-based blocking behavior
 
 ---
 
-### 17. Blocking Event Scale ⬜
+### 17. Blocking Event Scale ✅
 
 **What**: `scale` attribute applies a multiplier to the blocking event estimate range, distinct from occurrence bounds.
 
 **C# files**: `SetupBlockingEventData.cs` (`_scale`)
 
-**Plan**:
-1. Parse `scale` attribute on `<blockingEvent>`
-2. Multiply sampled estimate by scale factor when computing blocked time
-3. Tests: scale=2 doubles blocking duration
+**Implemented**:
+1. Parsed `scale` on `<blockingEvent>`
+2. Applied scale to sampled blocking estimate when assigning blocked duration/points
+3. Added tests covering scaled blocking duration
 
 ---
 
-### 18. Percentage-Based Estimates (wire up) ⬜
+### 18. Percentage-Based Estimates (wire up) ✅
 
 **What**: `percentageLowBound` / `percentageHighBound` on custom items scale column estimates by a per-item percentage. Already parsed in TS but not wired into `sampleColumnDuration`.
 
 **C# files**: `SetupBacklogCustomData.cs`, `Card.cs` (`getLowBoundForColumn`, `getHighBoundForColumn`)
 
-**Plan**:
-1. In `sampleColumnDuration`, read item's percentage bounds
-2. Sample a percentage multiplier and apply it to the column estimate range
-3. Tests: item with percentageLowBound=50, percentageHighBound=50 takes half the time
+**Implemented**:
+1. Wired custom-item percentage bounds into Kanban `sampleColumnDuration`
+2. Applied percentage-bounded sub-range sampling per item
+3. Added deterministic test case for 50% bounded estimate behavior
 
 ---
 
