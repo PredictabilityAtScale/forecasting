@@ -260,49 +260,54 @@ Browser TypeScript implementation vs C# desktop engine (`KanbanAndScrumSim/`).
 
 ## LOW — Specialised features
 
-### 19. Add Staff Simulation ⬜
+### 19. Add Staff Simulation ⏭️
 
 **What**: Dedicated simulation mode: runs repeated cycles adding 1 staff member at a time to each column, measuring which column benefits most. Outputs optimised staffing recommendations.
 
 **C# files**: `ExecuteAddStaffData.cs`
 
-**Plan**: Parse `<addStaff>` element. Run N cycles per column, incrementing WIP by 1 each cycle. Report improvement per column.
+**Skipped**:
+1. Deferred due high implementation risk and broad execution/reporting surface area
+2. Requires a dedicated optimisation simulation mode that is separate from current visual/MC flows
 
 
-### 21. Throughput-Based Scrum ⬜
+### 21. Throughput-Based Scrum ✅
 
 **What**: `SetupThroughputData` replaces story-point estimation with `itemsPerIterationLowBound/HighBound`, counting raw items per iteration.
 
 **C# files**: `SetupThroughputData.cs`
 
-**Plan**:
-1. Parse `<throughput>` element as alternative to `<iteration>`
-2. In Scrum sim, count items per iteration instead of story points
-3. Tests: throughput-based forecast with 5 items/iteration
+**Implemented**:
+1. Parsed `<throughput>` (`itemsPerIterationLowBound` / `itemsPerIterationHighBound`) as an alternative Scrum-capacity model
+2. Updated Scrum simulation to allow `<throughput>` without `<iteration>` and complete raw item counts per iteration
+3. Added tests for throughput parsing and completion behavior
 
 ---
 
 
-### 23. Initial Column for Custom Items ⬜
+### 23. Initial Column for Custom Items ✅
 
 **What**: Custom items can specify `initialColumn` to start mid-board (already partially parsed in TS `SimWorkItemTemplate.initialColumn` but not used in simulation logic).
 
 **C# files**: `SetupBacklogCustomData.cs`, `KanbanSimulation.cs` (`buildBacklog`)
 
-**Plan**:
-1. In `createKanbanItems`, place items with `initialColumn` directly into the specified column
-2. Pre-calculate completed work for columns before the initial column
-3. Tests: item starting in column 2 of 3; verify it skips column 1
+**Implemented**:
+1. Confirmed and retained `initialColumn` placement in `createKanbanItems` / board initialisation path
+2. Added regression coverage to ensure items can start mid-board and skip earlier columns
+3. Added tests for start-state placement in column 2 of 3
 
 ---
 
-### 24. Decimal Rounding Config ⬜
+### 24. Decimal Rounding Config ✅
 
 **What**: `decimalRounding` attribute on `<execute>` controls output precision for all statistics.
 
 **C# files**: `ExecuteData.cs` (`_decimalRounding`)
 
-**Plan**: Parse attribute. Apply `toFixed(n)` to all numeric outputs in results.
+**Implemented**:
+1. Parsed `decimalRounding` on `<execute>` (default `3`)
+2. Applied configurable precision rounding to visual, Monte Carlo, and sensitivity numeric outputs
+3. Added tests validating integer rounding when configured to `0` decimals
 
 ---
 
