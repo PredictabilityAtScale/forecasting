@@ -10,117 +10,118 @@ Browser TypeScript implementation vs C# desktop engine (`KanbanAndScrumSim/`).
 
 ## HIGH — Affects simulation correctness
 
-### 1. Pull Order / FIFO ⬜
+### 1. Pull Order / FIFO ✅
 
 **What**: C# supports 5 processing modes via `pullOrder` on `<execute>`: `randomAfterOrdering`, `random`, `indexSequence`, `FIFO`, `FIFOStrict`. Controls whether lower-index cards complete first and whether strict ordering prevents out-of-order completion. TS always processes positions sequentially (implicit `indexSequence`).
 
 **C# files**: `PullOrderEnum.cs`, `KanbanSimulation.cs` (`positionOrderToProcessList`, `isStrictFIFOAllowsComplete`), `ExecuteData.cs`
 
-**Plan**:
-1. Parse `pullOrder` attribute from `<execute>` element
-2. Implement `positionOrderToProcessList()` to shuffle/sort column positions per mode
-3. Add `isStrictFIFOAllowsComplete()` guard for `FIFOStrict` — block completion if a lower-index card in the same column isn't done
-4. Wire into `runKanbanSimulation` column processing loop
-5. Tests: verify each mode produces expected ordering behaviour
+**Implemented**:
+1. Parsed `pullOrder` from `<execute>`
+2. Added `parsePullOrder()` with legacy alias support for `index` and `afterOrdering`
+3. Implemented `orderCardsForProcessing()` and `isStrictFifoAllowsComplete()`
+4. Wired ordering into Kanban completion processing and pull-order sequence tracking
+5. Added tests for `FIFOStrict`, default handling, and legacy aliases
 
 ---
 
-### 2. Prerequisite Deliverables ⬜
+### 2. Prerequisite Deliverables ✅
 
 **What**: Deliverables can declare pipe-separated `preRequisiteDeliverables`; `nextAllowedBacklogCard()` skips cards whose prerequisite deliverables haven't all completed yet.
 
 **C# files**: `SetupBacklogDeliverableData.cs`, `KanbanSimulation.cs` (`nextAllowedBacklogCard`)
 
-**Plan**:
-1. Parse `preRequisiteDeliverables` attribute on `<deliverable>` elements (pipe-delimited string → string array)
-2. During backlog pull, check if all prerequisite deliverable names have had every card complete
-3. Skip blocked deliverable cards and try the next eligible card
-4. Tests: two deliverables where B depends on A; verify B cards don't start until A finishes
+**Implemented**:
+1. Parsed `preRequisiteDeliverables` on `<deliverable>` into string arrays
+2. Propagated prerequisites into created Kanban items
+3. Added backlog eligibility checks in `nextAllowedBacklogCard()`
+4. Tightened behavior so missing prerequisite deliverables do not silently pass
+5. Added tests for satisfied and missing prerequisite scenarios
 
 ---
 
-### 3. Earliest Start Date ⬜
+### 3. Earliest Start Date ✅
 
 **What**: Per-deliverable `earliestStartDate` prevents cards from leaving backlog until that simulation date is reached.
 
 **C# files**: `SetupBacklogDeliverableData.cs`, `KanbanSimulation.cs` (`nextAllowedBacklogCard`)
 
-**Plan**:
-1. Parse `earliestStartDate` attribute on `<deliverable>` elements
-2. In backlog pull logic, compare current simulation date against earliest start date
-3. Skip cards whose deliverable hasn't reached its start date
-4. Tests: deliverable with future start date; verify cards stay in backlog until that date
+**Implemented**:
+1. Parsed `earliestStartDate` on `<deliverable>`
+2. Propagated the value into created Kanban items
+3. Added simulation-date gating in `nextAllowedBacklogCard()`
+4. Aligned gating date math with forecast-date handling, including `excludeDate`
+5. Added tests for future start dates and excluded-date handling
 
 ---
 
-### 4. Completed Flag on Custom Backlog ⬜
+### 4. Completed Flag on Custom Backlog ✅
 
 **What**: `completed="true"` on `<custom>` elements marks items as already done. `buildBacklog()` adds them directly to the completed list and decrements remaining work. Needed for "forecast from current state" (e.g., "18 of 50 done, forecast the rest").
 
 **C# files**: `SetupBacklogCustomData.cs`, `KanbanSimulation.cs` (`buildBacklog`), `ScrumSimulation.cs`
 
-**Plan**:
-1. Parse `completed` boolean attribute on `<custom>` elements
-2. In `createKanbanItems` / `createScrumItems`, add completed items directly to the done list
-3. Ensure Monte Carlo and visual sim correctly report them as pre-completed
-4. Tests: 10 items with 4 completed; verify sim only processes 6 and reports 10 total done
+**Implemented**:
+1. Parsed `completed` on `<custom>` backlog items
+2. Seeded completed custom items into the initial done state for both Kanban and Scrum
+3. Ensured visual simulations start with correct `doneCount` / remaining backlog counts
+4. Added tests covering parser behavior plus Kanban and Scrum forecast-from-current-state cases
 
 ---
 
-### 5. Due Date Priority Ordering ⬜
+### 5. Due Date Priority Ordering ✅
 
 **What**: `dueDate` on deliverables and custom items enters the multi-key priority sort: deliverable order → backlog order → COS order → **dueDate** → sortOrder.
 
 **C# files**: `SetupBacklogDeliverableData.cs`, `SetupBacklogCustomData.cs`, `Card.cs` (`CardPriorityComparer`), `Story.cs` (`StoryPriorityComparer`)
 
-**Plan**:
-1. Parse `dueDate` attribute on `<deliverable>` and `<custom>` elements
-2. Add `dueDate` field to `KanbanItem` and `ScrumItem`
-3. Update item sorting to use the full C# priority chain: deliverable order → backlog order → COS order → dueDate → sortOrder
-4. Tests: items with different due dates; verify pull order matches expected priority
+**Implemented**:
+1. Parsed `dueDate` on both `<deliverable>` and `<custom>`, with deliverable dates inherited by nested custom items when not overridden
+2. Added `deliverableOrder` and `dueDate` to work-item templates and runtime Kanban/Scrum items
+3. Updated priority sorting to use deliverable order → backlog order → COS order → due date, while preserving random/index tie-breaking behavior
+4. Added tests covering parsing, Kanban deliverable-order precedence, and Scrum due-date tie-breaking
 
 ---
 
-### 6. Blocking Event Targeting ⬜
+### 6. Blocking Event Targeting ✅
 
 **What**: C# blocking events can target specific deliverables (`targetDeliverable`), specific custom items (`targetCustomBacklog`), specific card types (`blockWork`, `blockDefects`, `blockAddedScope`), and be scoped to specific `phases`.
 
 **C# files**: `SetupBlockingEventData.cs`, `BlockingEventProcessor.cs` (`pickNextCandidate`)
 
-**Plan**:
-1. Parse targeting attributes: `targetDeliverable`, `targetCustomBacklog`, `blockWork`, `blockDefects`, `blockAddedScope`, `phases`
-2. Add targeting fields to `SimBlockingEvent` interface
-3. In blocking event processing, filter eligible cards by target criteria before selecting victim
-4. Check phase scope when applying blocking events
-5. Tests: blocking event targeting only defects in a specific deliverable; verify work cards are unaffected
+**Implemented**:
+1. Parsed `targetDeliverable`, `targetCustomBacklog`, and `phases` onto `SimBlockingEvent` alongside existing card-type flags
+2. Added phase and target filtering to Kanban and Scrum blocking-event application logic
+3. Scoped blocking candidates by deliverable name, custom backlog name, card type, and active phase
+4. Added tests covering parser behavior, Kanban deliverable targeting, and Scrum phase-targeted blocking
 
 ---
 
-### 7. Execute Deliverables Filter ⬜
+### 7. Execute Deliverables Filter ✅
 
 **What**: `deliverables` attribute on `<execute>` lets a run include only a subset of deliverables from the backlog definition, so one SimML can power multiple forecasts.
 
 **C# files**: `ExecuteData.cs` (`_deliverables`), `KanbanSimulation.cs` (`buildBacklog`)
 
-**Plan**:
-1. Parse `deliverables` attribute from `<execute>` element (pipe-delimited string)
-2. Store as `string[]` on `SimExecute`
-3. In backlog building, filter items to only those belonging to listed deliverables (or all if empty)
-4. Tests: SimML with 3 deliverables, execute filtering to 2; verify only 2 deliverables' items are simulated
+**Implemented**:
+1. Parsed `deliverables` from `<execute>` into `SimExecute.deliverables`
+2. Filtered backlog templates before Kanban and Scrum item creation
+3. Matched desktop behavior: when deliverables are specified, only named deliverables are included and standalone custom backlog items are excluded
+4. Added tests covering parser behavior plus Kanban and Scrum filtering
 
 ---
 
-### 8. Complete Percentage Early Exit ⬜
+### 8. Complete Percentage Early Exit ✅
 
 **What**: `completePercentage` (default 100) and `activePositionsCompletePercentage` (default 100) allow the sim to stop early when a threshold of items are done and board utilisation drops.
 
 **C# files**: `ExecuteData.cs`, `KanbanSimulation.cs` (`RunSimulation` loop)
 
-**Plan**:
-1. Parse `completePercentage` and `activePositionsCompletePercentage` from `<execute>`
-2. In the main simulation loop, check both thresholds each step
-3. Exit early when both conditions are satisfied
-4. Tests: 100 items with `completePercentage="80"`; verify sim stops around 80 completed
+**Implemented**:
+1. Parsed `completePercentage` and `activePositionsCompletePercentage` from `<execute>`
+2. Added Kanban loop checks for completion percentage and active board-position percentage after each interval
+3. Exit now occurs when both thresholds are satisfied, matching desktop early-stop semantics
+4. Added a test verifying tail-end early exit with partial board utilisation
 
 ---
 
@@ -267,17 +268,6 @@ Browser TypeScript implementation vs C# desktop engine (`KanbanAndScrumSim/`).
 
 **Plan**: Parse `<addStaff>` element. Run N cycles per column, incrementing WIP by 1 each cycle. Report improvement per column.
 
----
-
-### 20. Ballot / Voting System ⬜
-
-**What**: Schulze and Borda voting methods for backlog prioritisation. Entirely separate simulation mode.
-
-**C# files**: `ExecuteBallotData.cs`, `VotingSystems/`
-
-**Plan**: Implement as separate module. Parse `<ballot>` element. Implement Schulze and Borda algorithms. Return ranked ordering.
-
----
 
 ### 21. Throughput-Based Scrum ⬜
 
@@ -292,15 +282,6 @@ Browser TypeScript implementation vs C# desktop engine (`KanbanAndScrumSim/`).
 
 ---
 
-### 22. Card Flow Data Export ⬜
-
-**What**: Per-interval, per-card position data for animation or detailed trace analysis beyond board snapshots.
-
-**C# files**: `ResultsVisual.cs` (`cardFlow`)
-
-**Plan**: Record each card's column at every step. Return as time-series data alongside visual results.
-
----
 
 ### 23. Initial Column for Custom Items ⬜
 

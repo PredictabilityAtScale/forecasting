@@ -20,6 +20,9 @@ export interface SimWorkItemTemplate {
   id: string
   name: string
   count: number
+  completed: boolean
+  deliverableOrder?: number
+  dueDate?: string
   order: number
   estimateLowBound?: number
   estimateHighBound?: number
@@ -68,6 +71,9 @@ export interface SimForecastDate {
 export interface SimExecute {
   simulationType: SimulationKind
   dateFormat: string
+  deliverables: string[]
+  completePercentage: number
+  activePositionsCompletePercentage: number
   limitIntervalsTo: number
   monteCarloCycles: number
   sensitivityCycles: number
@@ -102,6 +108,9 @@ export interface SimBlockingEvent {
   occurrenceHighBound: number
   estimateLowBound: number
   estimateHighBound: number
+  phases: string[]
+  targetCustomBacklog?: string
+  targetDeliverable?: string
   blockWork: boolean
   blockDefects: boolean
   blockAddedScope: boolean
@@ -316,6 +325,12 @@ export function parseSimMl(xmlSource: string): SimModel {
     execute: {
       simulationType,
       dateFormat: readAttr(execute, 'dateFormat') || 'yyyyMMdd',
+      deliverables: (readAttr(execute, 'deliverables') || '')
+        .split(/[|,]/)
+        .map((value) => value.trim())
+        .filter(Boolean),
+      completePercentage: readNumber(execute, 'completePercentage', 100),
+      activePositionsCompletePercentage: readNumber(execute, 'activePositionsCompletePercentage', 0),
       limitIntervalsTo: readNumber(execute, 'limitIntervalsTo', 9000),
       monteCarloCycles: readNumber(execute.querySelector(':scope > monteCarlo'), 'cycles', 500),
       sensitivityCycles: readNumber(execute.querySelector(':scope > sensitivity'), 'cycles', 300),
@@ -373,6 +388,7 @@ function parseBacklog(setup: Element, simulationType: SimulationKind): SimBacklo
         id: `simple-${index + 1}`,
         name: `Story ${index + 1}`,
         count: 1,
+        completed: false,
         order: index + 1,
         percentageLowBound: 0,
         percentageHighBound: 100,
@@ -387,13 +403,22 @@ function parseBacklog(setup: Element, simulationType: SimulationKind): SimBacklo
 
   const pushItem = (
     node: Element,
-    context?: { deliverable?: string; preRequisiteDeliverables: string[]; earliestStartDate?: string },
+    context?: {
+      deliverable?: string
+      deliverableOrder?: number
+      preRequisiteDeliverables: string[]
+      earliestStartDate?: string
+      dueDate?: string
+    },
   ) => {
     const count = Math.max(1, readNumber(node, 'count', 1))
     items.push({
       id: `${context?.deliverable || 'backlog'}-${sequence++}`,
       name: readAttr(node, 'name') || node.textContent.trim() || `Item ${sequence}`,
       count,
+      completed: readBoolean(node, 'completed', false),
+      deliverableOrder: context?.deliverableOrder,
+      dueDate: readAttr(node, 'dueDate') || context?.dueDate,
       order: readNumber(node, 'order', Number.MAX_SAFE_INTEGER),
       estimateLowBound: readOptionalNumber(node, 'estimateLowBound'),
       estimateHighBound: readOptionalNumber(node, 'estimateHighBound'),
@@ -418,15 +443,17 @@ function parseBacklog(setup: Element, simulationType: SimulationKind): SimBacklo
   )
   Array.from(backlog.querySelectorAll(':scope > deliverable')).forEach((deliverable) => {
     const name = readAttr(deliverable, 'name') || 'Deliverable'
+    const deliverableOrder = readOptionalNumber(deliverable, 'order')
     const skipPct = readNumber(deliverable, 'skipPercentage', 0)
     const earliestStartDate = readAttr(deliverable, 'earliestStartDate') || undefined
+    const dueDate = readAttr(deliverable, 'dueDate') || undefined
     const preRequisiteDeliverables = (readAttr(deliverable, 'preRequisiteDeliverables') || '')
       .split('|')
       .map((part) => part.trim())
       .filter(Boolean)
     if (skipPct > 0 && Math.random() * 100 < skipPct) return
     Array.from(deliverable.querySelectorAll(':scope > custom')).forEach((node) =>
-      pushItem(node, { deliverable: name, preRequisiteDeliverables, earliestStartDate }),
+      pushItem(node, { deliverable: name, deliverableOrder, preRequisiteDeliverables, earliestStartDate, dueDate }),
     )
   })
 
@@ -438,7 +465,7 @@ function parseBacklog(setup: Element, simulationType: SimulationKind): SimBacklo
     type: 'custom',
     simpleCount: 0,
     shuffle,
-    items: items.sort((a, b) => a.order - b.order || a.name.localeCompare(b.name)),
+    items: items.sort(compareTemplatePriority),
   }
 }
 
@@ -630,6 +657,12 @@ function parseBlockingEvents(setup: Element): SimBlockingEvent[] {
       occurrenceHighBound: readNumber(node, 'occurrenceHighBound', 6),
       estimateLowBound: readNumber(node, 'estimateLowBound', 1),
       estimateHighBound: readNumber(node, 'estimateHighBound', 5),
+      phases: (readAttr(node, 'phases') || '')
+        .split(/[|,]/)
+        .map((value) => value.trim())
+        .filter(Boolean),
+      targetCustomBacklog: readAttr(node, 'targetCustomBacklog') || undefined,
+      targetDeliverable: readAttr(node, 'targetDeliverable') || undefined,
       blockWork: readBoolean(node, 'blockWork', true),
       blockDefects: readBoolean(node, 'blockDefects', true),
       blockAddedScope: readBoolean(node, 'blockAddedScope', true),
@@ -722,6 +755,8 @@ interface KanbanItem {
   percentageHighBound: number
   cardType: 'work' | 'defect' | 'addedScope'
   classOfServiceRef?: SimClassOfService
+  deliverableOrder?: number
+  dueDate?: string
   order: number
   pullOrder: number
   preRequisiteDeliverables: string[]
@@ -732,6 +767,7 @@ interface ScrumItem {
   id: string
   label: string
   deliverable?: string
+  templateName: string
   estimate: number
   /** Points completed so far across all iterations. */
   completedPoints: number
@@ -743,7 +779,10 @@ interface ScrumItem {
   done: boolean
   storyType: 'work' | 'defect' | 'addedScope'
   classOfServiceRef?: SimClassOfService
+  deliverableOrder?: number
+  dueDate?: string
   order: number
+  sortOrder: number
 }
 
 export function runVisualSimulation(model: SimModel): SimulationRunResult {
@@ -943,7 +982,7 @@ function runKanbanSimulation(model: SimModel): SimulationRunResult {
   const limit = Math.max(1, Math.round(model.execute.limitIntervalsTo))
   const items = createKanbanItems(model)
   const originalItemCount = items.length
-  const doneItems: KanbanItem[] = []
+  const doneItems: KanbanItem[] = items.filter((item) => item.done)
   const snapshots: BoardSnapshot[] = []
   let step = 0
   let nextItemId = items.length + 1
@@ -981,7 +1020,7 @@ function runKanbanSimulation(model: SimModel): SimulationRunResult {
 
   // Place items with initialColumn
   items.forEach((item) => {
-    if (item.currentColumn >= 0) {
+    if (!item.done && item.currentColumn >= 0) {
       const col = columns[item.currentColumn]
       item.calculatedWork = col.isBuffer ? 0 : sampleColumnDuration(col, item, phaseEstMult())
       item.timeSoFar = 0
@@ -1052,7 +1091,7 @@ function runKanbanSimulation(model: SimModel): SimulationRunResult {
         // Check blocking events (apply phase occurrence multiplier to trigger)
         let isBlocked = false
         for (const bp of blockingProcessors) {
-          if (bp.def.columnId === column.id && shouldBlockingApply(bp.def, item.cardType)) {
+          if (bp.def.columnId === column.id && blockingEventApplies(bp.def, item, currentPhase)) {
             bp.cardsSeen += 1
             if (bp.cardsSeen >= bp.trigger) {
               bp.cardsSeen = 0
@@ -1265,6 +1304,18 @@ function runKanbanSimulation(model: SimModel): SimulationRunResult {
     }
 
     pushKanbanSnapshot(snapshots, step, columns, items, doneItems, currentPhase)
+
+    const completePct = items.length === 0 ? 100 : (doneItems.length / items.length) * 100
+    const totalBoardWip = columns.reduce((sum, column) => sum + getEffectiveWipLimit(column, currentPhase), 0)
+    const cardsOnBoard = items.filter((item) => !item.done && item.currentColumn >= 0).length
+    const activePositionsPct = totalBoardWip > 0 ? (cardsOnBoard / totalBoardWip) * 100 : 0
+
+    if (
+      completePct >= model.execute.completePercentage &&
+      activePositionsPct <= model.execute.activePositionsCompletePercentage
+    ) {
+      break
+    }
   }
 
   const completionDate = forecastStepToDate(model, step)
@@ -1288,7 +1339,7 @@ function runScrumSimulation(model: SimModel): SimulationRunResult {
 
   const backlog = createScrumItems(model)
   const originalStoryCount = backlog.length
-  const done: ScrumItem[] = []
+  const done: ScrumItem[] = backlog.filter((item) => item.done)
   const snapshots: BoardSnapshot[] = []
   let step = 0
   let nextItemId = backlog.length + 1
@@ -1420,7 +1471,7 @@ function runScrumSimulation(model: SimModel): SimulationRunResult {
 
         // Check blocking events on story start (apply phase occurrence multiplier)
         for (const bp of blockingProcessors) {
-          if (!shouldBlockingApply(bp.def, story.storyType)) continue
+          if (!blockingEventApplies(bp.def, story, currentPhase)) continue
           bp.storiesSeen += 1
           if (bp.storiesSeen >= bp.trigger) {
             bp.storiesSeen = 0
@@ -1496,7 +1547,7 @@ function createKanbanItems(model: SimModel) {
   const result: KanbanItem[] = []
   let sequence = 0
   const cos = model.setup.classOfServices
-  model.setup.backlog.items.forEach((template) => {
+  getIncludedBacklogTemplates(model).forEach((template) => {
     const cosRef = resolveCos(cos, template.classOfService)
     for (let count = 0; count < template.count; count += 1) {
       result.push({
@@ -1504,20 +1555,24 @@ function createKanbanItems(model: SimModel) {
         label: template.name.includes('{0}') ? template.name.replace('{0}', String(count + 1)) : `${template.name} ${count + 1}`,
         deliverable: template.deliverable,
         templateName: template.name,
-        currentColumn: template.initialColumn
+        currentColumn: template.completed
+          ? -1
+          : template.initialColumn
           ? Math.max(0, model.setup.columns.findIndex((column) => column.id === template.initialColumn))
           : -1,
         timeSoFar: 0,
         calculatedWork: 0,
         blockedTime: 0,
         blockerLabel: undefined,
-        done: false,
-        status: template.initialColumn ? 'active' : 'backlog',
+        done: template.completed,
+        status: template.completed ? 'done' : template.initialColumn ? 'active' : 'backlog',
         columnOverrides: template.columnOverrides,
         percentageLowBound: template.percentageLowBound,
         percentageHighBound: template.percentageHighBound,
         cardType: 'work',
         classOfServiceRef: cosRef,
+        deliverableOrder: template.deliverableOrder,
+        dueDate: template.dueDate,
         order: template.order,
         pullOrder: sequence,
         preRequisiteDeliverables: template.preRequisiteDeliverables,
@@ -1527,10 +1582,7 @@ function createKanbanItems(model: SimModel) {
     }
   })
   if (model.setup.backlog.shuffle) shuffleArray(result)
-  // Sort by COS order (lower = higher priority) for pull ordering
-  if (cos.length > 0 && !model.setup.backlog.shuffle) {
-    result.sort((a, b) => (a.classOfServiceRef?.order ?? 999) - (b.classOfServiceRef?.order ?? 999) || a.order - b.order)
-  }
+  result.sort(compareWorkItemPriority)
   return result
 }
 
@@ -1553,12 +1605,11 @@ function orderCardsForProcessing(items: KanbanItem[], pullOrder: SimPullOrder): 
     .sort((a, b) => {
       const byBacklog = a.item.order - b.item.order
       if (byBacklog !== 0) return byBacklog
-      const byCos = (a.item.classOfServiceRef?.order ?? Number.MAX_SAFE_INTEGER) -
-        (b.item.classOfServiceRef?.order ?? Number.MAX_SAFE_INTEGER)
-      if (byCos !== 0) return byCos
+      const byPriority = compareWorkItemPriority(a.item, b.item)
+      if (byPriority !== 0) return byPriority
       const byRandom = a.random - b.random
       if (byRandom !== 0) return byRandom
-      return a.item.order - b.item.order
+      return a.item.pullOrder - b.item.pullOrder
     })
     .map(({ item }) => item)
 }
@@ -1594,7 +1645,7 @@ function nextAllowedBacklogCard(items: KanbanItem[], model: SimModel, step: numb
     if (item.preRequisiteDeliverables.length > 0) {
       const prereqsDone = item.preRequisiteDeliverables.every((deliverableName) => {
         const deliverableCards = items.filter((candidate) => candidate.deliverable === deliverableName)
-        return deliverableCards.length === 0 || deliverableCards.every((candidate) => candidate.done)
+        return deliverableCards.length > 0 && deliverableCards.every((candidate) => candidate.done)
       })
       if (!prereqsDone) return false
     }
@@ -1608,42 +1659,101 @@ function currentSimulationDate(model: SimModel, step: number): Date | null {
   if (!forecast?.startDate) return null
   const startDate = parseSimDate(forecast.startDate)
   if (!startDate) return null
+  const excludedSet = new Set(
+    forecast.excludedDates
+      .map((d) => parseSimDate(d))
+      .filter((d): d is Date => d !== null)
+      .map((d) => d.toDateString()),
+  )
   const workUnits =
     model.execute.simulationType === 'scrum'
       ? step * forecast.workDaysPerIteration
       : Math.ceil(step / Math.max(1, forecast.intervalsToOneDay))
-  return addWorkDays(startDate, workUnits, forecast.workDays)
+  return addWorkDays(startDate, workUnits, forecast.workDays, excludedSet)
 }
 
 function createScrumItems(model: SimModel) {
   const result: ScrumItem[] = []
   let sequence = 0
   const cos = model.setup.classOfServices
-  model.setup.backlog.items.forEach((template) => {
+  getIncludedBacklogTemplates(model).forEach((template) => {
     const cosRef = resolveCos(cos, template.classOfService)
     for (let count = 0; count < template.count; count += 1) {
+      const estimate = sampleBetween(
+        template.estimateLowBound ?? 1,
+        template.estimateHighBound ?? template.estimateLowBound ?? 1,
+      )
       result.push({
         id: `s-${sequence + 1}`,
         label: template.name.includes('{0}') ? template.name.replace('{0}', String(count + 1)) : `${template.name} ${count + 1}`,
         deliverable: template.deliverable,
-        estimate: sampleBetween(template.estimateLowBound ?? 1, template.estimateHighBound ?? template.estimateLowBound ?? 1),
-        completedPoints: 0,
+        templateName: template.name,
+        estimate,
+        completedPoints: template.completed
+          ? estimate
+          : 0,
         blockedPoints: 0,
         burnedBlockedPoints: 0,
         blockerLabel: undefined,
-        done: false,
+        done: template.completed,
         storyType: 'work',
         classOfServiceRef: cosRef,
+        deliverableOrder: template.deliverableOrder,
+        dueDate: template.dueDate,
         order: template.order,
+        sortOrder: sequence,
       })
       sequence += 1
     }
   })
   if (model.setup.backlog.shuffle) shuffleArray(result)
-  if (cos.length > 0 && !model.setup.backlog.shuffle) {
-    result.sort((a, b) => (a.classOfServiceRef?.order ?? 999) - (b.classOfServiceRef?.order ?? 999) || a.order - b.order)
-  }
+  result.sort(compareWorkItemPriority)
   return result
+}
+
+function safePriorityDate(value?: string) {
+  return parseSimDate(value ?? '')?.getTime() ?? Number.MAX_SAFE_INTEGER
+}
+
+function getIncludedBacklogTemplates(model: SimModel) {
+  if (model.execute.deliverables.length === 0) {
+    return model.setup.backlog.items
+  }
+
+  const includedDeliverables = new Set(model.execute.deliverables.map((value) => value.toLowerCase()))
+  return model.setup.backlog.items.filter(
+    (template) => template.deliverable && includedDeliverables.has(template.deliverable.toLowerCase()),
+  )
+}
+
+function compareTemplatePriority(a: SimWorkItemTemplate, b: SimWorkItemTemplate) {
+  const byDeliverable = (a.deliverableOrder ?? Number.MAX_SAFE_INTEGER) - (b.deliverableOrder ?? Number.MAX_SAFE_INTEGER)
+  if (byDeliverable !== 0) return byDeliverable
+  const byBacklog = a.order - b.order
+  if (byBacklog !== 0) return byBacklog
+  const byDate = safePriorityDate(a.dueDate) - safePriorityDate(b.dueDate)
+  if (byDate !== 0) return byDate
+  return a.name.localeCompare(b.name)
+}
+
+function compareWorkItemPriority<
+  T extends {
+    deliverableOrder?: number
+    order: number
+    classOfServiceRef?: SimClassOfService
+    dueDate?: string
+  },
+>(a: T, b: T) {
+  const byDeliverable = (a.deliverableOrder ?? Number.MAX_SAFE_INTEGER) - (b.deliverableOrder ?? Number.MAX_SAFE_INTEGER)
+  if (byDeliverable !== 0) return byDeliverable
+  const byBacklog = a.order - b.order
+  if (byBacklog !== 0) return byBacklog
+  const byCos = (a.classOfServiceRef?.order ?? Number.MAX_SAFE_INTEGER) -
+    (b.classOfServiceRef?.order ?? Number.MAX_SAFE_INTEGER)
+  if (byCos !== 0) return byCos
+  const byDate = safePriorityDate(a.dueDate) - safePriorityDate(b.dueDate)
+  if (byDate !== 0) return byDate
+  return 0
 }
 
 function sampleColumnDuration(column: SimColumn, item: KanbanItem, phaseEstimateMultiplier = 1) {
@@ -1790,6 +1900,31 @@ function shouldBlockingApply(
   if (cardType === 'defect') return blockingEvent.blockDefects
   if (cardType === 'addedScope') return blockingEvent.blockAddedScope
   return blockingEvent.blockWork
+}
+
+function blockingEventApplies(
+  blockingEvent: SimBlockingEvent,
+  item:
+    | Pick<KanbanItem, 'cardType' | 'deliverable' | 'templateName'>
+    | Pick<ScrumItem, 'storyType' | 'deliverable' | 'templateName'>,
+  phase: SimPhase | null,
+) {
+  if (blockingEvent.phases.length > 0 && (!phase || !blockingEvent.phases.includes(phase.name))) {
+    return false
+  }
+
+  const cardType = 'cardType' in item ? item.cardType : item.storyType
+  if (!shouldBlockingApply(blockingEvent, cardType)) return false
+
+  if (blockingEvent.targetDeliverable && item.deliverable !== blockingEvent.targetDeliverable) {
+    return false
+  }
+
+  if (blockingEvent.targetCustomBacklog && item.templateName !== blockingEvent.targetCustomBacklog) {
+    return false
+  }
+
+  return true
 }
 
 function resolveKanbanStartColumn(columns: SimColumn[], startsInColumnId?: number) {

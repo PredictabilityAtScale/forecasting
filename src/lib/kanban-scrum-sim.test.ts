@@ -94,6 +94,280 @@ describe('kanban: buffer columns', () => {
   })
 })
 
+describe('backlog: completed custom items', () => {
+  it('parses completed custom backlog items', () => {
+    const model = parseSimMl(`
+      <simulation name="Completed Parse">
+        <execute>
+          <visual />
+        </execute>
+        <setup>
+          <backlog type="custom">
+            <custom name="Done item" count="2" completed="true" />
+            <custom name="Open item" count="1" />
+          </backlog>
+          <columns>
+            <column id="1" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Work</column>
+          </columns>
+        </setup>
+      </simulation>
+    `)
+
+    expect(model.setup.backlog.items[0].completed).toBe(true)
+    expect(model.setup.backlog.items[1].completed).toBe(false)
+  })
+
+  it('starts kanban simulations with completed custom items already done', () => {
+    const model = parseSimMl(`
+      <simulation name="Completed Kanban" locale="en-US">
+        <execute limitIntervalsTo="20">
+          <visual />
+        </execute>
+        <setup>
+          <backlog type="custom" shuffle="false">
+            <custom name="Done item" count="4" completed="true" estimateLowBound="1" estimateHighBound="1" />
+            <custom name="Open item" count="6" estimateLowBound="1" estimateHighBound="1" />
+          </backlog>
+          <columns>
+            <column id="1" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Work</column>
+          </columns>
+        </setup>
+      </simulation>
+    `)
+
+    const visual = runVisualSimulation(model)
+    const start = visual.snapshots[0]
+
+    expect(start?.doneCount).toBe(4)
+    expect(start?.backlogCount).toBe(6)
+    expect(visual.completedItems).toBe(10)
+    expect(visual.totalSteps).toBe(7)
+  })
+
+  it('starts scrum simulations with completed custom items already done', () => {
+    const model = parseSimMl(`
+      <simulation name="Completed Scrum" locale="en-US">
+        <execute type="scrum" limitIntervalsTo="10">
+          <visual />
+        </execute>
+        <setup>
+          <iteration storyPointsPerIterationLowBound="10" storyPointsPerIterationHighBound="10" />
+          <backlog type="custom" shuffle="false">
+            <custom name="Done story" count="2" completed="true" estimateLowBound="5" estimateHighBound="5" />
+            <custom name="Open story" count="2" estimateLowBound="5" estimateHighBound="5" />
+          </backlog>
+        </setup>
+      </simulation>
+    `)
+
+    const visual = runVisualSimulation(model)
+    const start = visual.snapshots[0]
+
+    expect(start?.doneCount).toBe(2)
+    expect(start?.backlogCount).toBe(2)
+    expect(visual.completedItems).toBe(4)
+    expect(visual.totalSteps).toBe(1)
+  })
+})
+
+describe('backlog: due date priority', () => {
+  it('parses deliverable and custom due dates', () => {
+    const model = parseSimMl(`
+      <simulation name="Due Date Parse">
+        <execute>
+          <visual />
+        </execute>
+        <setup>
+          <backlog type="custom" shuffle="false">
+            <deliverable name="A" dueDate="10-Jan-2020" order="2">
+              <custom name="Inherited due" count="1" estimateLowBound="1" estimateHighBound="1" />
+            </deliverable>
+            <custom name="Explicit due" count="1" dueDate="05-Jan-2020" estimateLowBound="1" estimateHighBound="1" />
+          </backlog>
+          <columns>
+            <column id="1" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Work</column>
+          </columns>
+        </setup>
+      </simulation>
+    `)
+
+    expect(model.setup.backlog.items[0].dueDate).toBe('10-Jan-2020')
+    expect(model.setup.backlog.items[0].deliverableOrder).toBe(2)
+    expect(model.setup.backlog.items[1].dueDate).toBe('05-Jan-2020')
+  })
+
+  it('uses deliverable order before due date for kanban pull priority', () => {
+    const model = parseSimMl(`
+      <simulation name="Kanban Deliverable Order Priority" locale="en-US">
+        <execute limitIntervalsTo="10">
+          <visual />
+        </execute>
+        <setup>
+          <backlog type="custom" shuffle="false">
+            <deliverable name="Later due sooner priority" order="1" dueDate="20-Jan-2020">
+              <custom name="Priority first" count="1" estimateLowBound="1" estimateHighBound="1" />
+            </deliverable>
+            <deliverable name="Earlier due lower priority" order="2" dueDate="05-Jan-2020">
+              <custom name="Due date second" count="1" estimateLowBound="1" estimateHighBound="1" />
+            </deliverable>
+          </backlog>
+          <columns>
+            <column id="1" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Work</column>
+          </columns>
+        </setup>
+      </simulation>
+    `)
+
+    const visual = runVisualSimulation(model)
+    expect(visual.snapshots.find((s) => s.step === 1)?.columns[0]?.cards.map((c) => c.label)).toEqual(['Priority first 1'])
+    expect(visual.snapshots.find((s) => s.step === 2)?.columns[0]?.cards.map((c) => c.label)).toEqual(['Due date second 1'])
+  })
+
+  it('uses earlier due dates to break equal scrum priorities', () => {
+    const model = parseSimMl(`
+      <simulation name="Scrum Due Date Priority" locale="en-US">
+        <execute type="scrum" limitIntervalsTo="10">
+          <visual />
+        </execute>
+        <setup>
+          <iteration storyPointsPerIterationLowBound="5" storyPointsPerIterationHighBound="5" />
+          <backlog type="custom" shuffle="false">
+            <custom name="Late due" count="1" order="1" dueDate="20-Jan-2020" estimateLowBound="5" estimateHighBound="5" />
+            <custom name="Early due" count="1" order="1" dueDate="05-Jan-2020" estimateLowBound="5" estimateHighBound="5" />
+          </backlog>
+        </setup>
+      </simulation>
+    `)
+
+    const visual = runVisualSimulation(model)
+    expect(visual.snapshots[0]?.columns[0]?.cards.map((c) => c.label)).toEqual(['Early due 1 (5)', 'Late due 1 (5)'])
+    expect(visual.snapshots.find((s) => s.step === 1)?.doneCount).toBe(1)
+    expect(visual.snapshots.find((s) => s.step === 1)?.backlogCount).toBe(1)
+    expect(visual.snapshots.find((s) => s.step === 1)?.columns[0]?.cards.map((c) => c.label)).toEqual(['Late due 1 (5)'])
+    expect(visual.snapshots.at(-1)?.doneCount).toBe(2)
+  })
+})
+
+describe('execute: deliverables filtering', () => {
+  it('parses execute deliverables filter', () => {
+    const model = parseSimMl(`
+      <simulation name="Deliverables Parse">
+        <execute deliverables="A|B">
+          <visual />
+        </execute>
+        <setup>
+          <backlog type="custom" shuffle="false">
+            <deliverable name="A">
+              <custom name="A item" count="1" estimateLowBound="1" estimateHighBound="1" />
+            </deliverable>
+            <deliverable name="B">
+              <custom name="B item" count="1" estimateLowBound="1" estimateHighBound="1" />
+            </deliverable>
+          </backlog>
+          <columns>
+            <column id="1" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Work</column>
+          </columns>
+        </setup>
+      </simulation>
+    `)
+
+    expect(model.execute.deliverables).toEqual(['A', 'B'])
+  })
+
+  it('filters kanban backlog items to selected deliverables only', () => {
+    const model = parseSimMl(`
+      <simulation name="Deliverables Kanban" locale="en-US">
+        <execute deliverables="A|C" limitIntervalsTo="20">
+          <visual />
+        </execute>
+        <setup>
+          <backlog type="custom" shuffle="false">
+            <custom name="Standalone" count="1" estimateLowBound="1" estimateHighBound="1" />
+            <deliverable name="A">
+              <custom name="A item" count="1" estimateLowBound="1" estimateHighBound="1" />
+            </deliverable>
+            <deliverable name="B">
+              <custom name="B item" count="1" estimateLowBound="1" estimateHighBound="1" />
+            </deliverable>
+            <deliverable name="C">
+              <custom name="C item" count="1" estimateLowBound="1" estimateHighBound="1" />
+            </deliverable>
+          </backlog>
+          <columns>
+            <column id="1" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Work</column>
+          </columns>
+        </setup>
+      </simulation>
+    `)
+
+    const visual = runVisualSimulation(model)
+    expect(visual.completedItems).toBe(2)
+    expect(visual.snapshots.at(-1)?.doneCount).toBe(2)
+    expect(visual.snapshots[0]?.backlogCount).toBe(2)
+    expect(visual.snapshots.find((s) => s.step === 1)?.columns[0]?.cards.map((c) => c.label)).toEqual(['A item 1'])
+    expect(visual.snapshots.find((s) => s.step === 2)?.columns[0]?.cards.map((c) => c.label)).toEqual(['C item 1'])
+  })
+
+  it('filters scrum backlog items to selected deliverables only', () => {
+    const model = parseSimMl(`
+      <simulation name="Deliverables Scrum" locale="en-US">
+        <execute type="scrum" deliverables="B" limitIntervalsTo="10">
+          <visual />
+        </execute>
+        <setup>
+          <iteration storyPointsPerIterationLowBound="5" storyPointsPerIterationHighBound="5" />
+          <backlog type="custom" shuffle="false">
+            <custom name="Standalone" count="1" estimateLowBound="5" estimateHighBound="5" />
+            <deliverable name="A">
+              <custom name="A item" count="1" estimateLowBound="5" estimateHighBound="5" />
+            </deliverable>
+            <deliverable name="B">
+              <custom name="B item" count="1" estimateLowBound="5" estimateHighBound="5" />
+            </deliverable>
+          </backlog>
+        </setup>
+      </simulation>
+    `)
+
+    const visual = runVisualSimulation(model)
+    expect(visual.completedItems).toBe(1)
+    expect(visual.snapshots[0]?.backlogCount).toBe(1)
+    expect(visual.snapshots[0]?.columns[0]?.cards.map((c) => c.label)).toEqual(['B item 1 (5)'])
+    expect(visual.snapshots.at(-1)?.doneCount).toBe(1)
+  })
+})
+
+describe('kanban: complete percentage early exit', () => {
+  it('stops once completion and active-position thresholds are both satisfied', () => {
+    const model = parseSimMl(`
+      <simulation name="Kanban Early Exit">
+        <execute
+          limitIntervalsTo="20"
+          completePercentage="80"
+          activePositionsCompletePercentage="50"
+        >
+          <visual />
+        </execute>
+        <setup>
+          <backlog type="simple" simpleCount="10" shuffle="false" />
+          <columns>
+            <column id="1" estimateLowBound="1" estimateHighBound="1" wipLimit="4">Work</column>
+          </columns>
+        </setup>
+      </simulation>
+    `)
+
+    const visual = runVisualSimulation(model)
+
+    expect(model.execute.completePercentage).toBe(80)
+    expect(model.execute.activePositionsCompletePercentage).toBe(50)
+    expect(visual.totalSteps).toBe(3)
+    expect(visual.completedItems).toBe(8)
+    expect(visual.snapshots.at(-1)?.doneCount).toBe(8)
+    expect(visual.snapshots.at(-1)?.columns[0]?.cards).toHaveLength(2)
+  })
+})
+
 describe('parsing: defects, blocking events, added scopes', () => {
   it('parses defects from SimML', () => {
     const model = parseSimMl(`
@@ -147,6 +421,39 @@ describe('parsing: defects, blocking events, added scopes', () => {
     expect(model.setup.blockingEvents[0].blockDefects).toBe(true)
     expect(model.setup.blockingEvents[0].blockAddedScope).toBe(true)
     expect(model.warnings.some((w) => w.includes('Blocking'))).toBe(false)
+  })
+
+  it('parses blocking event targeting attributes and phases', () => {
+    const model = parseSimMl(`
+      <simulation name="Blocking Target Parse">
+        <execute>
+          <visual />
+        </execute>
+        <setup>
+          <backlog type="simple" simpleCount="1" />
+          <columns>
+            <column id="1" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Work</column>
+          </columns>
+          <blockingEvents>
+            <blockingEvent
+              name="Targeted"
+              columnId="1"
+              occurrenceLowBound="1"
+              occurrenceHighBound="1"
+              estimateLowBound="1"
+              estimateHighBound="1"
+              targetDeliverable="A"
+              targetCustomBacklog="Feature"
+              phases="Alpha|Beta"
+            />
+          </blockingEvents>
+        </setup>
+      </simulation>
+    `)
+
+    expect(model.setup.blockingEvents[0].targetDeliverable).toBe('A')
+    expect(model.setup.blockingEvents[0].targetCustomBacklog).toBe('Feature')
+    expect(model.setup.blockingEvents[0].phases).toEqual(['Alpha', 'Beta'])
   })
 
   it('parses added scope events from SimML', () => {
@@ -439,6 +746,53 @@ describe('kanban: blocking event processing', () => {
     expect(visual.completedItems).toBe(3)
     // Blocking should make it take longer than without blocking
     expect(visual.totalSteps).toBeGreaterThan(0)
+  })
+
+  it('targets blocking events to a specific deliverable', () => {
+    const model = parseSimMl(`
+      <simulation name="Block Target Deliverable">
+        <execute limitIntervalsTo="10">
+          <visual />
+        </execute>
+        <setup>
+          <backlog type="custom" shuffle="false">
+            <deliverable name="A" order="1">
+              <custom name="A item" count="1" estimateLowBound="1" estimateHighBound="1" />
+            </deliverable>
+            <deliverable name="B" order="2">
+              <custom name="B item" count="1" estimateLowBound="1" estimateHighBound="1" />
+            </deliverable>
+          </backlog>
+          <columns>
+            <column id="1" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Work</column>
+          </columns>
+          <blockingEvents>
+            <blockingEvent
+              name="Review"
+              columnId="1"
+              occurrenceLowBound="1"
+              occurrenceHighBound="1"
+              estimateLowBound="1"
+              estimateHighBound="1"
+              targetDeliverable="A"
+            />
+          </blockingEvents>
+        </setup>
+      </simulation>
+    `)
+
+    const visual = runVisualSimulation(model)
+    const blocked = visual.snapshots.find((s) => s.step === 2)?.columns[0]?.cards[0]
+    const bBlocked = visual.snapshots.some((snapshot) =>
+      snapshot.columns.some((column) =>
+        column.cards.some((card) => card.label === 'B item 1' && card.blockerLabel === 'Review'),
+      ),
+    )
+
+    expect(blocked?.label).toBe('A item 1')
+    expect(blocked?.isBlocked).toBe(true)
+    expect(blocked?.blockerLabel).toBe('Review')
+    expect(bBlocked).toBe(false)
   })
 })
 
@@ -833,6 +1187,40 @@ describe('scrum: phases affect simulation', () => {
   })
 })
 
+describe('scrum: blocking event targeting', () => {
+  it('only applies blocking events during targeted phases', () => {
+    const model = parseSimMl(`
+      <simulation name="Scrum Blocking Phase Target">
+        <execute type="scrum" limitIntervalsTo="10"><visual /></execute>
+        <setup>
+          <iteration storyPointsPerIterationLowBound="5" storyPointsPerIterationHighBound="5" />
+          <backlog type="custom" shuffle="false">
+            <custom name="Story" count="1" estimateLowBound="5" estimateHighBound="5" />
+          </backlog>
+          <phases unit="iteration">
+            <phase start="1" end="1">Alpha</phase>
+            <phase start="2" end="10">Beta</phase>
+          </phases>
+          <blockingEvents>
+            <blockingEvent
+              name="Late blocker"
+              occurrenceLowBound="1"
+              occurrenceHighBound="1"
+              estimateLowBound="1"
+              estimateHighBound="1"
+              phases="Beta"
+            />
+          </blockingEvents>
+        </setup>
+      </simulation>
+    `)
+
+    const visual = runVisualSimulation(model)
+    expect(visual.totalSteps).toBe(1)
+    expect(visual.snapshots.find((s) => s.step === 1)?.doneCount).toBe(1)
+  })
+})
+
 describe('kanban: classOfService behaviour', () => {
   it('COS skipPercentage auto-completes items', () => {
     // 100% skip means all items skip the board entirely
@@ -1010,8 +1398,8 @@ describe('kanban: pull order', () => {
 
     const visual = runVisualSimulation(model)
     expect(visual.completedItems).toBe(2)
-    const doneLabels = visual.snapshots.at(-1)?.columns.find((c) => c.id === 'done')?.cards.map((c) => c.label) ?? []
-    expect(doneLabels[0]).toContain('Card A')
+    expect(visual.snapshots.at(-1)?.doneCount).toBe(2)
+    expect(visual.snapshots.find((s) => s.step === 1)?.columns[0]?.cards.map((c) => c.label)).toEqual(['Card A 1', 'Card B 1'])
   })
 })
 
@@ -1039,9 +1427,34 @@ describe('kanban: prerequisite deliverables', () => {
     `)
 
     const visual = runVisualSimulation(model)
-    const doneLabels = visual.snapshots.at(-1)?.columns.find((c) => c.id === 'done')?.cards.map((c) => c.label) ?? []
-    expect(doneLabels[0]).toContain('A item')
-    expect(doneLabels[1]).toContain('B item')
+    expect(visual.snapshots.at(-1)?.doneCount).toBe(2)
+    expect(visual.snapshots.find((s) => s.step === 1)?.columns[0]?.cards.map((c) => c.label)).toEqual(['A item 1'])
+    expect(visual.snapshots.find((s) => s.step === 2)?.columns[0]?.cards.map((c) => c.label)).toEqual(['B item 1'])
+  })
+
+  it('keeps a deliverable blocked when its prerequisite deliverable does not exist', () => {
+    const model = parseSimMl(`
+      <simulation name="Missing Prerequisite" locale="en-US">
+        <execute limitIntervalsTo="10">
+          <visual />
+        </execute>
+        <setup>
+          <backlog type="custom" shuffle="false">
+            <deliverable name="B" preRequisiteDeliverables="A">
+              <custom name="B item" count="1" estimateLowBound="1" estimateHighBound="1" />
+            </deliverable>
+          </backlog>
+          <columns>
+            <column id="1" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Work</column>
+          </columns>
+        </setup>
+      </simulation>
+    `)
+
+    const visual = runVisualSimulation(model)
+    expect(visual.completedItems).toBe(0)
+    expect(visual.snapshots.at(-1)?.backlogCount).toBe(1)
+    expect(visual.snapshots.every((s) => s.columns[0]?.cards.length === 0)).toBe(true)
   })
 })
 
@@ -1072,9 +1485,44 @@ describe('kanban: earliest start date', () => {
     const visual = runVisualSimulation(model)
     const stepFive = visual.snapshots.find((s) => s.step === 5)
     expect(stepFive?.backlogCount).toBeGreaterThan(0)
+    expect(visual.snapshots.find((s) => s.step === 6)?.backlogCount).toBeGreaterThan(0)
+    expect(visual.snapshots.find((s) => s.step === 7)?.columns[0]?.cards.map((c) => c.label)).toEqual(['Late item 1'])
+    expect(visual.snapshots.at(-1)?.doneCount).toBe(2)
+  })
 
-    const doneLabels = visual.snapshots.at(-1)?.columns.find((c) => c.id === 'done')?.cards.map((c) => c.label) ?? []
-    expect(doneLabels.some((label) => label.includes('Late item'))).toBe(true)
+  it('respects excluded dates when evaluating earliestStartDate', () => {
+    const model = parseSimMl(`
+      <simulation name="Earliest Start With Excluded Date" locale="en-US">
+        <execute limitIntervalsTo="30">
+          <visual />
+        </execute>
+        <setup>
+          <backlog type="custom" shuffle="false">
+            <deliverable name="Early" earliestStartDate="01-Jan-2020">
+              <custom name="Early item" count="1" estimateLowBound="1" estimateHighBound="1" />
+            </deliverable>
+            <deliverable name="Late" earliestStartDate="10-Jan-2020">
+              <custom name="Late item" count="1" estimateLowBound="1" estimateHighBound="1" />
+            </deliverable>
+          </backlog>
+          <columns>
+            <column id="1" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Work</column>
+          </columns>
+          <forecastDate
+            startDate="01-Jan-2020"
+            workDays="monday|tuesday|wednesday|thursday|friday"
+            intervalsToOneDay="1"
+          >
+            <excludeDate date="09-Jan-2020" />
+          </forecastDate>
+        </setup>
+      </simulation>
+    `)
+
+    const visual = runVisualSimulation(model)
+    expect(visual.snapshots.find((s) => s.step === 5)?.backlogCount).toBeGreaterThan(0)
+    expect(visual.snapshots.find((s) => s.step === 6)?.columns[0]?.cards.map((c) => c.label)).toEqual(['Late item 1'])
+    expect(visual.snapshots.at(-1)?.doneCount).toBe(2)
   })
 })
 
