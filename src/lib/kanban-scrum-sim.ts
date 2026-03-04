@@ -92,12 +92,18 @@ export interface SimExecute {
   sensitivityOccurrenceMultiplier: number
   sensitivityIterationMultiplier: number
   pullOrder: SimPullOrder
+  decimalRounding: number
 }
 
 export interface SimIteration {
   storyPointsPerIterationLowBound: number
   storyPointsPerIterationHighBound: number
   allowedToOverAllocate: boolean
+}
+
+export interface SimThroughput {
+  itemsPerIterationLowBound: number
+  itemsPerIterationHighBound: number
 }
 
 export interface SimDefect {
@@ -178,6 +184,7 @@ export interface SimModel {
     backlog: SimBacklog
     columns: SimColumn[]
     iteration?: SimIteration
+    throughput?: SimThroughput
     forecastDate?: SimForecastDate
     defects: SimDefect[]
     blockingEvents: SimBlockingEvent[]
@@ -320,6 +327,7 @@ export function parseSimMl(xmlSource: string): SimModel {
   const backlog = parseBacklog(setup, simulationType)
   const columns = simulationType === 'kanban' ? parseColumns(setup) : []
   const iteration = simulationType === 'scrum' ? parseIteration(setup) : undefined
+  const throughput = simulationType === 'scrum' ? parseThroughput(setup) : undefined
   const forecastDate = parseForecastDate(setup)
   const defects = parseDefects(setup)
   const blockingEvents = parseBlockingEvents(setup)
@@ -331,8 +339,8 @@ export function parseSimMl(xmlSource: string): SimModel {
     throw new Error('Kanban simulations require at least one <column>.')
   }
 
-  if (simulationType === 'scrum' && !iteration) {
-    throw new Error('Scrum simulations require an <iteration> definition.')
+  if (simulationType === 'scrum' && !iteration && !throughput) {
+    throw new Error('Scrum simulations require an <iteration> or <throughput> definition.')
   }
 
   return {
@@ -368,11 +376,13 @@ export function parseSimMl(xmlSource: string): SimModel {
         1.15,
       ),
       pullOrder: parsePullOrder(readAttr(execute, 'pullOrder')),
+      decimalRounding: Math.max(0, Math.round(readNumber(execute, 'decimalRounding', 3))),
     },
     setup: {
       backlog,
       columns,
       iteration,
+      throughput,
       forecastDate,
       defects,
       blockingEvents,
@@ -520,6 +530,17 @@ function parseIteration(setup: Element): SimIteration | undefined {
     storyPointsPerIterationLowBound: readNumber(iteration, 'storyPointsPerIterationLowBound', 10),
     storyPointsPerIterationHighBound: readNumber(iteration, 'storyPointsPerIterationHighBound', 20),
     allowedToOverAllocate: readBoolean(iteration, 'allowedToOverAllocate', true),
+  }
+}
+
+function parseThroughput(setup: Element): SimThroughput | undefined {
+  const throughput = setup.querySelector(':scope > throughput')
+  if (!throughput) {
+    return undefined
+  }
+  return {
+    itemsPerIterationLowBound: readNumber(throughput, 'itemsPerIterationLowBound', 1),
+    itemsPerIterationHighBound: readNumber(throughput, 'itemsPerIterationHighBound', 1),
   }
 }
 
@@ -855,9 +876,10 @@ interface ScrumItem {
 }
 
 export function runVisualSimulation(model: SimModel): SimulationRunResult {
-  return model.execute.simulationType === 'kanban'
+  const result = model.execute.simulationType === 'kanban'
     ? runKanbanSimulation(model)
     : runScrumSimulation(model)
+  return applyDecimalRoundingToRunResult(result, model.execute.decimalRounding)
 }
 
 export function runMonteCarlo(model: SimModel, cycles = model.execute.monteCarloCycles): MonteCarloResult {
@@ -872,7 +894,7 @@ export function runMonteCarlo(model: SimModel, cycles = model.execute.monteCarlo
 
   const likelihoods = [0.5, 0.7, 0.85, 0.95]
   const avg = round(steps.reduce((sum, value) => sum + value, 0) / steps.length)
-  return {
+  return applyDecimalRoundingToMonteCarloResult({
     averageSteps: avg,
     medianSteps: computePercentile(steps, 50),
     minSteps: steps[0] ?? 0,
@@ -891,7 +913,7 @@ export function runMonteCarlo(model: SimModel, cycles = model.execute.monteCarlo
       .sort((a, b) => a.step - b.step),
     rawSteps: steps,
     summarySteps: selectAggregationValue(steps, model.execute.aggregationValue),
-  }
+  }, model.execute.decimalRounding)
 }
 
 export function runSensitivityAnalysis(model: SimModel): SensitivityResult {
@@ -1029,11 +1051,14 @@ export function runSensitivityAnalysis(model: SimModel): SensitivityResult {
     })
   }
 
-  return {
+  const result = {
     baselineAverageSteps: baseline.averageSteps,
     tests: tests.sort((a, b) => a.deltaSteps - b.deltaSteps),
   }
+
+  return applyDecimalRoundingToSensitivityResult(result, model.execute.decimalRounding)
 }
+
 
 function toSensitivityRow(name: string, type: string, baselineAverageSteps: number, averageSteps: number) {
   const deltaSteps = round(averageSteps - baselineAverageSteps)
@@ -1415,8 +1440,9 @@ function runKanbanSimulation(model: SimModel): SimulationRunResult {
 
 function runScrumSimulation(model: SimModel): SimulationRunResult {
   const iteration = model.setup.iteration
-  if (!iteration) {
-    throw new Error('Scrum simulations require iteration settings.')
+  const throughput = model.setup.throughput
+  if (!iteration && !throughput) {
+    throw new Error('Scrum simulations require iteration or throughput settings.')
   }
 
   const backlog = createScrumItems(model)
@@ -1479,10 +1505,15 @@ function runScrumSimulation(model: SimModel): SimulationRunResult {
       }
     }
 
-    const rawCapacity = sampleBetween(
-      iteration.storyPointsPerIterationLowBound,
-      iteration.storyPointsPerIterationHighBound,
-    )
+    const rawCapacity = iteration
+      ? sampleBetween(
+        iteration.storyPointsPerIterationLowBound,
+        iteration.storyPointsPerIterationHighBound,
+      )
+      : sampleBetween(
+        throughput?.itemsPerIterationLowBound ?? 1,
+        throughput?.itemsPerIterationHighBound ?? 1,
+      )
     const pointsCapacity = rawCapacity * phaseIterMult
     let pointsRemaining = pointsCapacity
 
@@ -1523,6 +1554,30 @@ function runScrumSimulation(model: SimModel): SimulationRunResult {
 
     // 2. Pull new stories from backlog
     const pending = backlog.filter((item) => !item.done && !inProgress.includes(item))
+
+    if (!iteration && throughput) {
+      const takeCount = Math.max(0, Math.floor(pointsRemaining))
+      for (const story of pending.slice(0, takeCount)) {
+        story.completedPoints = story.estimate
+        story.done = true
+        done.push(story)
+        fireScrumCompletionEvents(addedScopeProcessors, defectProcessors, backlog, nextItemId)
+        nextItemId = backlog.length + 1
+      }
+      pointsRemaining = 0
+      pushScrumSnapshot(
+        snapshots,
+        step,
+        backlog.filter((item) => !item.done),
+        [],
+        done,
+        Math.min(pointsCapacity, pointsCapacity - pointsRemaining),
+        currentPhase,
+      )
+      valueDeliveredByStep.push({ step, cumulativeValue: round(backlog.filter((i) => i.done).reduce((sum, i) => sum + i.businessValue, 0)) })
+      if (done.length >= backlog.length) break
+      continue
+    }
     for (const story of pending) {
       if (pointsRemaining <= 0) break
 
@@ -1545,7 +1600,7 @@ function runScrumSimulation(model: SimModel): SimulationRunResult {
 
       const storyRemaining = story.estimate - story.completedPoints
 
-      if (pointsRemaining >= storyRemaining || iteration.allowedToOverAllocate) {
+      if (pointsRemaining >= storyRemaining || iteration?.allowedToOverAllocate) {
         inProgress.push(story)
 
         // Track story start for percentage-based phases
@@ -2371,6 +2426,55 @@ function sampleStdDev(values: number[]): number {
   return Math.sqrt(Math.max(0, variance))
 }
 
-function round(value: number) {
-  return Math.round(value * 100) / 100
+
+function applyDecimalRoundingToRunResult(result: SimulationRunResult, decimals: number): SimulationRunResult {
+  const roundToDecimals = (value: number) => round(value, decimals)
+  return {
+    ...result,
+    totalCost: roundToDecimals(result.totalCost),
+    costOfDelay: roundToDecimals(result.costOfDelay),
+    valueDeliveredByStep: result.valueDeliveredByStep.map((entry) => ({
+      ...entry,
+      cumulativeValue: roundToDecimals(entry.cumulativeValue),
+    })),
+  }
+}
+
+function applyDecimalRoundingToMonteCarloResult(result: MonteCarloResult, decimals: number): MonteCarloResult {
+  const roundToDecimals = (value: number) => round(value, decimals)
+  return {
+    ...result,
+    averageSteps: roundToDecimals(result.averageSteps),
+    medianSteps: roundToDecimals(result.medianSteps),
+    minSteps: roundToDecimals(result.minSteps),
+    maxSteps: roundToDecimals(result.maxSteps),
+    standardDeviation: roundToDecimals(result.standardDeviation),
+    summarySteps: roundToDecimals(result.summarySteps),
+    percentileSteps: result.percentileSteps.map((row) => ({
+      ...row,
+      steps: roundToDecimals(row.steps),
+    })),
+  }
+}
+
+function applyDecimalRoundingToSensitivityResult(
+  result: SensitivityResult,
+  decimals: number,
+): SensitivityResult {
+  const roundToDecimals = (value: number) => round(value, decimals)
+  return {
+    ...result,
+    baselineAverageSteps: roundToDecimals(result.baselineAverageSteps),
+    tests: result.tests.map((test) => ({
+      ...test,
+      averageSteps: roundToDecimals(test.averageSteps),
+      deltaSteps: roundToDecimals(test.deltaSteps),
+      deltaPercent: roundToDecimals(test.deltaPercent),
+    })),
+  }
+}
+
+function round(value: number, decimals = 2) {
+  const factor = 10 ** Math.max(0, decimals)
+  return Math.round(value * factor) / factor
 }

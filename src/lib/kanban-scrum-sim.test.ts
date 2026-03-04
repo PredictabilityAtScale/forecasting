@@ -1696,3 +1696,84 @@ describe('medium parity gaps 9-18', () => {
     expect(visual.totalSteps).toBe(51)
   })
 })
+
+describe('scrum: throughput mode', () => {
+  it('supports throughput-based iterations without story points', () => {
+    const model = parseSimMl(`
+      <simulation name="Throughput Scrum" locale="en-US">
+        <execute type="scrum" limitIntervalsTo="10">
+          <visual />
+        </execute>
+        <setup>
+          <throughput itemsPerIterationLowBound="2" itemsPerIterationHighBound="2" />
+          <backlog type="custom" shuffle="false">
+            <custom name="Item" count="5" estimateLowBound="8" estimateHighBound="8" />
+          </backlog>
+        </setup>
+      </simulation>
+    `)
+
+    const visual = runVisualSimulation(model)
+
+    expect(model.setup.throughput?.itemsPerIterationLowBound).toBe(2)
+    expect(visual.totalSteps).toBe(3)
+    expect(visual.completedItems).toBe(5)
+  })
+})
+
+describe('kanban: custom initial column', () => {
+  it('starts custom items in their configured initial column', () => {
+    const model = parseSimMl(`
+      <simulation name="Initial Column">
+        <execute limitIntervalsTo="10">
+          <visual />
+        </execute>
+        <setup>
+          <backlog type="custom" shuffle="false">
+            <custom name="Skip first" count="1" initialColumn="2" estimateLowBound="1" estimateHighBound="1" />
+          </backlog>
+          <columns>
+            <column id="1" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Analysis</column>
+            <column id="2" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Build</column>
+            <column id="3" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Done Gate</column>
+          </columns>
+        </setup>
+      </simulation>
+    `)
+
+    const visual = runVisualSimulation(model)
+    const start = visual.snapshots[0]
+
+    expect(start?.columns[0]?.cards).toHaveLength(0)
+    expect(start?.columns[1]?.cards.map((card) => card.label)).toEqual(['Skip first 1'])
+    expect(visual.completedItems).toBe(1)
+  })
+})
+
+describe('execute: decimal rounding', () => {
+  it('applies decimal rounding precision to monte carlo summary values', () => {
+    const model = parseSimMl(`
+      <simulation name="Rounding Example" locale="en-US">
+        <execute decimalRounding="0">
+          <visual />
+          <monteCarlo cycles="40" />
+          <sensitivity cycles="10" />
+        </execute>
+        <setup>
+          <backlog type="simple" simpleCount="5" />
+          <columns>
+            <column id="1" estimateLowBound="1" estimateHighBound="2" wipLimit="2">Work</column>
+          </columns>
+        </setup>
+      </simulation>
+    `)
+
+    const monteCarlo = runMonteCarlo(model, 40)
+    const sensitivity = runSensitivityAnalysis(model)
+
+    expect(Number.isInteger(monteCarlo.averageSteps)).toBe(true)
+    expect(Number.isInteger(monteCarlo.standardDeviation)).toBe(true)
+    expect(Number.isInteger(monteCarlo.summarySteps)).toBe(true)
+    expect(Number.isInteger(sensitivity.baselineAverageSteps)).toBe(true)
+  })
+})
