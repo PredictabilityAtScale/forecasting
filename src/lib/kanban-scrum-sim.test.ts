@@ -986,3 +986,142 @@ describe('variable and parameter preprocessing', () => {
     expect(model.setup.backlog.items).toHaveLength(6)
   })
 })
+
+describe('kanban: pull order', () => {
+  it('parses FIFOStrict pull order and keeps earlier cards ahead', () => {
+    const model = parseSimMl(`
+      <simulation name="FIFO strict">
+        <execute pullOrder="FIFOStrict" limitIntervalsTo="20">
+          <visual />
+        </execute>
+        <setup>
+          <backlog type="custom" shuffle="false">
+            <custom name="Card A" count="1" estimateLowBound="1" estimateHighBound="1" />
+            <custom name="Card B" count="1" estimateLowBound="1" estimateHighBound="1" />
+          </backlog>
+          <columns>
+            <column id="1" estimateLowBound="1" estimateHighBound="1" wipLimit="2">Work</column>
+          </columns>
+        </setup>
+      </simulation>
+    `)
+
+    expect(model.execute.pullOrder).toBe('FIFOStrict')
+
+    const visual = runVisualSimulation(model)
+    expect(visual.completedItems).toBe(2)
+    const doneLabels = visual.snapshots.at(-1)?.columns.find((c) => c.id === 'done')?.cards.map((c) => c.label) ?? []
+    expect(doneLabels[0]).toContain('Card A')
+  })
+})
+
+describe('kanban: prerequisite deliverables', () => {
+  it('does not pull dependent deliverables before prerequisites are complete', () => {
+    const model = parseSimMl(`
+      <simulation name="Prerequisites" locale="en-US">
+        <execute limitIntervalsTo="30">
+          <visual />
+        </execute>
+        <setup>
+          <backlog type="custom" shuffle="false">
+            <deliverable name="A">
+              <custom name="A item" count="1" estimateLowBound="1" estimateHighBound="1" />
+            </deliverable>
+            <deliverable name="B" preRequisiteDeliverables="A">
+              <custom name="B item" count="1" estimateLowBound="1" estimateHighBound="1" />
+            </deliverable>
+          </backlog>
+          <columns>
+            <column id="1" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Work</column>
+          </columns>
+        </setup>
+      </simulation>
+    `)
+
+    const visual = runVisualSimulation(model)
+    const doneLabels = visual.snapshots.at(-1)?.columns.find((c) => c.id === 'done')?.cards.map((c) => c.label) ?? []
+    expect(doneLabels[0]).toContain('A item')
+    expect(doneLabels[1]).toContain('B item')
+  })
+})
+
+describe('kanban: earliest start date', () => {
+  it('holds deliverable cards in backlog until earliestStartDate', () => {
+    const model = parseSimMl(`
+      <simulation name="Earliest Start" locale="en-US">
+        <execute limitIntervalsTo="30">
+          <visual />
+        </execute>
+        <setup>
+          <backlog type="custom" shuffle="false">
+            <deliverable name="Early" earliestStartDate="01-Jan-2020">
+              <custom name="Early item" count="1" estimateLowBound="1" estimateHighBound="1" />
+            </deliverable>
+            <deliverable name="Late" earliestStartDate="10-Jan-2020">
+              <custom name="Late item" count="1" estimateLowBound="1" estimateHighBound="1" />
+            </deliverable>
+          </backlog>
+          <columns>
+            <column id="1" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Work</column>
+          </columns>
+          <forecastDate startDate="01-Jan-2020" workDays="monday|tuesday|wednesday|thursday|friday" intervalsToOneDay="1" />
+        </setup>
+      </simulation>
+    `)
+
+    const visual = runVisualSimulation(model)
+    const stepFive = visual.snapshots.find((s) => s.step === 5)
+    expect(stepFive?.backlogCount).toBeGreaterThan(0)
+
+    const doneLabels = visual.snapshots.at(-1)?.columns.find((c) => c.id === 'done')?.cards.map((c) => c.label) ?? []
+    expect(doneLabels.some((label) => label.includes('Late item'))).toBe(true)
+  })
+})
+
+
+describe('kanban: pull order parsing defaults and aliases', () => {
+  it('defaults pullOrder to randomAfterOrdering', () => {
+    const model = parseSimMl(`
+      <simulation name="PullOrder Default">
+        <execute><visual /></execute>
+        <setup>
+          <backlog type="simple" simpleCount="1" />
+          <columns>
+            <column id="1" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Work</column>
+          </columns>
+        </setup>
+      </simulation>
+    `)
+
+    expect(model.execute.pullOrder).toBe('randomAfterOrdering')
+  })
+
+  it('supports legacy pullOrder aliases', () => {
+    const indexModel = parseSimMl(`
+      <simulation name="PullOrder Alias Index">
+        <execute pullOrder="index"><visual /></execute>
+        <setup>
+          <backlog type="simple" simpleCount="1" />
+          <columns>
+            <column id="1" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Work</column>
+          </columns>
+        </setup>
+      </simulation>
+    `)
+
+    const afterOrderingModel = parseSimMl(`
+      <simulation name="PullOrder Alias AfterOrdering">
+        <execute pullOrder="afterOrdering"><visual /></execute>
+        <setup>
+          <backlog type="simple" simpleCount="1" />
+          <columns>
+            <column id="1" estimateLowBound="1" estimateHighBound="1" wipLimit="1">Work</column>
+          </columns>
+        </setup>
+      </simulation>
+    `)
+
+    expect(indexModel.execute.pullOrder).toBe('indexSequence')
+    expect(afterOrderingModel.execute.pullOrder).toBe('randomAfterOrdering')
+  })
+})
