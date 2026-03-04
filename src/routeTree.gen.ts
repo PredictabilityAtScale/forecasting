@@ -16,6 +16,7 @@ import { Route as TeamDashboardRouteImport } from './routes/team-dashboard'
 import { Route as StoryCountRouteImport } from './routes/story-count'
 import { Route as SimmlStudioRouteImport } from './routes/simml-studio'
 import { Route as SimmlReferenceRouteImport } from './routes/simml-reference'
+import { Route as SimmlEditorRouteImport } from './routes/simml-editor'
 import { Route as MultiFeatureRouteImport } from './routes/multi-feature'
 import { Route as LatentDefectRouteImport } from './routes/latent-defect'
 import { Route as KanbanScrumSimRouteImport } from './routes/kanban-scrum-sim'
@@ -57,6 +58,11 @@ const SimmlReferenceRoute = SimmlReferenceRouteImport.update({
   path: '/simml-reference',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SimmlEditorRoute = SimmlEditorRouteImport.update({
+  id: '/simml-editor',
+  path: '/simml-editor',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MultiFeatureRoute = MultiFeatureRouteImport.update({
   id: '/multi-feature',
   path: '/multi-feature',
@@ -89,6 +95,7 @@ export interface FileRoutesByFullPath {
   '/kanban-scrum-sim': typeof KanbanScrumSimRoute
   '/latent-defect': typeof LatentDefectRoute
   '/multi-feature': typeof MultiFeatureRoute
+  '/simml-editor': typeof SimmlEditorRoute
   '/simml-reference': typeof SimmlReferenceRoute
   '/simml-studio': typeof SimmlStudioRoute
   '/story-count': typeof StoryCountRoute
@@ -103,6 +110,7 @@ export interface FileRoutesByTo {
   '/kanban-scrum-sim': typeof KanbanScrumSimRoute
   '/latent-defect': typeof LatentDefectRoute
   '/multi-feature': typeof MultiFeatureRoute
+  '/simml-editor': typeof SimmlEditorRoute
   '/simml-reference': typeof SimmlReferenceRoute
   '/simml-studio': typeof SimmlStudioRoute
   '/story-count': typeof StoryCountRoute
@@ -118,6 +126,7 @@ export interface FileRoutesById {
   '/kanban-scrum-sim': typeof KanbanScrumSimRoute
   '/latent-defect': typeof LatentDefectRoute
   '/multi-feature': typeof MultiFeatureRoute
+  '/simml-editor': typeof SimmlEditorRoute
   '/simml-reference': typeof SimmlReferenceRoute
   '/simml-studio': typeof SimmlStudioRoute
   '/story-count': typeof StoryCountRoute
@@ -134,6 +143,7 @@ export interface FileRouteTypes {
     | '/kanban-scrum-sim'
     | '/latent-defect'
     | '/multi-feature'
+    | '/simml-editor'
     | '/simml-reference'
     | '/simml-studio'
     | '/story-count'
@@ -148,6 +158,7 @@ export interface FileRouteTypes {
     | '/kanban-scrum-sim'
     | '/latent-defect'
     | '/multi-feature'
+    | '/simml-editor'
     | '/simml-reference'
     | '/simml-studio'
     | '/story-count'
@@ -162,6 +173,7 @@ export interface FileRouteTypes {
     | '/kanban-scrum-sim'
     | '/latent-defect'
     | '/multi-feature'
+    | '/simml-editor'
     | '/simml-reference'
     | '/simml-studio'
     | '/story-count'
@@ -177,6 +189,7 @@ export interface RootRouteChildren {
   KanbanScrumSimRoute: typeof KanbanScrumSimRoute
   LatentDefectRoute: typeof LatentDefectRoute
   MultiFeatureRoute: typeof MultiFeatureRoute
+  SimmlEditorRoute: typeof SimmlEditorRoute
   SimmlReferenceRoute: typeof SimmlReferenceRoute
   SimmlStudioRoute: typeof SimmlStudioRoute
   StoryCountRoute: typeof StoryCountRoute
@@ -237,6 +250,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SimmlReferenceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/simml-editor': {
+      id: '/simml-editor'
+      path: '/simml-editor'
+      fullPath: '/simml-editor'
+      preLoaderRoute: typeof SimmlEditorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/multi-feature': {
       id: '/multi-feature'
       path: '/multi-feature'
@@ -281,6 +301,7 @@ const rootRouteChildren: RootRouteChildren = {
   KanbanScrumSimRoute: KanbanScrumSimRoute,
   LatentDefectRoute: LatentDefectRoute,
   MultiFeatureRoute: MultiFeatureRoute,
+  SimmlEditorRoute: SimmlEditorRoute,
   SimmlReferenceRoute: SimmlReferenceRoute,
   SimmlStudioRoute: SimmlStudioRoute,
   StoryCountRoute: StoryCountRoute,
