@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type UIEvent } from 'react'
 import { loadSimulationExamples, parseSimMl } from '#/lib/kanban-scrum-sim'
 import {
   getCursorContext,
@@ -15,12 +15,63 @@ export const Route = createFileRoute('/simml-studio')({
 const EXAMPLES = loadSimulationExamples()
 const DEFAULT_EXAMPLE =
   EXAMPLES.find((example) => example.path.includes('1 - Simplest Board')) ?? EXAMPLES[0]
+const EDITOR_LINE_HEIGHT_REM = 1.5
+
+function clampRange(value: number, lower: number, upper: number) {
+  return Math.max(lower, Math.min(upper, value))
+}
+
+function escapeHtml(value: string) {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;')
+}
+
+function buildHighlightedMarkup(source: string, diagnostics: ReturnType<typeof validateSimMlSource>) {
+  if (!source) return '<br />'
+
+  const decorations = diagnostics
+    .map((diagnostic) => ({
+      from: clampRange(Math.min(diagnostic.from, diagnostic.to), 0, source.length),
+      to: clampRange(Math.max(diagnostic.from, diagnostic.to), 0, source.length),
+      severity: diagnostic.severity,
+    }))
+    .filter((diagnostic) => diagnostic.to > diagnostic.from)
+    .sort((left, right) => {
+      if (left.from !== right.from) return left.from - right.from
+      const leftWeight = left.severity === 'error' ? 0 : 1
+      const rightWeight = right.severity === 'error' ? 0 : 1
+      return leftWeight - rightWeight
+    })
+
+  let cursor = 0
+  let markup = ''
+
+  for (const decoration of decorations) {
+    if (decoration.from < cursor) continue
+    markup += escapeHtml(source.slice(cursor, decoration.from))
+    const style =
+      decoration.severity === 'error'
+        ? 'background:rgba(239,68,68,0.22);color:#ffd9d9;text-decoration:underline wavy rgba(248,113,113,0.95);'
+        : 'background:rgba(245,158,11,0.18);color:#ffe8b0;text-decoration:underline wavy rgba(251,191,36,0.9);'
+    markup += `<mark style="${style}">${escapeHtml(source.slice(decoration.from, decoration.to))}</mark>`
+    cursor = decoration.to
+  }
+
+  markup += escapeHtml(source.slice(cursor))
+  return markup
+}
 
 function SimmlStudioPage() {
   const [selectedExampleId, setSelectedExampleId] = useState(DEFAULT_EXAMPLE?.id ?? '')
   const [source, setSource] = useState(DEFAULT_EXAMPLE?.source ?? '')
   const [cursor, setCursor] = useState(0)
   const [isClient, setIsClient] = useState(false)
+  const [scrollTop, setScrollTop] = useState(0)
+  const editorRef = useRef<HTMLTextAreaElement | null>(null)
 
   useEffect(() => {
     setIsClient(true)
@@ -42,6 +93,40 @@ function SimmlStudioPage() {
   const context = useMemo(() => (isClient ? getCursorContext(source, cursor) : { activeTag: null, activeAttribute: null, inOpenTag: false, suggestedAttributes: [] }), [isClient, source, cursor])
   const activeTag = resolveTagHelp(context.activeTag)
   const activeAttribute = resolveAttributeHelp(context.activeTag, context.activeAttribute)
+  const lineCount = useMemo(() => Math.max(source.split('\n').length, 1), [source])
+  const lineNumbers = useMemo(() => Array.from({ length: lineCount }, (_, index) => index + 1), [lineCount])
+  const highlightedMarkup = useMemo(() => buildHighlightedMarkup(source, diagnostics), [diagnostics, source])
+  const enumAttributes = useMemo(
+    () => activeTag?.attributes.filter((attribute) => attribute.validValues?.length) ?? [],
+    [activeTag],
+  )
+  const editorTypography: CSSProperties = {
+    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+    fontSize: '12px',
+    lineHeight: `${EDITOR_LINE_HEIGHT_REM}rem`,
+  }
+
+  function handleEditorScroll(event: UIEvent<HTMLTextAreaElement>) {
+    setScrollTop(event.currentTarget.scrollTop)
+  }
+
+  function insertAttribute(attributeName: string) {
+    const editor = editorRef.current
+    const selectionStart = editor?.selectionStart ?? cursor
+    const selectionEnd = editor?.selectionEnd ?? selectionStart
+    const insertion = ` ${attributeName}=""`
+    const nextSource = `${source.slice(0, selectionStart)}${insertion}${source.slice(selectionEnd)}`
+    const nextCursor = selectionStart + insertion.length - 1
+    setSource(nextSource)
+    setCursor(nextCursor)
+
+    requestAnimationFrame(() => {
+      const currentEditor = editorRef.current
+      if (!currentEditor) return
+      currentEditor.focus()
+      currentEditor.setSelectionRange(nextCursor, nextCursor)
+    })
+  }
 
   return (
     <main className="mx-auto max-w-[1600px] px-4 pb-14 pt-8 sm:px-6 lg:px-8">
@@ -120,19 +205,44 @@ function SimmlStudioPage() {
         <article className="rounded-[1.8rem] border border-[var(--line)] bg-[#0b1b2f] p-4 shadow-sm">
           <div className="mb-3 flex items-center justify-between px-1">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#8ecbe0]">Editor</p>
-            <p className="text-xs text-[#9bb7cc]">{source.split('\n').length} lines</p>
+            <p className="text-xs text-[#9bb7cc]">{lineCount} lines</p>
           </div>
-          <textarea
-            className="min-h-[640px] w-full rounded-[1.2rem] border border-[rgba(141,229,219,0.2)] bg-[#0f223a] p-4 font-mono text-[12px] leading-6 text-[#e6f3ff] outline-none focus:border-[var(--lagoon)]"
-            spellCheck={false}
-            value={source}
-            onClick={(event) => setCursor(event.currentTarget.selectionStart)}
-            onKeyUp={(event) => setCursor(event.currentTarget.selectionStart)}
-            onChange={(event) => {
-              setSource(event.target.value)
-              setCursor(event.target.selectionStart)
-            }}
-          />
+          <div className="overflow-hidden rounded-[1.2rem] border border-[rgba(141,229,219,0.2)] bg-[#0f223a]">
+            <div className="grid min-h-[640px] grid-cols-[auto_1fr]">
+              <div className="border-r border-[rgba(141,229,219,0.12)] bg-[#0b1c31] px-3 py-4 text-right text-[#5f7d93]" style={editorTypography}>
+                <div style={{ transform: `translateY(-${scrollTop}px)` }}>
+                  {lineNumbers.map((lineNumber) => (
+                    <div key={lineNumber} className="select-none">
+                      {lineNumber}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="relative">
+                <pre
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 overflow-hidden whitespace-pre-wrap break-words px-4 py-4 text-[#8bb3cf]"
+                  style={{ ...editorTypography, transform: `translateY(-${scrollTop}px)` }}
+                  dangerouslySetInnerHTML={{ __html: highlightedMarkup }}
+                />
+                <textarea
+                  ref={editorRef}
+                  className="relative min-h-[640px] w-full resize-none bg-transparent px-4 py-4 text-transparent caret-[#e6f3ff] outline-none [text-shadow:0_0_0_#e6f3ff] selection:bg-[rgba(79,184,178,0.35)] focus:border-[var(--lagoon)]"
+                  style={editorTypography}
+                  spellCheck={false}
+                  value={source}
+                  onScroll={handleEditorScroll}
+                  onClick={(event) => setCursor(event.currentTarget.selectionStart)}
+                  onKeyUp={(event) => setCursor(event.currentTarget.selectionStart)}
+                  onSelect={(event) => setCursor(event.currentTarget.selectionStart)}
+                  onChange={(event) => {
+                    setSource(event.target.value)
+                    setCursor(event.target.selectionStart)
+                  }}
+                />
+              </div>
+            </div>
+          </div>
         </article>
 
         <article className="space-y-4">
@@ -166,15 +276,35 @@ function SimmlStudioPage() {
                       key={attribute.name}
                       type="button"
                       className="rounded-full border border-[var(--line)] bg-[var(--surface-strong)] px-2.5 py-1 text-[11px]"
-                      onClick={() => {
-                        setSource((current) => `${current.slice(0, cursor)} ${attribute.name}=""${current.slice(cursor)}`)
-                      }}
+                      onClick={() => insertAttribute(attribute.name)}
                     >
                       {attribute.name}
                       {attribute.mandatory ? ' *' : ''}
                     </button>
                   ))}
                 </div>
+                {enumAttributes.length ? (
+                  <div className="mt-4 rounded-xl border border-[var(--line)] bg-[var(--surface-strong)] p-3">
+                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--lagoon-deep)]">Enum-backed values</p>
+                    <div className="mt-2 space-y-2">
+                      {enumAttributes.map((attribute) => (
+                        <div key={attribute.name}>
+                          <p className="text-xs font-semibold text-[var(--sea-ink)]">{attribute.name}</p>
+                          <div className="mt-1 flex flex-wrap gap-1">
+                            {attribute.validValues?.map((value) => (
+                              <code
+                                key={`${attribute.name}-${value}`}
+                                className="rounded bg-[var(--surface)] px-1.5 py-0.5 text-[11px] text-[var(--sea-ink)]"
+                              >
+                                {value}
+                              </code>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
               </>
             ) : (
               <p className="mt-2 text-xs text-[var(--sea-ink-soft)]">Place cursor inside an opening tag to see schema-aware attribute guidance.</p>

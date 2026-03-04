@@ -63,6 +63,33 @@ export const SIMML_SCHEMA: SimMLSchemaElement = {
     },
   ],
   children: [
+    {
+      tag: 'example',
+      displayName: 'example',
+      description:
+        'Optional descriptive block used by bundled example models to store human-readable tutorial text and grouping metadata.',
+      mandatory: false,
+      csharpClass: 'Example metadata',
+      csharpFile: 'FocusedObjective.KanbanAndScrumSim/MainWindow.xaml.cs',
+      attributes: [
+        {
+          name: 'title',
+          description: 'Optional display title for the example entry in the desktop example browser.',
+          mandatory: false,
+          type: 'string',
+        },
+        {
+          name: 'group',
+          description: 'Optional grouping label used when organizing examples in the desktop example browser.',
+          mandatory: false,
+          type: 'string',
+        },
+      ],
+      children: [],
+      notes:
+        'Not part of the core simulation contract. The desktop app reads this element directly when presenting built-in examples, so it should be treated as valid top-level metadata.',
+    },
+
     // ── <?parameter ?> / <?variable ?> ─────────────────────────────────
     {
       tag: '?parameter',
@@ -945,7 +972,7 @@ export const SIMML_SCHEMA: SimMLSchemaElement = {
                   name: 'occurrenceType',
                   description:
                     'Measurement unit for occurrence rates. "count"/"cards"/"stories" = absolute item count trigger. "size"/"points" = story point trigger (Scrum). "percentage" = probability per interval.',
-                  mandatory: true,
+                  mandatory: false,
                   validValues: ['count', 'cards', 'stories', 'size', 'points', 'percentage'],
                   defaultValue: 'count',
                   type: 'enum',
@@ -1072,7 +1099,14 @@ export const SIMML_SCHEMA: SimMLSchemaElement = {
                       name: 'columnId',
                       description:
                         'Column id to apply the defect estimate override (Kanban only).',
-                      mandatory: true,
+                      mandatory: false,
+                      type: 'integer',
+                    },
+                    {
+                      name: 'id',
+                      description:
+                        'Legacy alias for columnId used by example SimML files for defect column overrides.',
+                      mandatory: false,
                       type: 'integer',
                     },
                     {
@@ -1141,7 +1175,7 @@ export const SIMML_SCHEMA: SimMLSchemaElement = {
                   name: 'occurrenceType',
                   description:
                     'Measurement unit for occurrence rates.',
-                  mandatory: true,
+                  mandatory: false,
                   validValues: ['count', 'cards', 'stories', 'size', 'points', 'percentage'],
                   defaultValue: 'count',
                   type: 'enum',
@@ -1269,7 +1303,7 @@ export const SIMML_SCHEMA: SimMLSchemaElement = {
                 {
                   name: 'occurrenceType',
                   description: 'Measurement unit for occurrence rates.',
-                  mandatory: true,
+                  mandatory: false,
                   validValues: ['count', 'cards', 'stories', 'size', 'points', 'percentage'],
                   defaultValue: 'count',
                   type: 'enum',
@@ -1733,7 +1767,7 @@ export const SIMML_SCHEMA: SimMLSchemaElement = {
                   name: 'start',
                   description:
                     'Lowest trigger value to activate this phase (in units defined by parent <phases unit=...>).',
-                  mandatory: true,
+                  mandatory: false,
                   defaultValue: '0',
                   type: 'number',
                 },
@@ -1741,7 +1775,23 @@ export const SIMML_SCHEMA: SimMLSchemaElement = {
                   name: 'end',
                   description:
                     'Highest trigger value — phase deactivates above this value.',
-                  mandatory: true,
+                  mandatory: false,
+                  defaultValue: '0',
+                  type: 'number',
+                },
+                {
+                  name: 'startPercentage',
+                  description:
+                    'Legacy alias for start when <phases unit="percentage"> is being used.',
+                  mandatory: false,
+                  defaultValue: '0',
+                  type: 'number',
+                },
+                {
+                  name: 'endPercentage',
+                  description:
+                    'Legacy alias for end when <phases unit="percentage"> is being used.',
+                  mandatory: false,
                   defaultValue: '0',
                   type: 'number',
                 },
@@ -1936,6 +1986,22 @@ export const SIMML_SCHEMA: SimMLSchemaElement = {
       notes: 'Container element with no attributes of its own.',
     },
   ],
+}
+
+function findSchemaElementByPath(node: SimMLSchemaElement, path: string[]): SimMLSchemaElement | null {
+  let current: SimMLSchemaElement | null = node
+  for (const tag of path) {
+    current = current?.children.find((child) => child.tag === tag) ?? null
+    if (!current) return null
+  }
+  return current
+}
+
+const backlogCustomSchema = findSchemaElementByPath(SIMML_SCHEMA, ['setup', 'backlog', 'custom'])
+const deliverableSchema = findSchemaElementByPath(SIMML_SCHEMA, ['setup', 'backlog', 'deliverable'])
+
+if (backlogCustomSchema && deliverableSchema && !deliverableSchema.children.some((child) => child.tag === 'custom')) {
+  deliverableSchema.children.push(backlogCustomSchema)
 }
 
 // ─── Utility: flatten tree ─────────────────────────────────────────────────

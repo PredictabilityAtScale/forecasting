@@ -20,6 +20,31 @@ for (const { element } of FLAT_SCHEMA) {
   }
 }
 
+function hasAttributeOrAlias(node: Element, schemaNode: SimMLSchemaElement, attributeName: string) {
+  if (node.hasAttribute(attributeName)) return true
+
+  if (schemaNode.tag === 'phase' && attributeName === 'start') return node.hasAttribute('startPercentage')
+  if (schemaNode.tag === 'phase' && attributeName === 'end') return node.hasAttribute('endPercentage')
+  if (schemaNode.tag === 'column' && attributeName === 'columnId') return node.hasAttribute('id')
+
+  return false
+}
+
+function isKnownAttribute(schemaNode: SimMLSchemaElement, attributeName: string) {
+  const knownAttributes = new Set(schemaNode.attributes.map((attribute) => attribute.name))
+  if (knownAttributes.has(attributeName)) return true
+
+  if (schemaNode.tag === 'phase' && (attributeName === 'startPercentage' || attributeName === 'endPercentage')) {
+    return true
+  }
+
+  if (schemaNode.tag === 'column' && attributeName === 'id') {
+    return knownAttributes.has('columnId') || knownAttributes.has('id')
+  }
+
+  return false
+}
+
 function getLineStarts(source: string) {
   const starts = [0]
   for (let i = 0; i < source.length; i += 1) {
@@ -76,7 +101,7 @@ function validateElement(
   const pos = tagOffset >= 0 ? offsetToLineColumn(source, tagOffset) : { line: 1, column: 1 }
 
   for (const requiredAttribute of schemaNode.attributes.filter((attribute) => attribute.mandatory)) {
-    if (!node.hasAttribute(requiredAttribute.name)) {
+    if (!hasAttributeOrAlias(node, schemaNode, requiredAttribute.name)) {
       diagnostics.push({
         severity: 'error',
         message: `<${schemaNode.tag}> is missing required attribute \"${requiredAttribute.name}\".`,
@@ -88,9 +113,8 @@ function validateElement(
     }
   }
 
-  const knownAttributes = new Set(schemaNode.attributes.map((attribute) => attribute.name))
   for (const attribute of node.getAttributeNames()) {
-    if (!knownAttributes.has(attribute)) {
+    if (!isKnownAttribute(schemaNode, attribute)) {
       diagnostics.push({
         severity: 'warning',
         message: `Unknown attribute \"${attribute}\" on <${schemaNode.tag}>.`,

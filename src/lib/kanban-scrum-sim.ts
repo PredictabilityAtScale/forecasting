@@ -290,6 +290,7 @@ const DEFAULT_WORK_DAYS = [1, 2, 3, 4, 5]
 
 export function loadSimulationExamples(): SimulationExampleFile[] {
   return Object.entries(RAW_EXAMPLES)
+    .filter(([path]) => !path.replace(/\\/g, '/').toLowerCase().includes('snippets'))
     .map(([path, source]) => {
       const normalized = path.replace(/\\/g, '/')
       const relative = normalized.split('FocusedObjective.KanbanAndScrumSim/')[1] ?? normalized

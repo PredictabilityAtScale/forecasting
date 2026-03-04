@@ -105,7 +105,7 @@ function KanbanScrumSimPage() {
     <main className="mx-auto max-w-[1500px] px-4 pb-14 pt-8 sm:px-6 lg:px-8">
       <div className="space-y-5">
         <section className="island-shell rounded-[2rem] p-5 sm:p-6">
-          <div className="grid gap-4 xl:grid-cols-[minmax(280px,0.95fr)_minmax(260px,0.8fr)_minmax(320px,1.2fr)]">
+          <div className="grid gap-4 xl:grid-cols-[minmax(280px,0.9fr)_minmax(320px,1fr)_minmax(320px,1.15fr)]">
             <div className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface)] p-5">
               <p className="island-kicker mb-2">Legacy Simulator</p>
               <h1 className="display-title text-3xl font-semibold text-[var(--sea-ink)]">
@@ -133,15 +133,17 @@ function KanbanScrumSimPage() {
               <label className="field-legend">Example library</label>
               <button
                 type="button"
-                className="field-input mt-1 flex w-full items-center justify-between"
+                className="field-input mt-1 flex w-full items-center text-left"
                 onClick={() => setIsExplorerOpen(true)}
               >
-                <span className="truncate text-left">
+                <span className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
                   {selectedExample
                     ? `${selectedExample.section} / ${selectedExample.title}`
                     : 'Choose a bundled example'}
                 </span>
-                <span className="text-xs uppercase tracking-[0.12em] text-[var(--kicker)]">Browse</span>
+                <span className="ml-auto shrink-0 pl-4 text-right text-xs uppercase tracking-[0.12em] text-[var(--kicker)]">
+                  Browse
+                </span>
               </button>
 
               <label className="field-legend mt-4">Load local `.simml` file</label>
