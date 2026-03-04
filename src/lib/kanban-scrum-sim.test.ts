@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import {
   parseSimMl,
   runMonteCarlo,
@@ -560,8 +560,7 @@ describe('parsing: sensitivity occurrence multiplier', () => {
 })
 
 describe('parsing: deliverable skip percentage', () => {
-  it('skips entire deliverable when skipPercentage triggers', () => {
-    // Use 100% skip to guarantee the skip
+  it('samples deliverable skipPercentage at runtime instead of parse time', () => {
     const model = parseSimMl(`
       <simulation name="Skip Test">
         <execute type="scrum">
@@ -573,7 +572,7 @@ describe('parsing: deliverable skip percentage', () => {
             <deliverable name="Required" skipPercentage="0">
               <custom name="Must Do" count="1" estimateLowBound="5" estimateHighBound="5" />
             </deliverable>
-            <deliverable name="Skippable" skipPercentage="100">
+            <deliverable name="Skippable" skipPercentage="50">
               <custom name="Might Skip" count="3" estimateLowBound="5" estimateHighBound="5" />
             </deliverable>
           </backlog>
@@ -581,9 +580,44 @@ describe('parsing: deliverable skip percentage', () => {
       </simulation>
     `)
 
-    // Only the Required deliverable should have items
-    expect(model.setup.backlog.items.length).toBe(1)
-    expect(model.setup.backlog.items[0].deliverable).toBe('Required')
+    expect(model.setup.backlog.items).toHaveLength(2)
+
+    const randomSpy = vi.spyOn(Math, 'random')
+    randomSpy.mockReturnValueOnce(0.99)
+    expect(runVisualSimulation(model).completedItems).toBe(4)
+
+    randomSpy.mockReturnValueOnce(0.0)
+    expect(runVisualSimulation(model).completedItems).toBe(1)
+
+    randomSpy.mockRestore()
+  })
+
+  it('produces multiple outcomes across monte carlo cycles for a skippable deliverable', () => {
+    const model = parseSimMl(`
+      <simulation name="Multi-modal Risk">
+        <execute type="scrum">
+          <visual />
+          <monteCarlo cycles="200" />
+        </execute>
+        <setup>
+          <iteration storyPointsPerIterationLowBound="10" storyPointsPerIterationHighBound="10" />
+          <backlog type="custom" shuffle="false">
+            <deliverable name="Baseline">
+              <custom name="Baseline" count="2" estimateLowBound="5" estimateHighBound="5" />
+            </deliverable>
+            <deliverable name="Risk" skipPercentage="50">
+              <custom name="Risk" count="2" estimateLowBound="5" estimateHighBound="5" />
+            </deliverable>
+          </backlog>
+        </setup>
+      </simulation>
+    `)
+
+    const result = runMonteCarlo(model, 200)
+    const observedSteps = new Set(result.histogram.map((entry) => entry.step))
+
+    expect(observedSteps.has(1)).toBe(true)
+    expect(observedSteps.has(2)).toBe(true)
   })
 })
 
@@ -620,7 +654,7 @@ describe('scrum: carry-over logic', () => {
         </execute>
         <setup>
           <iteration storyPointsPerIterationLowBound="5" storyPointsPerIterationHighBound="5" />
-          <backlog type="custom">
+          <backlog type="custom" shuffle="false">
             <custom name="Big Story" count="1" estimateLowBound="12" estimateHighBound="12" />
           </backlog>
         </setup>

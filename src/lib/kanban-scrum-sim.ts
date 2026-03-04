@@ -22,6 +22,7 @@ export interface SimWorkItemTemplate {
   count: number
   completed: boolean
   deliverableOrder?: number
+  deliverableSkipPercentage?: number
   dueDate?: string
   order: number
   estimateLowBound?: number
@@ -438,6 +439,7 @@ function parseBacklog(setup: Element, simulationType: SimulationKind): SimBacklo
     context?: {
       deliverable?: string
       deliverableOrder?: number
+      deliverableSkipPercentage?: number
       preRequisiteDeliverables: string[]
       earliestStartDate?: string
       dueDate?: string
@@ -450,6 +452,7 @@ function parseBacklog(setup: Element, simulationType: SimulationKind): SimBacklo
       count,
       completed: readBoolean(node, 'completed', false),
       deliverableOrder: context?.deliverableOrder,
+      deliverableSkipPercentage: context?.deliverableSkipPercentage,
       dueDate: readAttr(node, 'dueDate') || context?.dueDate,
       order: readNumber(node, 'order', Number.MAX_SAFE_INTEGER),
       estimateLowBound: readOptionalNumber(node, 'estimateLowBound'),
@@ -485,9 +488,15 @@ function parseBacklog(setup: Element, simulationType: SimulationKind): SimBacklo
       .split('|')
       .map((part) => part.trim())
       .filter(Boolean)
-    if (skipPct > 0 && Math.random() * 100 < skipPct) return
     Array.from(deliverable.querySelectorAll(':scope > custom')).forEach((node) =>
-      pushItem(node, { deliverable: name, deliverableOrder, preRequisiteDeliverables, earliestStartDate, dueDate }),
+      pushItem(node, {
+        deliverable: name,
+        deliverableOrder,
+        deliverableSkipPercentage: skipPct,
+        preRequisiteDeliverables,
+        earliestStartDate,
+        dueDate,
+      }),
     )
   })
 
@@ -1887,14 +1896,34 @@ function safePriorityDate(value?: string) {
 }
 
 function getIncludedBacklogTemplates(model: SimModel) {
-  if (model.execute.deliverables.length === 0) {
-    return model.setup.backlog.items
-  }
+  const deliverableFilter = model.execute.deliverables.length > 0
+    ? new Set(model.execute.deliverables.map((value) => value.toLowerCase()))
+    : null
+  const skippedDeliverables = new Set<string>()
+  const evaluatedDeliverables = new Set<string>()
 
-  const includedDeliverables = new Set(model.execute.deliverables.map((value) => value.toLowerCase()))
-  return model.setup.backlog.items.filter(
-    (template) => template.deliverable && includedDeliverables.has(template.deliverable.toLowerCase()),
-  )
+  return model.setup.backlog.items.filter((template) => {
+    if (!template.deliverable) {
+      return deliverableFilter == null
+    }
+
+    const deliverableKey = template.deliverable.toLowerCase()
+    if (deliverableFilter && !deliverableFilter.has(deliverableKey)) {
+      return false
+    }
+
+    if (!evaluatedDeliverables.has(deliverableKey)) {
+      evaluatedDeliverables.add(deliverableKey)
+      if (
+        (template.deliverableSkipPercentage ?? 0) > 0 &&
+        Math.random() * 100 < (template.deliverableSkipPercentage ?? 0)
+      ) {
+        skippedDeliverables.add(deliverableKey)
+      }
+    }
+
+    return !skippedDeliverables.has(deliverableKey)
+  })
 }
 
 function compareTemplatePriority(a: SimWorkItemTemplate, b: SimWorkItemTemplate) {

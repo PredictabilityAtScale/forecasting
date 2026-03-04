@@ -794,6 +794,19 @@ a {
     0 0 0 1.5px rgba(219, 250, 246, 0.2);
 }
 
+.dark .sim-board-card-kind {
+  color: color-mix(in oklab, #27403a 78%, #dff5ec 22%);
+}
+
+.dark .sim-board-card-title {
+  color: color-mix(in oklab, #14211e 84%, #f8fff5 16%);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.dark .sim-board-card-meta {
+  color: color-mix(in oklab, #1c2f2a 78%, #edf7e2 22%);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
