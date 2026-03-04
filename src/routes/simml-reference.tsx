@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState, useMemo, useCallback } from 'react'
 import {
   SIMML_SCHEMA,
@@ -321,54 +321,12 @@ function SearchResults({
   )
 }
 
-/* ─── Example XML snippet generator ──────────────────────────────────────── */
-
-function generateExample(element: SimMLSchemaElement, indent = 0): string {
-  const pad = '  '.repeat(indent)
-  const tag = element.tag.startsWith('?') ? element.tag : element.tag
-
-  // Processing instruction
-  if (element.tag.startsWith('?')) {
-    const attrs = element.attributes
-      .filter((a) => a.mandatory)
-      .map((a) => `${a.name}="${a.defaultValue ?? '...'}"`)
-      .join(' ')
-    return `${pad}<?${element.tag.slice(1)} ${attrs}?>`
-  }
-
-  const mandatoryAttrs = element.attributes.filter((a) => a.mandatory)
-  const optionalAttrs = element.attributes.filter((a) => !a.mandatory).slice(0, 3)
-
-  let attrStr = mandatoryAttrs.map((a) => `${a.name}="${a.defaultValue ?? '...'}"`)
-  attrStr = attrStr.concat(optionalAttrs.map((a) => `${a.name}="${a.defaultValue ?? '...'}">`))
-
-  // Format the opening tag
-  const attrString = attrStr.length > 0 ? ' ' + attrStr.join(' ') : ''
-
-  if (element.children.length === 0 && !element.notes?.includes('text content')) {
-    return `${pad}<${tag}${attrString} />`
-  }
-
-  const lines = [`${pad}<${tag}${attrString.replace(/\>$/, '')}>`]
-  for (const child of element.children.slice(0, 3)) {
-    lines.push(generateExample(child, indent + 1))
-  }
-  if (element.children.length > 3) {
-    lines.push(`${'  '.repeat(indent + 1)}<!-- ... -->`)
-  }
-  lines.push(`${pad}</${tag}>`)
-  return lines.join('\n')
-}
-
-/* ─── Main page ──────────────────────────────────────────────────────────── */
-
 function SimMLReferencePage() {
   const [selectedTag, setSelectedTag] = useState('simulation')
   const [searchQuery, setSearchQuery] = useState('')
   const [expandedSet, setExpandedSet] = useState<Set<string>>(
     () => new Set(['simulation', 'execute', 'setup']),
   )
-  const [showExample, setShowExample] = useState(false)
 
   const flat = useMemo(() => flattenSchema(SIMML_SCHEMA), [])
   const stats = useMemo(() => schemaStats(SIMML_SCHEMA), [])
@@ -427,11 +385,6 @@ function SimMLReferencePage() {
       }
     },
     [flat],
-  )
-
-  const example = useMemo(
-    () => generateExample(selectedEntry.element),
-    [selectedEntry],
   )
 
   return (
@@ -573,19 +526,16 @@ function SimMLReferencePage() {
                 path={selectedEntry.path}
               />
 
-              {/* Toggle example snippet */}
               <div className="mt-6 border-t border-[var(--line)] pt-4">
-                <button
-                  onClick={() => setShowExample((v) => !v)}
-                  className="text-xs font-semibold text-[var(--lagoon-deep)] transition hover:underline"
+                <p className="text-xs text-[var(--sea-ink-soft)]">
+                  Need insertable snippets? Use the dedicated editor workspace.
+                </p>
+                <Link
+                  to="/simml-editor"
+                  className="mt-2 inline-flex items-center rounded-full border border-[rgba(50,143,151,0.3)] bg-[rgba(79,184,178,0.14)] px-3 py-1.5 text-xs font-semibold text-[var(--lagoon-deep)] no-underline"
                 >
-                  {showExample ? 'Hide' : 'Show'} XML example snippet
-                </button>
-                {showExample && (
-                  <pre className="mt-3 overflow-x-auto rounded-xl border border-[var(--line)] bg-[rgba(0,0,0,0.03)] p-4 text-xs leading-5 text-[var(--sea-ink)] dark:bg-[rgba(255,255,255,0.03)]">
-                    {example}
-                  </pre>
-                )}
+                  Open SimML Editor
+                </Link>
               </div>
             </div>
           </div>

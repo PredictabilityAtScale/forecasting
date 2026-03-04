@@ -5,8 +5,14 @@ export interface SimulationExampleFile {
   title: string
   group: string
   section: string
+  type: SimulationKind
   path: string
   source: string
+  metadata: {
+    name?: string
+    locale?: string
+    example?: string
+  }
 }
 
 export interface SimColumnOverride {
@@ -288,17 +294,40 @@ export function loadSimulationExamples(): SimulationExampleFile[] {
       const normalized = path.replace(/\\/g, '/')
       const relative = normalized.split('FocusedObjective.KanbanAndScrumSim/')[1] ?? normalized
       const segments = relative.split('/')
-      const title = segments.at(-1)?.replace(/\.[^.]+$/, '') ?? relative
+      const displaySegments = segments.map(stripOrderingPrefix)
+      const title = stripOrderingPrefix(segments.at(-1)?.replace(/\.[^.]+$/, '') ?? relative)
+      const metadata = extractExampleMetadata(source)
+      const type = segments[0]?.toLowerCase().includes('scrum') ? 'scrum' : 'kanban'
       return {
         id: relative.toLowerCase(),
-        title,
-        group: segments[0] ?? 'Examples',
-        section: segments.slice(1, -1).join(' / ') || 'Root',
+        title: metadata.name || title,
+        group: displaySegments[0] || 'Examples',
+        section: displaySegments.slice(1, -1).join(' / ') || 'Root',
+        type,
         path: relative,
         source,
+        metadata,
       }
     })
     .sort((a, b) => a.path.localeCompare(b.path))
+}
+
+function stripOrderingPrefix(label: string) {
+  const cleaned = label.replace(/^\d+\s*(?:--|-|–)\s*/, '').trim()
+  return cleaned || label
+}
+
+function extractExampleMetadata(source: string) {
+  const simulationMatch = source.match(/<simulation\b[^>]*>/i)?.[0] ?? ''
+  const nameMatch = simulationMatch.match(/\bname\s*=\s*"([^"]*)"/i)
+  const localeMatch = simulationMatch.match(/\blocale\s*=\s*"([^"]*)"/i)
+  const exampleMatch = source.match(/<example>([\s\S]*?)<\/example>/i)
+
+  return {
+    name: nameMatch?.[1]?.trim(),
+    locale: localeMatch?.[1]?.trim(),
+    example: exampleMatch?.[1]?.replace(/\s+/g, ' ').trim(),
+  }
 }
 
 export function parseSimMl(xmlSource: string): SimModel {

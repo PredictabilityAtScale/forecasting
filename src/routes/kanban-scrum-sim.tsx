@@ -17,6 +17,9 @@ const EXAMPLES = loadSimulationExamples()
 const DEFAULT_EXAMPLE =
   EXAMPLES.find((example) => example.path.includes('1 - Simplest Board')) ?? EXAMPLES[0]
 
+const KANBAN_EXAMPLES = EXAMPLES.filter((example) => example.type === 'kanban')
+const SCRUM_EXAMPLES = EXAMPLES.filter((example) => example.type === 'scrum')
+
 type SimulationResults = {
   visual: ReturnType<typeof runVisualSimulation>
   monteCarlo: ReturnType<typeof runMonteCarlo>
@@ -32,6 +35,10 @@ function KanbanScrumSimPage() {
   const [runVersion, setRunVersion] = useState(0)
   const [results, setResults] = useState<SimulationResults | null>(null)
   const [isSimulating, setIsSimulating] = useState(false)
+  const [isExplorerOpen, setIsExplorerOpen] = useState(false)
+  const [activeExampleTab, setActiveExampleTab] = useState<'kanban' | 'scrum'>(
+    DEFAULT_EXAMPLE?.type ?? 'kanban',
+  )
 
   const selectedExample = EXAMPLES.find((example) => example.id === selectedExampleId) ?? null
 
@@ -39,6 +46,7 @@ function KanbanScrumSimPage() {
     if (!selectedExample) return
     setSource(selectedExample.source)
     setStepIndex(0)
+    setActiveExampleTab(selectedExample.type)
   }, [selectedExampleId, selectedExample])
 
   useEffect(() => {
@@ -113,21 +121,28 @@ function KanbanScrumSimPage() {
                 SimML Reference
                 <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="currentColor"><path d="M4.53 4.53a.75.75 0 0 1 1.06 0l5.72 5.72V5a.75.75 0 0 1 1.5 0v7.25a.75.75 0 0 1-.75.75H4.81a.75.75 0 0 1 0-1.5h5.25L4.53 5.59a.75.75 0 0 1 0-1.06Z" /></svg>
               </Link>
+              <Link
+                to="/simml-editor"
+                className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-[rgba(50,143,151,0.3)] bg-[rgba(79,184,178,0.14)] px-3.5 py-1.5 text-xs font-semibold text-[var(--lagoon-deep)] no-underline transition hover:-translate-y-0.5 hover:bg-[rgba(79,184,178,0.24)]"
+              >
+                SimML Editor Snippets
+              </Link>
             </div>
 
             <div className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface)] p-5">
               <label className="field-legend">Example library</label>
-              <select
-                className="field-input"
-                value={selectedExampleId}
-                onChange={(event) => setSelectedExampleId(event.target.value)}
+              <button
+                type="button"
+                className="field-input mt-1 flex w-full items-center justify-between"
+                onClick={() => setIsExplorerOpen(true)}
               >
-                {EXAMPLES.map((example) => (
-                  <option key={example.id} value={example.id}>
-                    {example.group} / {example.section} / {example.title}
-                  </option>
-                ))}
-              </select>
+                <span className="truncate text-left">
+                  {selectedExample
+                    ? `${selectedExample.section} / ${selectedExample.title}`
+                    : 'Choose a bundled example'}
+                </span>
+                <span className="text-xs uppercase tracking-[0.12em] text-[var(--kicker)]">Browse</span>
+              </button>
 
               <label className="field-legend mt-4">Load local `.simml` file</label>
               <input
@@ -148,18 +163,18 @@ function KanbanScrumSimPage() {
             </div>
 
             <div className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface)] p-5">
-              {parsed?.example ? (
+              {(parsed?.example || selectedExample?.metadata.example) ? (
                 <>
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--kicker)]">
                     Example note
                   </p>
                   <p className="mt-2 text-sm leading-6 text-[var(--sea-ink-soft)]">
-                    {parsed.example}
+                    {parsed?.example ?? selectedExample?.metadata.example}
                   </p>
                 </>
               ) : (
                 <p className="text-sm text-[var(--sea-ink-soft)]">
-                  Choose an example or load a local file to inspect the model.
+                  Choose an example or load a local file to inspect metadata and model behavior.
                 </p>
               )}
 
@@ -176,6 +191,61 @@ function KanbanScrumSimPage() {
             </div>
           </div>
         </section>
+
+        {isExplorerOpen ? (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 p-4"
+            onClick={() => setIsExplorerOpen(false)}
+          >
+            <div
+              className="max-h-[85vh] w-full max-w-4xl overflow-hidden rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface)] shadow-2xl"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="flex items-center justify-between border-b border-[var(--line)] px-5 py-4">
+                <h2 className="text-lg font-semibold text-[var(--sea-ink)]">Example explorer</h2>
+                <button type="button" className="text-sm font-semibold text-[var(--sea-ink-soft)]" onClick={() => setIsExplorerOpen(false)}>Close</button>
+              </div>
+              <div className="px-5 pt-4">
+                <div className="inline-flex rounded-full border border-[var(--line)] bg-[var(--surface-strong)] p-1 text-xs font-semibold">
+                  {(['kanban', 'scrum'] as const).map((tab) => (
+                    <button
+                      key={tab}
+                      type="button"
+                      className={`rounded-full px-4 py-1.5 transition ${
+                        activeExampleTab === tab
+                          ? 'bg-[rgba(79,184,178,0.2)] text-[var(--lagoon-deep)]'
+                          : 'text-[var(--sea-ink-soft)]'
+                      }`}
+                      onClick={() => setActiveExampleTab(tab)}
+                    >
+                      {tab === 'kanban' ? `Kanban (${KANBAN_EXAMPLES.length})` : `Scrum (${SCRUM_EXAMPLES.length})`}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="mt-4 max-h-[58vh] overflow-y-auto px-5 pb-5">
+                {(activeExampleTab === 'kanban' ? KANBAN_EXAMPLES : SCRUM_EXAMPLES).map((example) => (
+                  <button
+                    key={example.id}
+                    type="button"
+                    className="mb-2 w-full rounded-xl border border-[var(--line)] bg-[var(--surface-strong)] p-3 text-left transition hover:border-[rgba(79,184,178,0.45)]"
+                    onClick={() => {
+                      setSelectedExampleId(example.id)
+                      setIsExplorerOpen(false)
+                    }}
+                  >
+                    <p className="text-xs uppercase tracking-[0.12em] text-[var(--kicker)]">{example.section}</p>
+                    <p className="mt-1 text-sm font-semibold text-[var(--sea-ink)]">{example.title}</p>
+                    <p className="mt-1 text-xs text-[var(--sea-ink-soft)]">Locale: {example.metadata.locale ?? 'n/a'}</p>
+                    {example.metadata.example ? (
+                      <p className="mt-1 line-clamp-2 text-xs text-[var(--sea-ink-soft)]">{example.metadata.example}</p>
+                    ) : null}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        ) : null}
 
         <section className="island-shell rounded-[2rem] p-5 sm:p-6">
           <div className="flex flex-wrap items-center justify-between gap-4">
