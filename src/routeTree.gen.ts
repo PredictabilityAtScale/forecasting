@@ -14,6 +14,7 @@ import { Route as VotingRouteImport } from './routes/voting'
 import { Route as ThroughputRouteImport } from './routes/throughput'
 import { Route as TeamDashboardRouteImport } from './routes/team-dashboard'
 import { Route as StoryCountRouteImport } from './routes/story-count'
+import { Route as SimmlStudioRouteImport } from './routes/simml-studio'
 import { Route as SimmlReferenceRouteImport } from './routes/simml-reference'
 import { Route as SimmlEditorRouteImport } from './routes/simml-editor'
 import { Route as MultiFeatureRouteImport } from './routes/multi-feature'
@@ -45,6 +46,11 @@ const TeamDashboardRoute = TeamDashboardRouteImport.update({
 const StoryCountRoute = StoryCountRouteImport.update({
   id: '/story-count',
   path: '/story-count',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SimmlStudioRoute = SimmlStudioRouteImport.update({
+  id: '/simml-studio',
+  path: '/simml-studio',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SimmlReferenceRoute = SimmlReferenceRouteImport.update({
@@ -91,6 +97,7 @@ export interface FileRoutesByFullPath {
   '/multi-feature': typeof MultiFeatureRoute
   '/simml-editor': typeof SimmlEditorRoute
   '/simml-reference': typeof SimmlReferenceRoute
+  '/simml-studio': typeof SimmlStudioRoute
   '/story-count': typeof StoryCountRoute
   '/team-dashboard': typeof TeamDashboardRoute
   '/throughput': typeof ThroughputRoute
@@ -105,6 +112,7 @@ export interface FileRoutesByTo {
   '/multi-feature': typeof MultiFeatureRoute
   '/simml-editor': typeof SimmlEditorRoute
   '/simml-reference': typeof SimmlReferenceRoute
+  '/simml-studio': typeof SimmlStudioRoute
   '/story-count': typeof StoryCountRoute
   '/team-dashboard': typeof TeamDashboardRoute
   '/throughput': typeof ThroughputRoute
@@ -120,6 +128,7 @@ export interface FileRoutesById {
   '/multi-feature': typeof MultiFeatureRoute
   '/simml-editor': typeof SimmlEditorRoute
   '/simml-reference': typeof SimmlReferenceRoute
+  '/simml-studio': typeof SimmlStudioRoute
   '/story-count': typeof StoryCountRoute
   '/team-dashboard': typeof TeamDashboardRoute
   '/throughput': typeof ThroughputRoute
@@ -136,6 +145,7 @@ export interface FileRouteTypes {
     | '/multi-feature'
     | '/simml-editor'
     | '/simml-reference'
+    | '/simml-studio'
     | '/story-count'
     | '/team-dashboard'
     | '/throughput'
@@ -150,6 +160,7 @@ export interface FileRouteTypes {
     | '/multi-feature'
     | '/simml-editor'
     | '/simml-reference'
+    | '/simml-studio'
     | '/story-count'
     | '/team-dashboard'
     | '/throughput'
@@ -164,6 +175,7 @@ export interface FileRouteTypes {
     | '/multi-feature'
     | '/simml-editor'
     | '/simml-reference'
+    | '/simml-studio'
     | '/story-count'
     | '/team-dashboard'
     | '/throughput'
@@ -179,6 +191,7 @@ export interface RootRouteChildren {
   MultiFeatureRoute: typeof MultiFeatureRoute
   SimmlEditorRoute: typeof SimmlEditorRoute
   SimmlReferenceRoute: typeof SimmlReferenceRoute
+  SimmlStudioRoute: typeof SimmlStudioRoute
   StoryCountRoute: typeof StoryCountRoute
   TeamDashboardRoute: typeof TeamDashboardRoute
   ThroughputRoute: typeof ThroughputRoute
@@ -221,6 +234,13 @@ declare module '@tanstack/react-router' {
       path: '/story-count'
       fullPath: '/story-count'
       preLoaderRoute: typeof StoryCountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/simml-studio': {
+      id: '/simml-studio'
+      path: '/simml-studio'
+      fullPath: '/simml-studio'
+      preLoaderRoute: typeof SimmlStudioRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/simml-reference': {
@@ -283,6 +303,7 @@ const rootRouteChildren: RootRouteChildren = {
   MultiFeatureRoute: MultiFeatureRoute,
   SimmlEditorRoute: SimmlEditorRoute,
   SimmlReferenceRoute: SimmlReferenceRoute,
+  SimmlStudioRoute: SimmlStudioRoute,
   StoryCountRoute: StoryCountRoute,
   TeamDashboardRoute: TeamDashboardRoute,
   ThroughputRoute: ThroughputRoute,
