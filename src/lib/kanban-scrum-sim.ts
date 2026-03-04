@@ -27,9 +27,13 @@ export interface SimWorkItemTemplate {
   percentageHighBound: number
   initialColumn?: number
   deliverable?: string
+  preRequisiteDeliverables: string[]
+  earliestStartDate?: string
   classOfService?: string
   columnOverrides: SimColumnOverride[]
 }
+
+export type SimPullOrder = 'randomAfterOrdering' | 'random' | 'indexSequence' | 'FIFO' | 'FIFOStrict'
 
 export interface SimBacklog {
   type: 'simple' | 'custom'
@@ -70,6 +74,7 @@ export interface SimExecute {
   sensitivityEstimateMultiplier: number
   sensitivityOccurrenceMultiplier: number
   sensitivityIterationMultiplier: number
+  pullOrder: SimPullOrder
 }
 
 export interface SimIteration {
@@ -329,6 +334,7 @@ export function parseSimMl(xmlSource: string): SimModel {
         'iterationMultiplier',
         1.15,
       ),
+      pullOrder: parsePullOrder(readAttr(execute, 'pullOrder')),
     },
     setup: {
       backlog,
@@ -370,6 +376,7 @@ function parseBacklog(setup: Element, simulationType: SimulationKind): SimBacklo
         order: index + 1,
         percentageLowBound: 0,
         percentageHighBound: 100,
+        preRequisiteDeliverables: [],
         columnOverrides: [],
       })),
     }
@@ -378,10 +385,13 @@ function parseBacklog(setup: Element, simulationType: SimulationKind): SimBacklo
   const items: SimWorkItemTemplate[] = []
   let sequence = 0
 
-  const pushItem = (node: Element, deliverable?: string) => {
+  const pushItem = (
+    node: Element,
+    context?: { deliverable?: string; preRequisiteDeliverables: string[]; earliestStartDate?: string },
+  ) => {
     const count = Math.max(1, readNumber(node, 'count', 1))
     items.push({
-      id: `${deliverable || 'backlog'}-${sequence++}`,
+      id: `${context?.deliverable || 'backlog'}-${sequence++}`,
       name: readAttr(node, 'name') || node.textContent.trim() || `Item ${sequence}`,
       count,
       order: readNumber(node, 'order', Number.MAX_SAFE_INTEGER),
@@ -390,7 +400,9 @@ function parseBacklog(setup: Element, simulationType: SimulationKind): SimBacklo
       percentageLowBound: readNumber(node, 'percentageLowBound', 0),
       percentageHighBound: readNumber(node, 'percentageHighBound', 100),
       initialColumn: readOptionalNumber(node, 'initialColumn'),
-      deliverable,
+      deliverable: context?.deliverable,
+      preRequisiteDeliverables: context?.preRequisiteDeliverables ?? [],
+      earliestStartDate: context?.earliestStartDate,
       classOfService: readAttr(node, 'classOfService') || undefined,
       columnOverrides: Array.from(node.querySelectorAll(':scope > column')).map((column) => ({
         columnId: readNumber(column, 'id', -1),
@@ -401,12 +413,21 @@ function parseBacklog(setup: Element, simulationType: SimulationKind): SimBacklo
     })
   }
 
-  Array.from(backlog.querySelectorAll(':scope > custom')).forEach((node) => pushItem(node))
+  Array.from(backlog.querySelectorAll(':scope > custom')).forEach((node) =>
+    pushItem(node, { preRequisiteDeliverables: [] }),
+  )
   Array.from(backlog.querySelectorAll(':scope > deliverable')).forEach((deliverable) => {
     const name = readAttr(deliverable, 'name') || 'Deliverable'
     const skipPct = readNumber(deliverable, 'skipPercentage', 0)
+    const earliestStartDate = readAttr(deliverable, 'earliestStartDate') || undefined
+    const preRequisiteDeliverables = (readAttr(deliverable, 'preRequisiteDeliverables') || '')
+      .split('|')
+      .map((part) => part.trim())
+      .filter(Boolean)
     if (skipPct > 0 && Math.random() * 100 < skipPct) return
-    Array.from(deliverable.querySelectorAll(':scope > custom')).forEach((node) => pushItem(node, name))
+    Array.from(deliverable.querySelectorAll(':scope > custom')).forEach((node) =>
+      pushItem(node, { deliverable: name, preRequisiteDeliverables, earliestStartDate }),
+    )
   })
 
   if (simulationType === 'scrum' && items.length === 0) {
@@ -538,6 +559,16 @@ function maybeEvaluateExpression(input: string) {
 
 function readAttr(node: Element | null, name: string) {
   return node?.getAttribute(name)?.trim() ?? ''
+}
+
+function parsePullOrder(value: string): SimPullOrder {
+  const normalized = value.toLowerCase()
+  if (normalized === 'afterordering' || normalized === 'randomafterordering') return 'randomAfterOrdering'
+  if (normalized === 'random') return 'random'
+  if (normalized === 'index' || normalized === 'indexsequence') return 'indexSequence'
+  if (normalized === 'fifo') return 'FIFO'
+  if (normalized === 'fifostrict') return 'FIFOStrict'
+  return 'randomAfterOrdering'
 }
 
 function readChildText(node: Element | null, selector: string) {
@@ -692,6 +723,9 @@ interface KanbanItem {
   cardType: 'work' | 'defect' | 'addedScope'
   classOfServiceRef?: SimClassOfService
   order: number
+  pullOrder: number
+  preRequisiteDeliverables: string[]
+  earliestStartDate?: string
 }
 
 interface ScrumItem {
@@ -913,6 +947,7 @@ function runKanbanSimulation(model: SimModel): SimulationRunResult {
   const snapshots: BoardSnapshot[] = []
   let step = 0
   let nextItemId = items.length + 1
+  let nextPullOrder = items.length + 1
   let itemsPulled = 0
   let currentPhase: SimPhase | null = null
   let accumulatedCost = 0
@@ -951,6 +986,7 @@ function runKanbanSimulation(model: SimModel): SimulationRunResult {
       item.calculatedWork = col.isBuffer ? 0 : sampleColumnDuration(col, item, phaseEstMult())
       item.timeSoFar = 0
       item.status = 'active'
+      item.pullOrder = nextPullOrder++
     }
   })
 
@@ -988,8 +1024,9 @@ function runKanbanSimulation(model: SimModel): SimulationRunResult {
       const column = columns[colIdx]
       const canComplete = stepMatchesInterval(step, column.completeInterval)
 
-      const cardsInColumn = items.filter(
-        (item) => !item.done && item.currentColumn === colIdx,
+      const cardsInColumn = orderCardsForProcessing(
+        items.filter((item) => !item.done && item.currentColumn === colIdx),
+        model.execute.pullOrder,
       )
 
       cardsInColumn.forEach((item) => {
@@ -1003,6 +1040,11 @@ function runKanbanSimulation(model: SimModel): SimulationRunResult {
         }
 
         if (!canComplete) {
+          item.status = 'queued'
+          return
+        }
+
+        if (!isStrictFifoAllowsComplete(model.execute.pullOrder, item, colIdx, items)) {
           item.status = 'queued'
           return
         }
@@ -1058,6 +1100,9 @@ function runKanbanSimulation(model: SimModel): SimulationRunResult {
                   percentageHighBound: 100,
                   cardType: 'defect',
                   order: Number.MAX_SAFE_INTEGER,
+                  pullOrder: nextPullOrder++,
+                  preRequisiteDeliverables: [],
+                  earliestStartDate: undefined,
                 }
                 items.push(defectItem)
                 if (defectItem.currentColumn >= 0) {
@@ -1097,6 +1142,9 @@ function runKanbanSimulation(model: SimModel): SimulationRunResult {
                   percentageHighBound: 100,
                   cardType: 'addedScope',
                   order: Number.MAX_SAFE_INTEGER,
+                  pullOrder: nextPullOrder++,
+                  preRequisiteDeliverables: [],
+                  earliestStartDate: undefined,
                 })
               }
             }
@@ -1121,6 +1169,7 @@ function runKanbanSimulation(model: SimModel): SimulationRunResult {
             item.calculatedWork = nextColumn.isBuffer ? 0 : sampleColumnDuration(nextColumn, item, phaseEstMult())
             item.timeSoFar = 0
             item.blockedTime = 0
+            item.pullOrder = nextPullOrder++
             item.status = nextColumn.isBuffer ? 'queued' : 'active'
             blockLowestPriorityCard(items, nextIdx, item)
             if (nextColumn.isBuffer) {
@@ -1139,6 +1188,7 @@ function runKanbanSimulation(model: SimModel): SimulationRunResult {
         item.timeSoFar = excessTime
         item.blockedTime = 0
         item.blockerLabel = undefined
+        item.pullOrder = nextPullOrder++
         item.status = nextColumn.isBuffer ? 'queued' : 'active'
 
         // Buffer passthrough
@@ -1163,13 +1213,13 @@ function runKanbanSimulation(model: SimModel): SimulationRunResult {
         defectCard.timeSoFar = 0
         defectCard.blockedTime = 0
         defectCard.blockerLabel = undefined
+        defectCard.pullOrder = nextPullOrder++
         defectCard.status = 'active'
         active += 1
       }
 
       // Pull from main backlog (respecting COS rules)
-      const backlogCandidates = items
-        .filter((item) => !item.done && item.currentColumn === -1 && item.cardType !== 'defect')
+      const backlogCandidates = nextAllowedBacklogCard(items, model, step)
 
       for (const item of backlogCandidates) {
         if (active >= wipLim && !item.classOfServiceRef?.violateWip) continue
@@ -1204,6 +1254,7 @@ function runKanbanSimulation(model: SimModel): SimulationRunResult {
         item.timeSoFar = 0
         item.blockedTime = 0
         item.blockerLabel = undefined
+        item.pullOrder = nextPullOrder++
         item.status = 'active'
         active += 1
 
@@ -1468,6 +1519,9 @@ function createKanbanItems(model: SimModel) {
         cardType: 'work',
         classOfServiceRef: cosRef,
         order: template.order,
+        pullOrder: sequence,
+        preRequisiteDeliverables: template.preRequisiteDeliverables,
+        earliestStartDate: template.earliestStartDate,
       })
       sequence += 1
     }
@@ -1478,6 +1532,87 @@ function createKanbanItems(model: SimModel) {
     result.sort((a, b) => (a.classOfServiceRef?.order ?? 999) - (b.classOfServiceRef?.order ?? 999) || a.order - b.order)
   }
   return result
+}
+
+
+function orderCardsForProcessing(items: KanbanItem[], pullOrder: SimPullOrder): KanbanItem[] {
+  if (pullOrder === 'random') {
+    return shuffleArray([...items])
+  }
+
+  if (pullOrder === 'indexSequence') {
+    return [...items].sort((a, b) => a.order - b.order || a.pullOrder - b.pullOrder)
+  }
+
+  if (pullOrder === 'FIFO' || pullOrder === 'FIFOStrict') {
+    return [...items].sort((a, b) => a.pullOrder - b.pullOrder || a.order - b.order)
+  }
+
+  return [...items]
+    .map((item) => ({ item, random: Math.random() }))
+    .sort((a, b) => {
+      const byBacklog = a.item.order - b.item.order
+      if (byBacklog !== 0) return byBacklog
+      const byCos = (a.item.classOfServiceRef?.order ?? Number.MAX_SAFE_INTEGER) -
+        (b.item.classOfServiceRef?.order ?? Number.MAX_SAFE_INTEGER)
+      if (byCos !== 0) return byCos
+      const byRandom = a.random - b.random
+      if (byRandom !== 0) return byRandom
+      return a.item.order - b.item.order
+    })
+    .map(({ item }) => item)
+}
+
+function isStrictFifoAllowsComplete(
+  pullOrder: SimPullOrder,
+  item: KanbanItem,
+  colIdx: number,
+  allItems: KanbanItem[],
+) {
+  if (pullOrder !== 'FIFOStrict') return true
+  return !allItems.some(
+    (candidate) =>
+      !candidate.done &&
+      candidate.currentColumn === colIdx &&
+      candidate.id !== item.id &&
+      candidate.pullOrder < item.pullOrder,
+  )
+}
+
+function nextAllowedBacklogCard(items: KanbanItem[], model: SimModel, step: number): KanbanItem[] {
+  return items.filter((item) => {
+    if (item.done || item.currentColumn !== -1 || item.cardType === 'defect') return false
+
+    if (item.earliestStartDate) {
+      const earliest = parseSimDate(item.earliestStartDate)
+      const current = currentSimulationDate(model, step)
+      if (earliest && current && current < earliest) {
+        return false
+      }
+    }
+
+    if (item.preRequisiteDeliverables.length > 0) {
+      const prereqsDone = item.preRequisiteDeliverables.every((deliverableName) => {
+        const deliverableCards = items.filter((candidate) => candidate.deliverable === deliverableName)
+        return deliverableCards.length === 0 || deliverableCards.every((candidate) => candidate.done)
+      })
+      if (!prereqsDone) return false
+    }
+
+    return true
+  })
+}
+
+function currentSimulationDate(model: SimModel, step: number): Date | null {
+  const forecast = model.setup.forecastDate
+  if (!forecast?.startDate) return null
+  const startDate = parseSimDate(forecast.startDate)
+  if (!startDate) return null
+  const workUnits =
+    model.execute.simulationType === 'scrum'
+      ? step * forecast.workDaysPerIteration
+      : Math.ceil(step / Math.max(1, forecast.intervalsToOneDay))
+  return addWorkDays(startDate, workUnits, forecast.workDays)
 }
 
 function createScrumItems(model: SimModel) {
