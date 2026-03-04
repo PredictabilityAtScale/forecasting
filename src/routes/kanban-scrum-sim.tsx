@@ -229,7 +229,7 @@ function KanbanScrumSimPage() {
               <div className="flex flex-wrap items-end justify-between gap-3">
                 <div>
                   <p className="sim-board-kicker">Visual board</p>
-                  <h2 className="mt-1 text-2xl font-semibold text-[#173047]">
+                  <h2 className="mt-1 text-2xl font-semibold text-[var(--sea-ink)]">
                     {snapshot.label}
                     {snapshot.activePhase ? (
                       <span className="ml-3 inline-flex items-center gap-1.5 rounded-full border border-[rgba(79,184,178,0.35)] bg-[rgba(79,184,178,0.12)] px-3 py-0.5 align-middle text-sm font-semibold text-[var(--lagoon-deep)]">
@@ -238,7 +238,7 @@ function KanbanScrumSimPage() {
                       </span>
                     ) : null}
                   </h2>
-                  <p className="mt-1 text-sm text-[#537086]">
+                  <p className="mt-1 text-sm text-[var(--sea-ink-soft)]">
                     Backlog {snapshot.backlogCount} · Done {snapshot.doneCount}
                   </p>
                 </div>
@@ -249,7 +249,7 @@ function KanbanScrumSimPage() {
                     <LegendChip label="Added scope" kind="addedScope" />
                     <span className="sim-board-legend sim-board-legend-blocked">Blocker</span>
                   </div>
-                  <span className="rounded-full border border-[rgba(33,88,116,0.18)] bg-white/80 px-3 py-1 text-xs font-semibold text-[#214f71]">
+                  <span className="rounded-full border border-[var(--line)] bg-[var(--surface-strong)] px-3 py-1 text-xs font-semibold text-[var(--sea-ink-soft)]">
                     Step {snapshot.step} / {results.visual.totalSteps}
                   </span>
                 </div>
@@ -416,8 +416,8 @@ function BoardView({ snapshot }: { snapshot: BoardSnapshot }) {
           >
             <div className="flex items-center justify-between gap-2">
               <div>
-                <h3 className="text-sm font-semibold tracking-[0.01em] text-[#173047]">{column.label}</h3>
-                <p className="text-[11px] font-medium text-[#537086]">
+                <h3 className="text-sm font-semibold tracking-[0.01em] text-[var(--sea-ink)]">{column.label}</h3>
+                <p className="text-[11px] font-medium text-[var(--sea-ink-soft)]">
                   {column.cards.length} items{column.wipLimit ? ` / WIP ${column.wipLimit}` : ''}
                 </p>
               </div>
@@ -457,7 +457,7 @@ function BoardView({ snapshot }: { snapshot: BoardSnapshot }) {
                   </article>
                 ))
               ) : (
-                <div className="col-span-full rounded-2xl border border-dashed border-[rgba(52,119,154,0.24)] bg-[rgba(255,255,255,0.58)] px-3 py-10 text-center text-xs font-medium text-[#7a98a8]">
+                <div className="col-span-full rounded-2xl border border-dashed border-[var(--line)] bg-[var(--surface)] px-3 py-10 text-center text-xs font-medium text-[var(--sea-ink-soft)]">
                   Empty
                 </div>
               )}

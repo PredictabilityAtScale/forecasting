@@ -560,14 +560,14 @@ a {
 }
 
 .sim-board-shell {
-  border: 1px solid rgba(43, 101, 136, 0.16);
+  border: 1px solid color-mix(in oklab, var(--lagoon) 20%, var(--line) 80%);
   background:
-    radial-gradient(circle at top left, rgba(144, 219, 233, 0.38), transparent 28%),
-    radial-gradient(circle at top right, rgba(104, 194, 176, 0.28), transparent 24%),
-    linear-gradient(180deg, rgba(244, 251, 255, 0.98), rgba(232, 244, 249, 0.96));
+    radial-gradient(circle at top left, color-mix(in oklab, var(--lagoon) 30%, transparent), transparent 34%),
+    radial-gradient(circle at top right, color-mix(in oklab, var(--palm) 24%, transparent), transparent 28%),
+    linear-gradient(180deg, color-mix(in oklab, var(--surface-strong) 96%, var(--hero-a) 4%), color-mix(in oklab, var(--surface) 94%, var(--hero-b) 6%));
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    0 24px 50px rgba(28, 80, 106, 0.1);
+    inset 0 1px 0 color-mix(in oklab, var(--inset-glint) 72%, transparent),
+    0 24px 50px color-mix(in oklab, var(--lagoon) 14%, transparent);
 }
 
 .sim-board-kicker {
@@ -575,18 +575,18 @@ a {
   text-transform: uppercase;
   font-weight: 700;
   font-size: 0.69rem;
-  color: #3f7d99;
+  color: color-mix(in oklab, var(--lagoon-deep) 76%, var(--sea-ink) 24%);
 }
 
 .sim-board-column {
-  border: 1px solid rgba(52, 119, 154, 0.16);
+  border: 1px solid color-mix(in oklab, var(--line) 88%, var(--lagoon) 12%);
   border-radius: 1.35rem;
   padding: 0.9rem;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(242, 248, 251, 0.92));
+    linear-gradient(180deg, color-mix(in oklab, var(--surface-strong) 96%, white 4%), color-mix(in oklab, var(--surface) 93%, var(--hero-a) 7%));
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.92),
-    0 14px 30px rgba(38, 91, 115, 0.08);
+    inset 0 1px 0 color-mix(in oklab, var(--inset-glint) 64%, transparent),
+    0 14px 30px color-mix(in oklab, var(--lagoon) 10%, transparent);
 }
 
 .sim-board-legend {
@@ -594,14 +594,14 @@ a {
   align-items: center;
   gap: 0.4rem;
   border-radius: 999px;
-  border: 1px solid rgba(35, 93, 123, 0.12);
+  border: 1px solid color-mix(in oklab, var(--line) 84%, var(--lagoon) 16%);
   padding: 0.35rem 0.7rem;
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #24485f;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  color: color-mix(in oklab, var(--sea-ink) 82%, var(--lagoon-deep) 18%);
+  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--inset-glint) 62%, transparent);
 }
 
 .sim-board-legend::before {
@@ -614,35 +614,35 @@ a {
 }
 
 .sim-board-legend-story {
-  background: linear-gradient(180deg, #fff2a8, #f8df7b);
+  background: linear-gradient(180deg, color-mix(in oklab, #fff2a8 88%, var(--surface-strong) 12%), color-mix(in oklab, #f8df7b 86%, var(--surface) 14%));
   color: #5f4910;
 }
 
 .sim-board-legend-defect {
-  background: linear-gradient(180deg, #9ae8ff, #6fd0f2);
+  background: linear-gradient(180deg, color-mix(in oklab, #9ae8ff 86%, var(--surface-strong) 14%), color-mix(in oklab, #6fd0f2 84%, var(--surface) 16%));
   color: #0f4960;
 }
 
 .sim-board-legend-addedScope {
-  background: linear-gradient(180deg, #c5f8b0, #9adf7b);
+  background: linear-gradient(180deg, color-mix(in oklab, #c5f8b0 86%, var(--surface-strong) 14%), color-mix(in oklab, #9adf7b 84%, var(--surface) 16%));
   color: #29561d;
 }
 
 .sim-board-legend-blocked {
-  background: linear-gradient(180deg, #ffe4e8, #ffccd5);
+  background: linear-gradient(180deg, color-mix(in oklab, #ffe4e8 88%, var(--surface-strong) 12%), color-mix(in oklab, #ffccd5 86%, var(--surface) 14%));
   color: #8d1837;
 }
 
 .sim-board-card {
   position: relative;
   overflow: visible;
-  border: 1px solid rgba(52, 68, 42, 0.15);
+  border: 1px solid color-mix(in oklab, var(--line) 78%, #5a6d48 22%);
   border-radius: 0.2rem 0.25rem 0.5rem 0.35rem;
   padding: 0.5rem 0.6rem 0.45rem;
   box-shadow:
-    0 4px 8px rgba(72, 84, 48, 0.08),
-    0 2px 0 rgba(255, 255, 255, 0.5) inset,
-    inset 0 -6px 10px rgba(138, 115, 42, 0.05);
+    0 4px 8px color-mix(in oklab, #4a5e3e 22%, transparent),
+    0 2px 0 color-mix(in oklab, var(--inset-glint) 52%, transparent) inset,
+    inset 0 -6px 10px color-mix(in oklab, #8a732a 16%, transparent);
   transform: rotate(-0.5deg);
 }
 
@@ -667,17 +667,17 @@ a {
 
 .sim-board-card-story {
   background:
-    linear-gradient(175deg, #fff8c9 0%, #f5e07a 100%);
+    linear-gradient(175deg, color-mix(in oklab, #fff8c9 90%, var(--surface-strong) 10%) 0%, color-mix(in oklab, #f5e07a 88%, var(--surface) 12%) 100%);
 }
 
 .sim-board-card-defect {
   background:
-    linear-gradient(175deg, #c4f2ff 0%, #8dd9f3 100%);
+    linear-gradient(175deg, color-mix(in oklab, #c4f2ff 88%, var(--surface-strong) 12%) 0%, color-mix(in oklab, #8dd9f3 86%, var(--surface) 14%) 100%);
 }
 
 .sim-board-card-addedScope {
   background:
-    linear-gradient(175deg, #dfffca 0%, #b4e891 100%);
+    linear-gradient(175deg, color-mix(in oklab, #dfffca 88%, var(--surface-strong) 12%) 0%, color-mix(in oklab, #b4e891 86%, var(--surface) 14%) 100%);
 }
 
 .sim-board-card-queued {
@@ -686,9 +686,9 @@ a {
 
 .sim-board-card-blocked {
   box-shadow:
-    0 14px 18px rgba(134, 50, 70, 0.16),
-    0 4px 0 rgba(255, 255, 255, 0.45) inset,
-    inset 0 -16px 24px rgba(138, 115, 42, 0.08);
+    0 14px 18px color-mix(in oklab, #8a3048 28%, transparent),
+    0 4px 0 color-mix(in oklab, var(--inset-glint) 50%, transparent) inset,
+    inset 0 -16px 24px color-mix(in oklab, #8a732a 18%, transparent);
 }
 
 .sim-board-card-pin {
@@ -714,7 +714,7 @@ a {
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgba(41, 56, 21, 0.6);
+  color: color-mix(in oklab, var(--sea-ink) 58%, #405329 42%);
 }
 
 .sim-board-card-title {
@@ -723,7 +723,7 @@ a {
   font-size: 0.82rem;
   font-weight: 700;
   line-height: 1.3;
-  color: #26311b;
+  color: color-mix(in oklab, var(--sea-ink) 66%, #2f3a22 34%);
 }
 
 .sim-board-card-meta {
@@ -732,7 +732,7 @@ a {
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(38, 49, 27, 0.5);
+  color: color-mix(in oklab, var(--sea-ink-soft) 72%, #384626 28%);
 }
 
 .sim-board-card-blocker {
@@ -743,12 +743,12 @@ a {
   min-width: 1.2rem;
   min-height: 1.2rem;
   border-radius: 0.15rem;
-  border: 1px solid rgba(137, 15, 47, 0.32);
+  border: 1px solid color-mix(in oklab, #8f0f2f 52%, var(--line) 48%);
   background:
-    linear-gradient(180deg, #ff6b84 0%, #ef3156 100%);
+    linear-gradient(180deg, color-mix(in oklab, #ff6b84 90%, var(--surface-strong) 10%) 0%, color-mix(in oklab, #ef3156 86%, var(--surface) 14%) 100%);
   box-shadow:
-    0 6px 10px rgba(154, 31, 62, 0.20),
-    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    0 6px 10px color-mix(in oklab, #9a1f3e 35%, transparent),
+    inset 0 1px 0 color-mix(in oklab, var(--inset-glint) 46%, transparent);
   z-index: 3;
 }
 
@@ -772,6 +772,26 @@ a {
   line-height: 1.2;
   color: #fff4f6;
   text-transform: uppercase;
+}
+
+
+.dark .sim-board-card {
+  box-shadow:
+    0 8px 14px color-mix(in oklab, #020808 44%, transparent),
+    0 1px 0 color-mix(in oklab, var(--inset-glint) 40%, transparent) inset,
+    inset 0 -8px 12px color-mix(in oklab, #0e1310 48%, transparent);
+}
+
+.dark .sim-board-card::after {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.22), transparent 24%),
+    linear-gradient(180deg, transparent 0%, rgba(6, 10, 10, 0.22) 100%);
+}
+
+.dark .sim-board-card-pin {
+  box-shadow:
+    0 1px 2px rgba(2, 10, 15, 0.65),
+    0 0 0 1.5px rgba(219, 250, 246, 0.2);
 }
 
 @layer base {
