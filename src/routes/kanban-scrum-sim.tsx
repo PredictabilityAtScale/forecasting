@@ -113,6 +113,12 @@ function KanbanScrumSimPage() {
                 SimML Reference
                 <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="currentColor"><path d="M4.53 4.53a.75.75 0 0 1 1.06 0l5.72 5.72V5a.75.75 0 0 1 1.5 0v7.25a.75.75 0 0 1-.75.75H4.81a.75.75 0 0 1 0-1.5h5.25L4.53 5.59a.75.75 0 0 1 0-1.06Z" /></svg>
               </Link>
+              <Link
+                to="/simml-studio"
+                className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-[rgba(50,143,151,0.3)] bg-[rgba(79,184,178,0.14)] px-3.5 py-1.5 text-xs font-semibold text-[var(--lagoon-deep)] no-underline transition hover:-translate-y-0.5 hover:bg-[rgba(79,184,178,0.24)]"
+              >
+                Open SimML Studio
+              </Link>
             </div>
 
             <div className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface)] p-5">

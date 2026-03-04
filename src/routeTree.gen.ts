@@ -14,6 +14,7 @@ import { Route as VotingRouteImport } from './routes/voting'
 import { Route as ThroughputRouteImport } from './routes/throughput'
 import { Route as TeamDashboardRouteImport } from './routes/team-dashboard'
 import { Route as StoryCountRouteImport } from './routes/story-count'
+import { Route as SimmlStudioRouteImport } from './routes/simml-studio'
 import { Route as SimmlReferenceRouteImport } from './routes/simml-reference'
 import { Route as MultiFeatureRouteImport } from './routes/multi-feature'
 import { Route as LatentDefectRouteImport } from './routes/latent-defect'
@@ -44,6 +45,11 @@ const TeamDashboardRoute = TeamDashboardRouteImport.update({
 const StoryCountRoute = StoryCountRouteImport.update({
   id: '/story-count',
   path: '/story-count',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SimmlStudioRoute = SimmlStudioRouteImport.update({
+  id: '/simml-studio',
+  path: '/simml-studio',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SimmlReferenceRoute = SimmlReferenceRouteImport.update({
@@ -84,6 +90,7 @@ export interface FileRoutesByFullPath {
   '/latent-defect': typeof LatentDefectRoute
   '/multi-feature': typeof MultiFeatureRoute
   '/simml-reference': typeof SimmlReferenceRoute
+  '/simml-studio': typeof SimmlStudioRoute
   '/story-count': typeof StoryCountRoute
   '/team-dashboard': typeof TeamDashboardRoute
   '/throughput': typeof ThroughputRoute
@@ -97,6 +104,7 @@ export interface FileRoutesByTo {
   '/latent-defect': typeof LatentDefectRoute
   '/multi-feature': typeof MultiFeatureRoute
   '/simml-reference': typeof SimmlReferenceRoute
+  '/simml-studio': typeof SimmlStudioRoute
   '/story-count': typeof StoryCountRoute
   '/team-dashboard': typeof TeamDashboardRoute
   '/throughput': typeof ThroughputRoute
@@ -111,6 +119,7 @@ export interface FileRoutesById {
   '/latent-defect': typeof LatentDefectRoute
   '/multi-feature': typeof MultiFeatureRoute
   '/simml-reference': typeof SimmlReferenceRoute
+  '/simml-studio': typeof SimmlStudioRoute
   '/story-count': typeof StoryCountRoute
   '/team-dashboard': typeof TeamDashboardRoute
   '/throughput': typeof ThroughputRoute
@@ -126,6 +135,7 @@ export interface FileRouteTypes {
     | '/latent-defect'
     | '/multi-feature'
     | '/simml-reference'
+    | '/simml-studio'
     | '/story-count'
     | '/team-dashboard'
     | '/throughput'
@@ -139,6 +149,7 @@ export interface FileRouteTypes {
     | '/latent-defect'
     | '/multi-feature'
     | '/simml-reference'
+    | '/simml-studio'
     | '/story-count'
     | '/team-dashboard'
     | '/throughput'
@@ -152,6 +163,7 @@ export interface FileRouteTypes {
     | '/latent-defect'
     | '/multi-feature'
     | '/simml-reference'
+    | '/simml-studio'
     | '/story-count'
     | '/team-dashboard'
     | '/throughput'
@@ -166,6 +178,7 @@ export interface RootRouteChildren {
   LatentDefectRoute: typeof LatentDefectRoute
   MultiFeatureRoute: typeof MultiFeatureRoute
   SimmlReferenceRoute: typeof SimmlReferenceRoute
+  SimmlStudioRoute: typeof SimmlStudioRoute
   StoryCountRoute: typeof StoryCountRoute
   TeamDashboardRoute: typeof TeamDashboardRoute
   ThroughputRoute: typeof ThroughputRoute
@@ -208,6 +221,13 @@ declare module '@tanstack/react-router' {
       path: '/story-count'
       fullPath: '/story-count'
       preLoaderRoute: typeof StoryCountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/simml-studio': {
+      id: '/simml-studio'
+      path: '/simml-studio'
+      fullPath: '/simml-studio'
+      preLoaderRoute: typeof SimmlStudioRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/simml-reference': {
@@ -262,6 +282,7 @@ const rootRouteChildren: RootRouteChildren = {
   LatentDefectRoute: LatentDefectRoute,
   MultiFeatureRoute: MultiFeatureRoute,
   SimmlReferenceRoute: SimmlReferenceRoute,
+  SimmlStudioRoute: SimmlStudioRoute,
   StoryCountRoute: StoryCountRoute,
   TeamDashboardRoute: TeamDashboardRoute,
   ThroughputRoute: ThroughputRoute,
