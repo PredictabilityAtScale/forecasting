@@ -154,6 +154,8 @@ function KanbanScrumSimPage() {
   const [selectedExampleId, setSelectedExampleId] = useState(DEFAULT_EXAMPLE.id)
   const [source, setSource] = useState(DEFAULT_EXAMPLE.source)
   const [cursor, setCursor] = useState(0)
+  const [simulationMode, setSimulationMode] = useState<'auto' | 'manual'>('auto')
+  const [hasPendingSimulation, setHasPendingSimulation] = useState(false)
   const [stepIndex, setStepIndex] = useState(0)
   const [cycles, setCycles] = useState(300)
   const [runVersion, setRunVersion] = useState(0)
@@ -164,6 +166,7 @@ function KanbanScrumSimPage() {
     DEFAULT_EXAMPLE.type,
   )
   const editorRef = useRef<EditorView | null>(null)
+  const hasInitializedSourceRef = useRef(false)
 
   const selectedExample = EXAMPLES.find((example) => example.id === selectedExampleId) ?? null
 
@@ -178,6 +181,16 @@ function KanbanScrumSimPage() {
   useEffect(() => {
     setIsClient(true)
   }, [])
+
+  useEffect(() => {
+    if (!hasInitializedSourceRef.current) {
+      hasInitializedSourceRef.current = true
+      return
+    }
+    if (simulationMode === 'manual') {
+      setHasPendingSimulation(true)
+    }
+  }, [source, cycles, simulationMode])
 
   const parseResult = useMemo(() => {
     if (!isClient) {
@@ -249,6 +262,12 @@ function KanbanScrumSimPage() {
     if (!parsed) {
       setResults(null)
       setIsSimulating(false)
+      setHasPendingSimulation(false)
+      return
+    }
+
+    if (simulationMode === 'manual' && hasPendingSimulation) {
+      setIsSimulating(false)
       return
     }
 
@@ -264,6 +283,7 @@ function KanbanScrumSimPage() {
       }
       if (cancelled) return
       setResults(nextResults)
+      setHasPendingSimulation(false)
       setIsSimulating(false)
     }, 10)
 
@@ -271,13 +291,14 @@ function KanbanScrumSimPage() {
       cancelled = true
       window.clearTimeout(timer)
     }
-  }, [parsed, cycles, runVersion])
+  }, [parsed, cycles, runVersion, simulationMode, hasPendingSimulation])
 
   useEffect(() => {
     setStepIndex(0)
   }, [results?.visual.totalSteps])
 
   const snapshot = results?.visual.snapshots[Math.min(stepIndex, (results?.visual.snapshots.length ?? 1) - 1)] ?? null
+  const forecastIsStale = simulationMode === 'manual' && hasPendingSimulation && !modelError
 
   return (
     <main className="mx-auto max-w-[1500px] px-4 pb-14 pt-8 sm:px-6 lg:px-8">
@@ -433,11 +454,44 @@ function KanbanScrumSimPage() {
             <button
               type="button"
               className="rounded-full border border-[rgba(50,143,151,0.3)] bg-[rgba(79,184,178,0.14)] px-4 py-2 text-sm font-semibold text-[var(--lagoon-deep)]"
-              onClick={() => setRunVersion((value) => value + 1)}
+              onClick={() => {
+                setHasPendingSimulation(false)
+                setRunVersion((value) => value + 1)
+              }}
             >
-              Re-run
+              {simulationMode === 'manual' ? 'Run simulation' : 'Re-run'}
             </button>
           </div>
+
+          <div className="mt-3 inline-flex rounded-full border border-[var(--line)] bg-[var(--surface)] p-1 text-xs font-semibold">
+            <button
+              type="button"
+              className={`rounded-full px-3 py-1.5 transition ${
+                simulationMode === 'auto'
+                  ? 'bg-[rgba(79,184,178,0.2)] text-[var(--lagoon-deep)]'
+                  : 'text-[var(--sea-ink-soft)]'
+              }`}
+              onClick={() => setSimulationMode('auto')}
+            >
+              Auto simulate
+            </button>
+            <button
+              type="button"
+              className={`rounded-full px-3 py-1.5 transition ${
+                simulationMode === 'manual'
+                  ? 'bg-[rgba(79,184,178,0.2)] text-[var(--lagoon-deep)]'
+                  : 'text-[var(--sea-ink-soft)]'
+              }`}
+              onClick={() => setSimulationMode('manual')}
+            >
+              Manual simulate
+            </button>
+          </div>
+          {forecastIsStale ? (
+            <p className="mt-2 text-xs font-semibold text-amber-700">
+              Forecast is out of date while editing. Click “Run simulation” to refresh.
+            </p>
+          ) : null}
 
           <div className="mt-4 overflow-hidden rounded-[1.5rem] border border-[rgba(141,229,219,0.18)] bg-[#0d2034] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
             {isClient ? (
@@ -460,6 +514,9 @@ function KanbanScrumSimPage() {
                   if (update.docChanged) {
                     const nextSource = update.state.doc.toString()
                     setSource((current) => (current === nextSource ? current : nextSource))
+                    if (simulationMode === 'manual') {
+                      setHasPendingSimulation(true)
+                    }
                   }
                   if (update.selectionSet) {
                     const status = completionStatus(update.state)
@@ -556,7 +613,11 @@ function KanbanScrumSimPage() {
           ) : null}
         </section>
 
-        <section className="sim-board-shell rounded-[2rem] p-5 sm:p-6">
+        <section
+          className={`sim-board-shell rounded-[2rem] p-5 sm:p-6 transition-opacity ${
+            forecastIsStale ? 'opacity-55' : 'opacity-100'
+          }`}
+        >
           {!isClient ? (
             <div className="rounded-[1.6rem] border border-[rgba(33,88,116,0.2)] bg-white/75 p-6 text-sm text-[var(--sea-ink-soft)]">
               Initializing the client-side simulator…
@@ -612,7 +673,11 @@ function KanbanScrumSimPage() {
           )}
         </section>
 
-        <section className="island-shell rounded-[2rem] p-5 sm:p-6">
+        <section
+          className={`island-shell rounded-[2rem] p-5 sm:p-6 transition-opacity ${
+            forecastIsStale ? 'opacity-55' : 'opacity-100'
+          }`}
+        >
           {!isClient ? null : results ? (
             <div className="relative space-y-4">
               {isSimulating ? <SimulationSpinner label="Running Monte Carlo simulation..." /> : null}
