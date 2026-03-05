@@ -1,13 +1,26 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useEffect, useMemo, useState, startTransition } from 'react'
+import { useEffect, useMemo, useRef, useState, startTransition } from 'react'
+import CodeMirror from '@uiw/react-codemirror'
+import { xml } from '@codemirror/lang-xml'
+import { oneDark } from '@codemirror/theme-one-dark'
+import { EditorView } from '@codemirror/view'
+import { autocompletion, completionStatus } from '@codemirror/autocomplete'
+import type { Completion, CompletionContext, CompletionResult } from '@codemirror/autocomplete'
+import { SIMML_SCHEMA, flattenSchema } from '#/data/simml-schema'
+import {
+  getCursorContext,
+  resolveAttributeHelp,
+  resolveTagHelp,
+  validateSimMlSource,
+} from '#/lib/simml-editor'
 import {
   loadSimulationExamples,
   parseSimMl,
   runMonteCarlo,
   runSensitivityAnalysis,
   runVisualSimulation,
-  type BoardSnapshot,
 } from '#/lib/kanban-scrum-sim'
+import type { BoardSnapshot } from '#/lib/kanban-scrum-sim'
 
 export const Route = createFileRoute('/kanban-scrum-sim')({
   component: KanbanScrumSimPage,
@@ -19,6 +32,116 @@ const DEFAULT_EXAMPLE =
 
 const KANBAN_EXAMPLES = EXAMPLES.filter((example) => example.type === 'kanban')
 const SCRUM_EXAMPLES = EXAMPLES.filter((example) => example.type === 'scrum')
+const TAG_NAMES = Array.from(
+  new Set(flattenSchema(SIMML_SCHEMA).map(({ element }) => element.tag)),
+).sort((left, right) => left.localeCompare(right))
+
+function simmlCompletionSource(context: CompletionContext): CompletionResult | null {
+  const source = context.state.doc.toString()
+  const pos = context.pos
+  const before = source.slice(0, pos)
+  const lastOpen = before.lastIndexOf('<')
+  const lastClose = before.lastIndexOf('>')
+
+  if (lastOpen < 0 || lastOpen <= lastClose) return null
+
+  const fragment = before.slice(lastOpen)
+  if (fragment.startsWith('<!--')) return null
+
+  const tagMatch = fragment.match(/^<\/?([A-Za-z_][\w:.-]*)?/) ?? null
+  const activeTag = tagMatch?.[1] ?? null
+
+  const valueMatch = fragment.match(/([A-Za-z_][\w:-]*)\s*=\s*(["'])([^"']*)$/)
+  if (valueMatch && activeTag) {
+    const attributeName = valueMatch[1]
+    const quote = valueMatch[2]
+    const currentValue = valueMatch[3]
+    const tagHelp = resolveTagHelp(activeTag)
+    const attributeHelp = tagHelp?.attributes.find((attribute) => attribute.name === attributeName)
+    const values = attributeHelp?.validValues ?? []
+
+    if (!values.length) return null
+
+    const valueFrom = pos - currentValue.length
+    let valueTo = pos
+    while (valueTo < source.length && source[valueTo] !== quote) {
+      valueTo += 1
+    }
+
+    return {
+      from: valueFrom,
+      to: valueTo,
+      options: values
+        .filter((value) => value.toLowerCase().startsWith(currentValue.toLowerCase()))
+        .map((value) => ({
+          label: value,
+          type: 'enum',
+          detail: `${attributeName} value`,
+          apply: (view: EditorView, completion: Completion, from: number, to: number) => {
+            const selectedValue = completion.label
+            view.dispatch({
+              changes: { from, to, insert: selectedValue },
+              selection: { anchor: from + selectedValue.length },
+              scrollIntoView: true,
+            })
+          },
+        })),
+      validFor: /^[\w-]*$/,
+    }
+  }
+
+  const tagNameMatch = fragment.match(/^<\/?([A-Za-z_][\w:.-]*)?$/)
+  if (tagNameMatch) {
+    const typed = tagNameMatch[1]
+    let tagTo = pos
+    while (tagTo < source.length && /[\w:.-]/.test(source[tagTo] ?? '')) {
+      tagTo += 1
+    }
+    return {
+      from: pos - typed.length,
+      to: tagTo,
+      options: TAG_NAMES.filter((tag) => tag.toLowerCase().startsWith(typed.toLowerCase())).map((tag) => ({
+        label: tag,
+        type: 'type',
+      })),
+      validFor: /^[A-Za-z_][\w:.-]*$/,
+    }
+  }
+
+  if (!activeTag) return null
+  const tagHelp = resolveTagHelp(activeTag)
+  if (!tagHelp) return null
+
+  const existingAttributes = new Set(Array.from(fragment.matchAll(/([A-Za-z_][\w:-]*)\s*=/g), (match) => match[1]))
+  const partialAttributeMatch = fragment.match(/(?:\s+)([A-Za-z_][\w:-]*)?$/)
+  const partialAttribute = partialAttributeMatch?.[1] ?? ''
+  if (!context.explicit && !partialAttribute && !fragment.endsWith(' ')) return null
+
+  let attributeTo = pos
+  while (attributeTo < source.length && /[\w:-]/.test(source[attributeTo] ?? '')) {
+    attributeTo += 1
+  }
+
+  const options = tagHelp.attributes
+    .filter((attribute) => attribute.name.toLowerCase().startsWith(partialAttribute.toLowerCase()))
+    .filter((attribute) => !existingAttributes.has(attribute.name) || attribute.name === partialAttribute)
+    .map((attribute) => ({
+      label: attribute.name,
+      type: 'property',
+      detail: attribute.mandatory ? 'required' : 'optional',
+      info: attribute.description,
+      apply: `${attribute.name}=""`,
+    }))
+
+  if (!options.length) return null
+
+  return {
+    from: pos - partialAttribute.length,
+    to: attributeTo,
+    options,
+    validFor: /^[A-Za-z_][\w:-]*$/,
+  }
+}
 
 type SimulationResults = {
   visual: ReturnType<typeof runVisualSimulation>
@@ -28,8 +151,9 @@ type SimulationResults = {
 
 function KanbanScrumSimPage() {
   const [isClient, setIsClient] = useState(false)
-  const [selectedExampleId, setSelectedExampleId] = useState(DEFAULT_EXAMPLE?.id ?? '')
-  const [source, setSource] = useState(DEFAULT_EXAMPLE?.source ?? '')
+  const [selectedExampleId, setSelectedExampleId] = useState(DEFAULT_EXAMPLE.id)
+  const [source, setSource] = useState(DEFAULT_EXAMPLE.source)
+  const [cursor, setCursor] = useState(0)
   const [stepIndex, setStepIndex] = useState(0)
   const [cycles, setCycles] = useState(300)
   const [runVersion, setRunVersion] = useState(0)
@@ -37,14 +161,16 @@ function KanbanScrumSimPage() {
   const [isSimulating, setIsSimulating] = useState(false)
   const [isExplorerOpen, setIsExplorerOpen] = useState(false)
   const [activeExampleTab, setActiveExampleTab] = useState<'kanban' | 'scrum'>(
-    DEFAULT_EXAMPLE?.type ?? 'kanban',
+    DEFAULT_EXAMPLE.type,
   )
+  const editorRef = useRef<EditorView | null>(null)
 
   const selectedExample = EXAMPLES.find((example) => example.id === selectedExampleId) ?? null
 
   useEffect(() => {
     if (!selectedExample) return
     setSource(selectedExample.source)
+    setCursor(0)
     setStepIndex(0)
     setActiveExampleTab(selectedExample.type)
   }, [selectedExampleId, selectedExample])
@@ -66,6 +192,58 @@ function KanbanScrumSimPage() {
   }, [isClient, source])
   const parsed = parseResult.model
   const modelError = parseResult.error
+  const diagnostics = useMemo(() => (isClient ? validateSimMlSource(source) : []), [isClient, source])
+  const context = useMemo(
+    () =>
+      isClient
+        ? getCursorContext(source, cursor)
+        : { activeTag: null, activeAttribute: null, inOpenTag: false, suggestedAttributes: [] },
+    [isClient, source, cursor],
+  )
+  const activeTag = resolveTagHelp(context.activeTag)
+  const activeAttribute = resolveAttributeHelp(context.activeTag, context.activeAttribute)
+  const enumAttributes = useMemo(
+    () => activeTag?.attributes.filter((attribute) => attribute.validValues?.length) ?? [],
+    [activeTag],
+  )
+  const editorExtensions = useMemo(
+    () => [
+      xml(),
+      EditorView.lineWrapping,
+      autocompletion({
+        override: [simmlCompletionSource],
+        selectOnOpen: false,
+        interactionDelay: 0,
+      }),
+    ],
+    [],
+  )
+
+  function insertAttribute(attributeName: string) {
+    const editor = editorRef.current
+    if (!editor) return
+    const selection = editor.state.selection.main
+    const insertion = ` ${attributeName}=""`
+    const nextCursor = selection.from + insertion.length - 1
+    editor.dispatch({
+      changes: { from: selection.from, to: selection.to, insert: insertion },
+      selection: { anchor: nextCursor },
+      scrollIntoView: true,
+    })
+    editor.focus()
+  }
+
+  function focusLocation(line: number, column: number) {
+    const lines = source.split('\n')
+    const lineIndex = Math.max(0, Math.min(lines.length - 1, line - 1))
+    const offset = lines.slice(0, lineIndex).reduce((total, current) => total + current.length + 1, 0)
+    const target = offset + Math.max(0, column - 1)
+    setCursor(target)
+    const editor = editorRef.current
+    if (!editor) return
+    editor.dispatch({ selection: { anchor: target }, scrollIntoView: true })
+    editor.focus()
+  }
 
   useEffect(() => {
     if (!parsed) {
@@ -121,12 +299,6 @@ function KanbanScrumSimPage() {
                 SimML Reference
                 <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="currentColor"><path d="M4.53 4.53a.75.75 0 0 1 1.06 0l5.72 5.72V5a.75.75 0 0 1 1.5 0v7.25a.75.75 0 0 1-.75.75H4.81a.75.75 0 0 1 0-1.5h5.25L4.53 5.59a.75.75 0 0 1 0-1.06Z" /></svg>
               </Link>
-              <Link
-                to="/simml-studio"
-                className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-[rgba(50,143,151,0.3)] bg-[rgba(79,184,178,0.14)] px-3.5 py-1.5 text-xs font-semibold text-[var(--lagoon-deep)] no-underline transition hover:-translate-y-0.5 hover:bg-[rgba(79,184,178,0.24)]"
-              >
-                Open SimML Studio
-              </Link>
             </div>
 
             <div className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--surface)] p-5">
@@ -158,6 +330,7 @@ function KanbanScrumSimPage() {
                   startTransition(() => {
                     setSelectedExampleId('')
                     setSource(text)
+                    setCursor(0)
                     setStepIndex(0)
                   })
                 }}
@@ -266,12 +439,105 @@ function KanbanScrumSimPage() {
             </button>
           </div>
 
-          <textarea
-            className="mt-4 min-h-[420px] w-full rounded-[1.5rem] border border-[rgba(141,229,219,0.18)] bg-[#0d2034] p-4 font-mono text-[12px] leading-6 text-[#e6f3ff] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] outline-none focus:border-[var(--lagoon)]"
-            spellCheck={false}
-            value={source}
-            onChange={(event) => setSource(event.target.value)}
-          />
+          <div className="mt-4 overflow-hidden rounded-[1.5rem] border border-[rgba(141,229,219,0.18)] bg-[#0d2034] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+            {isClient ? (
+              <CodeMirror
+                value={source}
+                height="420px"
+                basicSetup={{
+                  foldGutter: true,
+                  dropCursor: true,
+                  allowMultipleSelections: false,
+                  autocompletion: false,
+                }}
+                theme={oneDark}
+                extensions={editorExtensions}
+                onCreateEditor={(view) => {
+                  editorRef.current = view
+                }}
+                onUpdate={(update) => {
+                  if (!update.docChanged && !update.selectionSet) return
+                  if (update.docChanged) {
+                    const nextSource = update.state.doc.toString()
+                    setSource((current) => (current === nextSource ? current : nextSource))
+                  }
+                  if (update.selectionSet) {
+                    const status = completionStatus(update.state)
+                    if (status === 'active' || status === 'pending') return
+                    const nextCursor = update.state.selection.main.head
+                    setCursor((current) => (current === nextCursor ? current : nextCursor))
+                  }
+                }}
+              />
+            ) : (
+              <textarea
+                className="min-h-[420px] w-full resize-none bg-[#0d2034] p-4 font-mono text-[12px] leading-6 text-[#e6f3ff] outline-none"
+                value={source}
+                readOnly
+              />
+            )}
+          </div>
+
+          <div className="mt-4 grid gap-4 lg:grid-cols-3">
+            <div className="rounded-[1rem] border border-[var(--line)] bg-[var(--surface)] p-3">
+              <p className="island-kicker">Validation</p>
+              <p className="mt-2 text-xs text-[var(--sea-ink-soft)]">
+                {diagnostics.length
+                  ? `${diagnostics.filter((item) => item.severity === 'error').length} errors, ${diagnostics.filter((item) => item.severity === 'warning').length} warnings`
+                  : 'No schema or syntax diagnostics'}
+              </p>
+            </div>
+
+            <div className="rounded-[1rem] border border-[var(--line)] bg-[var(--surface)] p-3">
+              <p className="island-kicker">Context-aware help</p>
+              {activeTag ? (
+                <>
+                  <p className="mt-2 text-xs text-[var(--sea-ink-soft)]">&lt;{activeTag.tag}&gt;</p>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {context.suggestedAttributes.slice(0, 8).map((attribute) => (
+                      <button
+                        key={attribute.name}
+                        type="button"
+                        className="rounded-full border border-[var(--line)] bg-[var(--surface-strong)] px-2.5 py-1 text-[11px]"
+                        onClick={() => insertAttribute(attribute.name)}
+                      >
+                        {attribute.name}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <p className="mt-2 text-xs text-[var(--sea-ink-soft)]">Place cursor inside an opening tag.</p>
+              )}
+              {activeAttribute?.validValues?.length ? (
+                <p className="mt-2 text-xs text-[var(--sea-ink-soft)]">Values: {activeAttribute.validValues.join(', ')}</p>
+              ) : null}
+              {enumAttributes.length ? (
+                <p className="mt-2 text-xs text-[var(--sea-ink-soft)]">Enum attributes: {enumAttributes.map((item) => item.name).join(', ')}</p>
+              ) : null}
+            </div>
+
+            <div className="rounded-[1rem] border border-[var(--line)] bg-[var(--surface)] p-3">
+              <p className="island-kicker">Diagnostics</p>
+              <ul className="mt-2 max-h-[140px] space-y-2 overflow-auto pr-1 text-xs">
+                {diagnostics.length === 0 ? (
+                  <li className="rounded-lg border border-emerald-200 bg-emerald-50 p-2 text-emerald-800">All checks are passing.</li>
+                ) : (
+                  diagnostics.slice(0, 8).map((diagnostic, index) => (
+                    <button
+                      key={`${diagnostic.message}-${index}`}
+                      type="button"
+                      className={`block w-full rounded-lg border p-2 text-left ${diagnostic.severity === 'error' ? 'border-red-200 bg-red-50 text-red-900' : 'border-amber-200 bg-amber-50 text-amber-900'}`}
+                      onClick={() => focusLocation(diagnostic.line, diagnostic.column)}
+                    >
+                      <p className="font-semibold">{diagnostic.severity.toUpperCase()} · line {diagnostic.line}, col {diagnostic.column}</p>
+                      <p className="mt-0.5">{diagnostic.message}</p>
+                    </button>
+                  ))
+                )}
+              </ul>
+            </div>
+          </div>
 
           {modelError ? (
             <div className="mt-4 rounded-2xl border border-red-300/60 bg-red-50/80 p-4 text-sm text-red-900">
