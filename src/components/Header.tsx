@@ -127,6 +127,12 @@ export default function Header() {
           >
             Training ↗
           </a>
+          <Link
+            to="/contact"
+            className="nav-link rounded-lg px-3 py-2 text-sm font-semibold no-underline"
+          >
+            Contact
+          </Link>
 
           <a
             href={SCHEDULE_CALL_URL}
@@ -275,6 +281,14 @@ export default function Header() {
           >
             Training ↗
           </a>
+          <Link
+            to="/contact"
+            className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-[var(--sea-ink-soft)] no-underline transition hover:bg-[var(--link-bg-hover)] hover:text-[var(--sea-ink)]"
+            activeProps={{ className: 'block rounded-lg px-3 py-2.5 text-sm font-semibold text-[var(--sea-ink)] no-underline bg-[var(--link-bg-hover)]' }}
+            onClick={() => setMobileOpen(false)}
+          >
+            Contact
+          </Link>
 
           <a
             href={SCHEDULE_CALL_URL}

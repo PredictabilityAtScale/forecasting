@@ -20,6 +20,7 @@ import { Route as SimmlEditorRouteImport } from './routes/simml-editor'
 import { Route as MultiFeatureRouteImport } from './routes/multi-feature'
 import { Route as LatentDefectRouteImport } from './routes/latent-defect'
 import { Route as KanbanScrumSimRouteImport } from './routes/kanban-scrum-sim'
+import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CapabilityMatrixRouteImport } from './routes/capability-matrix'
 import { Route as IndexRouteImport } from './routes/index'
 
@@ -78,6 +79,11 @@ const KanbanScrumSimRoute = KanbanScrumSimRouteImport.update({
   path: '/kanban-scrum-sim',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CapabilityMatrixRoute = CapabilityMatrixRouteImport.update({
   id: '/capability-matrix',
   path: '/capability-matrix',
@@ -92,6 +98,7 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/capability-matrix': typeof CapabilityMatrixRoute
+  '/contact': typeof ContactRoute
   '/kanban-scrum-sim': typeof KanbanScrumSimRoute
   '/latent-defect': typeof LatentDefectRoute
   '/multi-feature': typeof MultiFeatureRoute
@@ -107,6 +114,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/capability-matrix': typeof CapabilityMatrixRoute
+  '/contact': typeof ContactRoute
   '/kanban-scrum-sim': typeof KanbanScrumSimRoute
   '/latent-defect': typeof LatentDefectRoute
   '/multi-feature': typeof MultiFeatureRoute
@@ -123,6 +131,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/capability-matrix': typeof CapabilityMatrixRoute
+  '/contact': typeof ContactRoute
   '/kanban-scrum-sim': typeof KanbanScrumSimRoute
   '/latent-defect': typeof LatentDefectRoute
   '/multi-feature': typeof MultiFeatureRoute
@@ -140,6 +149,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/capability-matrix'
+    | '/contact'
     | '/kanban-scrum-sim'
     | '/latent-defect'
     | '/multi-feature'
@@ -155,6 +165,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/capability-matrix'
+    | '/contact'
     | '/kanban-scrum-sim'
     | '/latent-defect'
     | '/multi-feature'
@@ -170,6 +181,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/capability-matrix'
+    | '/contact'
     | '/kanban-scrum-sim'
     | '/latent-defect'
     | '/multi-feature'
@@ -186,6 +198,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CapabilityMatrixRoute: typeof CapabilityMatrixRoute
+  ContactRoute: typeof ContactRoute
   KanbanScrumSimRoute: typeof KanbanScrumSimRoute
   LatentDefectRoute: typeof LatentDefectRoute
   MultiFeatureRoute: typeof MultiFeatureRoute
@@ -278,6 +291,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof KanbanScrumSimRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/capability-matrix': {
       id: '/capability-matrix'
       path: '/capability-matrix'
@@ -298,6 +318,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CapabilityMatrixRoute: CapabilityMatrixRoute,
+  ContactRoute: ContactRoute,
   KanbanScrumSimRoute: KanbanScrumSimRoute,
   LatentDefectRoute: LatentDefectRoute,
   MultiFeatureRoute: MultiFeatureRoute,
