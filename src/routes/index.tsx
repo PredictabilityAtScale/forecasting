@@ -78,7 +78,7 @@ const PRODUCT_HIGHLIGHTS = [
   {
     name: 'FocusedFit AI',
     href: 'https://focusedfit.ai',
-    logo: '/images/products/focusedfit-logo.svg',
+    logo: '/images/products/focusedfit-logo.png',
     summary:
       'AI-powered recruiting support designed to help teams identify stronger-fit candidates faster, streamline screening, and improve hiring confidence.',
   },
