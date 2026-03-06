@@ -52,6 +52,46 @@ const MAIN_COURSES = [
   },
 ] as const
 
+const PRODUCT_HIGHLIGHTS = [
+  {
+    name: 'UsageTap',
+    href: 'https://usagetap.com',
+    logo: '/images/products/usagetap-logo.svg',
+    summary:
+      'Product analytics and user insights made simple so teams can quickly understand feature adoption, retention signals, and growth opportunities.',
+  },
+  {
+    name: 'AskPilot',
+    href: 'https://askpilot.io',
+    logo: '/images/products/askpilot-logo.svg',
+    summary:
+      'An AI copilot experience for faster answers and better decisions, helping teams turn scattered information into actionable, context-aware guidance.',
+  },
+  {
+    name: 'LLM as a Service',
+    href: 'https://llmasaservice.io',
+    logo: '/images/products/llm-service-logo.svg',
+    summary:
+      'Managed LLM infrastructure that accelerates shipping AI-powered products with reliable performance, security-minded controls, and clean integrations.',
+  },
+
+  {
+    name: 'FocusedFit AI',
+    href: 'https://focusedfit.ai',
+    logo: '/images/products/focusedfit-logo.svg',
+    summary:
+      'AI-powered recruiting support designed to help teams identify stronger-fit candidates faster, streamline screening, and improve hiring confidence.',
+  },
+  {
+    name: 'HeyCasey',
+    href: 'https://heycasey.io',
+    logo: '/images/products/heycasey-logo.svg',
+    summary:
+      'A conversational AI assistant focused on productivity, helping individuals and teams move from ideas to polished work with less friction.',
+    logoOnDark: true,
+  },
+] as const
+
 export const Route = createFileRoute('/')({ component: App })
 
 function App() {
@@ -112,6 +152,50 @@ function App() {
               View more courses
             </a>
           </div>
+        </div>
+      </section>
+
+      {/* Product highlights */}
+      <section className="island-shell mt-10 overflow-hidden rounded-3xl px-6 py-8 sm:px-8 sm:py-10 lg:px-10">
+        <div className="mb-6 flex flex-col gap-2 sm:mb-8">
+          <p className="island-kicker m-0">Featured Products & Projects</p>
+          <h2 className="m-0 text-2xl font-semibold text-[var(--sea-ink)] sm:text-3xl">
+            Products we&apos;re excited about
+          </h2>
+          <p className="m-0 max-w-3xl text-sm leading-relaxed text-[var(--sea-ink-soft)] sm:text-base">
+            A curated set of AI and product-focused projects designed to help teams learn faster,
+            build confidently, and deliver smarter customer outcomes.
+          </p>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          {PRODUCT_HIGHLIGHTS.map((product) => (
+            <a
+              key={product.href}
+              href={product.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="feature-card group flex items-start gap-4 rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-5 no-underline transition hover:-translate-y-0.5"
+            >
+              <div
+                className={`flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-[var(--line)] p-2 ${"logoOnDark" in product ? "bg-[#111827]" : "bg-white"}`}
+              >
+                <img src={product.logo} alt={`${product.name} logo`} className="h-full w-full object-contain" loading="lazy" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h3 className="mb-1 text-lg font-semibold text-[var(--sea-ink)] group-hover:text-[var(--lagoon-deep)]">
+                  {product.name}
+                </h3>
+                <p className="m-0 text-sm leading-relaxed text-[var(--sea-ink-soft)]">{product.summary}</p>
+                <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-[var(--lagoon-deep)]">
+                  Visit project
+                  <svg className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M6.22 3.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L9.94 8 6.22 4.28a.75.75 0 0 1 0-1.06Z" />
+                  </svg>
+                </span>
+              </div>
+            </a>
+          ))}
         </div>
       </section>
 
