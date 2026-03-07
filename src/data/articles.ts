@@ -20,21 +20,17 @@ type Frontmatter = Partial<{
 }>
 
 function parseFrontmatter(raw: string): { frontmatter: Frontmatter; body: string } {
-  const trimmed = raw.replace(/^\uFEFF/, '')
-  if (!trimmed.startsWith('---\n')) {
+  const content = raw.replace(/^\uFEFF/, '')
+  const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/)
+  if (!match) {
     return { frontmatter: {}, body: raw }
   }
 
-  const end = trimmed.indexOf('\n---\n', 4)
-  if (end === -1) {
-    return { frontmatter: {}, body: raw }
-  }
-
-  const fmBlock = trimmed.slice(4, end)
-  const body = trimmed.slice(end + '\n---\n'.length)
+  const fmBlock = match[1]
+  const body = content.slice(match[0].length)
 
   const frontmatter: Frontmatter = {}
-  for (const line of fmBlock.split('\n')) {
+  for (const line of fmBlock.split(/\r?\n/)) {
     const m = line.match(/^([A-Za-z0-9_]+)\s*:\s*(.*)$/)
     if (!m) continue
     const key = m[1]
@@ -81,7 +77,11 @@ function entryFromFile(path: string, raw: string): ArticleEntry {
 }
 
 // Load markdown from both published + drafts directories.
-const modules = import.meta.glob('#/content/articles/**/*.{md,mdx}', { as: 'raw', eager: true })
+const modules = import.meta.glob('../content/articles/**/*.{md,mdx}', {
+  eager: true,
+  query: '?raw',
+  import: 'default',
+})
 
 export const ARTICLE_ENTRIES: ArticleEntry[] = Object.entries(modules)
   .map(([path, raw]) => entryFromFile(path, raw as string))

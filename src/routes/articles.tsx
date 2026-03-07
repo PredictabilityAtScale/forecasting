@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { Outlet, createFileRoute, Link, useRouterState } from '@tanstack/react-router'
 import { ARTICLE_ENTRIES } from '#/data/articles'
 
 export const Route = createFileRoute('/articles')({
@@ -13,6 +13,13 @@ const formatDate = (date: string) =>
   }).format(new Date(`${date}T12:00:00Z`))
 
 function ArticlesPage() {
+  const pathname = useRouterState({ select: (state) => state.location.pathname })
+  const isArchiveIndex = pathname === '/articles'
+
+  if (!isArchiveIndex) {
+    return <Outlet />
+  }
+
   const weeklyArticles = ARTICLE_ENTRIES.filter(
     (entry) => entry.type === 'article' && entry.status === 'published',
   )
