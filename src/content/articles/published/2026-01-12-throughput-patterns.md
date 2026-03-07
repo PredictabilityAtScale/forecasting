@@ -1,3 +1,11 @@
+---
+title: "Throughput patterns: what changed this week?"
+summary: "A weekly checklist to convert throughput data into useful communication for stakeholders."
+publishedAt: "2026-01-12"
+type: "article"
+status: "published"
+---
+
 # Throughput patterns: what changed this week?
 
 Teams often miss turning weekly throughput data into clear decisions. This note gives a fast routine for every Friday.

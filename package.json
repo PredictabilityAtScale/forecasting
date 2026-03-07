@@ -12,7 +12,8 @@
     "test": "vitest run",
     "lint": "eslint",
     "format": "prettier --check .",
-    "check": "prettier --write . && eslint --fix"
+    "check": "prettier --write . && eslint --fix",
+    "new:draft": "node scripts/new-article-draft.mjs"
   },
   "dependencies": {
     "@codemirror/autocomplete": "^6.20.1",

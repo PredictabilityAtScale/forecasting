@@ -13,8 +13,12 @@ const formatDate = (date: string) =>
   }).format(new Date(`${date}T12:00:00Z`))
 
 function ArticlesPage() {
-  const weeklyArticles = ARTICLE_ENTRIES.filter((entry) => entry.type === 'article')
-  const newsletterArchive = ARTICLE_ENTRIES.filter((entry) => entry.type === 'newsletter')
+  const weeklyArticles = ARTICLE_ENTRIES.filter(
+    (entry) => entry.type === 'article' && entry.status === 'published',
+  )
+  const newsletterArchive = ARTICLE_ENTRIES.filter(
+    (entry) => entry.type === 'newsletter' && entry.status === 'published',
+  )
 
   return (
     <main className="mx-auto max-w-7xl px-4 pb-16 pt-10 sm:px-6 lg:px-8">

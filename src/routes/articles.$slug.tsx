@@ -10,6 +10,11 @@ export const Route = createFileRoute('/articles/$slug')({
       throw notFound()
     }
 
+    // Never show drafts in production builds.
+    if (entry.status === 'draft' && !import.meta.env.DEV) {
+      throw notFound()
+    }
+
     return entry
   },
   component: ArticleDetailPage,
