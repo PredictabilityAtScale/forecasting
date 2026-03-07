@@ -1,12 +1,14 @@
 ---
 title: "Focused Objective: Introduction"
 summary: "Why I’m relaunching Focused Objective for predictable delivery in an AI engineering world."
-publishedAt: "2026-03-10"
+publishedAt: "2026-03-06"
 type: "article"
-status: "draft"
+status: "published"
 ---
 
 # Focused Objective: Introduction
+
+YT:https://youtu.be/LuUwfELE0ts
 
 Video: [Watch on YouTube](https://youtu.be/LuUwfELE0ts)
 

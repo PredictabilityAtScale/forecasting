@@ -8,6 +8,8 @@ status: "draft"
 
 # AI Leadership (Part 1): What work should be automated?
 
+YT:https://youtu.be/1VxmB_s6UBY
+
 Video: [Watch on YouTube](https://youtu.be/1VxmB_s6UBY)
 
 AI doesn’t mean “automate everything.”

@@ -8,6 +8,8 @@ status: "draft"
 
 # Forecasting Errors (Part 3): Split rate (granularity mismatch)
 
+YT:https://youtu.be/ajIkuoAOGys
+
 Video: [Watch on YouTube](https://youtu.be/ajIkuoAOGys)
 
 This one is subtle, common, and can easily create a 2x miss.

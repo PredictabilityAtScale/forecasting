@@ -3,7 +3,7 @@ title: "Newsletter #2 — Confidence intervals people can actually use"
 summary: "How to present confidence intervals in a way that supports better product decisions."
 publishedAt: "2026-01-17"
 type: "newsletter"
-status: "published"
+status: "draft"
 ---
 
 # Newsletter #2 — Confidence intervals people can actually use

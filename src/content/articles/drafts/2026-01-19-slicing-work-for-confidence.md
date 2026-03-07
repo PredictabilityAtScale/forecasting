@@ -3,7 +3,7 @@ title: "Slice work smaller to tighten forecast confidence"
 summary: "Practical ways to reduce forecast spread by making work sizing and splitting more consistent."
 publishedAt: "2026-01-19"
 type: "article"
-status: "published"
+status: "draft"
 ---
 
 # Slice work smaller to tighten forecast confidence

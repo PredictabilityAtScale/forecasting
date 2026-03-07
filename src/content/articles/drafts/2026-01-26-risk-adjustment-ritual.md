@@ -3,7 +3,7 @@ title: "A weekly risk-adjustment ritual for delivery plans"
 summary: "A fast 20-minute weekly routine to recalibrate delivery ranges with transparent assumptions."
 publishedAt: "2026-01-26"
 type: "article"
-status: "published"
+status: "draft"
 ---
 
 # A weekly risk-adjustment ritual for delivery plans

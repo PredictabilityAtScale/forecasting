@@ -8,6 +8,8 @@ status: "draft"
 
 # Forecasting Errors (Part 1): Start date + double-dipping throughput
 
+YT:https://youtu.be/HvcD9qEEqyc
+
 Video: [Watch on YouTube](https://youtu.be/HvcD9qEEqyc)
 
 This is the first in a short series of the most common forecasting errors I see in product engineering.

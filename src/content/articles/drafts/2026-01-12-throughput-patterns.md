@@ -3,7 +3,7 @@ title: "Throughput patterns: what changed this week?"
 summary: "A weekly checklist to convert throughput data into useful communication for stakeholders."
 publishedAt: "2026-01-12"
 type: "article"
-status: "published"
+status: "draft"
 ---
 
 # Throughput patterns: what changed this week?

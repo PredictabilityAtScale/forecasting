@@ -8,6 +8,8 @@ status: "draft"
 
 # Forecasting Errors (Part 2): Recency, relevance, seasonality
 
+YT:https://youtu.be/1u4RDhNrd5s
+
 Video: [Watch on YouTube](https://youtu.be/1u4RDhNrd5s)
 
 Using historical throughput is good practice—until the data stops being representative of your current system.

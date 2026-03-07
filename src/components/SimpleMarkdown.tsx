@@ -43,6 +43,46 @@ function renderInline(text: string): ReactNode {
   return nodes.map((node, index) => <Fragment key={`inline-${index}`}>{node}</Fragment>)
 }
 
+function youtubeIdFromUrl(url: string) {
+  try {
+    const u = new URL(url)
+    if (u.hostname === 'youtu.be') {
+      return u.pathname.replace('/', '').trim() || null
+    }
+    if (u.hostname.endsWith('youtube.com')) {
+      return u.searchParams.get('v')
+    }
+  } catch {
+    // ignore
+  }
+  return null
+}
+
+function renderYouTubeEmbed(url: string, key: string): ReactNode {
+  const id = youtubeIdFromUrl(url)
+  if (!id) {
+    return (
+      <p key={key} className="my-4 leading-relaxed text-[var(--sea-ink-soft)]">
+        {renderInline(url)}
+      </p>
+    )
+  }
+
+  return (
+    <div key={key} className="my-6">
+      <div className="relative w-full overflow-hidden rounded-2xl bg-black" style={{ paddingTop: '56.25%' }}>
+        <iframe
+          className="absolute left-0 top-0 h-full w-full"
+          src={`https://www.youtube.com/embed/${id}`}
+          title="YouTube video"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+        />
+      </div>
+    </div>
+  )
+}
+
 export default function SimpleMarkdown({ content }: SimpleMarkdownProps) {
   const lines = content.split('\n')
   const blocks: ReactNode[] = []
@@ -69,6 +109,11 @@ export default function SimpleMarkdown({ content }: SimpleMarkdownProps) {
           {line.slice(3)}
         </h2>,
       )
+      continue
+    }
+
+    if (line.startsWith('YT:')) {
+      blocks.push(renderYouTubeEmbed(line.slice(3).trim(), `yt-${i}`))
       continue
     }
 

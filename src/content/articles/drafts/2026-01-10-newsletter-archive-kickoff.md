@@ -3,7 +3,7 @@ title: "Newsletter #1 — Forecasting archive kickoff"
 summary: "The first archived issue and the new weekly publishing rhythm for article + newsletter updates."
 publishedAt: "2026-01-10"
 type: "newsletter"
-status: "published"
+status: "draft"
 ---
 
 # Newsletter #1 — Forecasting archive kickoff
