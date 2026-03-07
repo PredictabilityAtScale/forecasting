@@ -24,6 +24,7 @@ export const Route = createFileRoute('/articles/$slug')({
     const description = buildMetaDescription(entry.summary, entry.markdown)
     const canonical = `${SITE_URL}/articles/${entry.slug}`
     const publishedTime = `${entry.publishedAt}T12:00:00Z`
+    const heroImage = entry.heroImage?.trim() ? `${SITE_URL}${entry.heroImage}` : `${SITE_URL}/fo.jpg`
 
     return {
       meta: [
@@ -36,12 +37,12 @@ export const Route = createFileRoute('/articles/$slug')({
         { property: 'og:title', content: title },
         { property: 'og:description', content: description },
         { property: 'og:url', content: canonical },
-        { property: 'og:image', content: `${SITE_URL}/fo.jpg` },
+        { property: 'og:image', content: heroImage },
         { property: 'article:published_time', content: publishedTime },
         { name: 'twitter:card', content: 'summary_large_image' },
         { name: 'twitter:title', content: title },
         { name: 'twitter:description', content: description },
-        { name: 'twitter:image', content: `${SITE_URL}/fo.jpg` },
+        { name: 'twitter:image', content: heroImage },
       ],
       links: [{ rel: 'canonical', href: canonical }],
     }
@@ -75,7 +76,21 @@ function ArticleDetailPage() {
         {entry.summary ? (
           <p className="mt-3 max-w-3xl text-lg leading-relaxed text-[var(--sea-ink-soft)]">{entry.summary}</p>
         ) : null}
-        <div className="mt-4">
+        {entry.heroImage ? (
+          <div className="mt-6 overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--sea-foam)]">
+            <img
+              src={entry.heroImage}
+              alt=""
+              loading="lazy"
+              className="h-auto w-full"
+              onError={(event) => {
+                const img = event.currentTarget
+                img.style.display = 'none'
+              }}
+            />
+          </div>
+        ) : null}
+        <div className="mt-6">
           <SimpleMarkdown content={articleContent} />
         </div>
       </section>

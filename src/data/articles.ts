@@ -8,6 +8,7 @@ export interface ArticleEntry {
   publishedAt: string
   type: ArticleType
   status: ArticleStatus
+  heroImage?: string
   markdown: string
 }
 
@@ -17,6 +18,7 @@ type Frontmatter = Partial<{
   publishedAt: string
   type: ArticleType
   status: ArticleStatus
+  heroImage: string
 }>
 
 function parseFrontmatter(raw: string): { frontmatter: Frontmatter; body: string } {
@@ -42,6 +44,7 @@ function parseFrontmatter(raw: string): { frontmatter: Frontmatter; body: string
     if (key === 'publishedAt') frontmatter.publishedAt = value
     if (key === 'type' && (value === 'article' || value === 'newsletter')) frontmatter.type = value
     if (key === 'status' && (value === 'draft' || value === 'published')) frontmatter.status = value
+    if (key === 'heroImage') frontmatter.heroImage = value
   }
 
   return { frontmatter, body }
@@ -72,6 +75,7 @@ function entryFromFile(path: string, raw: string): ArticleEntry {
     publishedAt,
     type,
     status,
+    heroImage: frontmatter.heroImage,
     markdown: body.trim(),
   }
 }
