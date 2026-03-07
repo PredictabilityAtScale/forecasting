@@ -22,7 +22,9 @@ import { Route as LatentDefectRouteImport } from './routes/latent-defect'
 import { Route as KanbanScrumSimRouteImport } from './routes/kanban-scrum-sim'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CapabilityMatrixRouteImport } from './routes/capability-matrix'
+import { Route as ArticlesRouteImport } from './routes/articles'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ArticlesSlugRouteImport } from './routes/articles.$slug'
 
 const WrongOrderRoute = WrongOrderRouteImport.update({
   id: '/wrong-order',
@@ -89,14 +91,25 @@ const CapabilityMatrixRoute = CapabilityMatrixRouteImport.update({
   path: '/capability-matrix',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ArticlesRoute = ArticlesRouteImport.update({
+  id: '/articles',
+  path: '/articles',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ArticlesSlugRoute = ArticlesSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => ArticlesRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/articles': typeof ArticlesRouteWithChildren
   '/capability-matrix': typeof CapabilityMatrixRoute
   '/contact': typeof ContactRoute
   '/kanban-scrum-sim': typeof KanbanScrumSimRoute
@@ -110,9 +123,11 @@ export interface FileRoutesByFullPath {
   '/throughput': typeof ThroughputRoute
   '/voting': typeof VotingRoute
   '/wrong-order': typeof WrongOrderRoute
+  '/articles/$slug': typeof ArticlesSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/articles': typeof ArticlesRouteWithChildren
   '/capability-matrix': typeof CapabilityMatrixRoute
   '/contact': typeof ContactRoute
   '/kanban-scrum-sim': typeof KanbanScrumSimRoute
@@ -126,10 +141,12 @@ export interface FileRoutesByTo {
   '/throughput': typeof ThroughputRoute
   '/voting': typeof VotingRoute
   '/wrong-order': typeof WrongOrderRoute
+  '/articles/$slug': typeof ArticlesSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/articles': typeof ArticlesRouteWithChildren
   '/capability-matrix': typeof CapabilityMatrixRoute
   '/contact': typeof ContactRoute
   '/kanban-scrum-sim': typeof KanbanScrumSimRoute
@@ -143,11 +160,13 @@ export interface FileRoutesById {
   '/throughput': typeof ThroughputRoute
   '/voting': typeof VotingRoute
   '/wrong-order': typeof WrongOrderRoute
+  '/articles/$slug': typeof ArticlesSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/articles'
     | '/capability-matrix'
     | '/contact'
     | '/kanban-scrum-sim'
@@ -161,9 +180,11 @@ export interface FileRouteTypes {
     | '/throughput'
     | '/voting'
     | '/wrong-order'
+    | '/articles/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/articles'
     | '/capability-matrix'
     | '/contact'
     | '/kanban-scrum-sim'
@@ -177,9 +198,11 @@ export interface FileRouteTypes {
     | '/throughput'
     | '/voting'
     | '/wrong-order'
+    | '/articles/$slug'
   id:
     | '__root__'
     | '/'
+    | '/articles'
     | '/capability-matrix'
     | '/contact'
     | '/kanban-scrum-sim'
@@ -193,10 +216,12 @@ export interface FileRouteTypes {
     | '/throughput'
     | '/voting'
     | '/wrong-order'
+    | '/articles/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ArticlesRoute: typeof ArticlesRouteWithChildren
   CapabilityMatrixRoute: typeof CapabilityMatrixRoute
   ContactRoute: typeof ContactRoute
   KanbanScrumSimRoute: typeof KanbanScrumSimRoute
@@ -305,6 +330,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CapabilityMatrixRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/articles': {
+      id: '/articles'
+      path: '/articles'
+      fullPath: '/articles'
+      preLoaderRoute: typeof ArticlesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -312,11 +344,31 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/articles/$slug': {
+      id: '/articles/$slug'
+      path: '/$slug'
+      fullPath: '/articles/$slug'
+      preLoaderRoute: typeof ArticlesSlugRouteImport
+      parentRoute: typeof ArticlesRoute
+    }
   }
 }
 
+interface ArticlesRouteChildren {
+  ArticlesSlugRoute: typeof ArticlesSlugRoute
+}
+
+const ArticlesRouteChildren: ArticlesRouteChildren = {
+  ArticlesSlugRoute: ArticlesSlugRoute,
+}
+
+const ArticlesRouteWithChildren = ArticlesRoute._addFileChildren(
+  ArticlesRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ArticlesRoute: ArticlesRouteWithChildren,
   CapabilityMatrixRoute: CapabilityMatrixRoute,
   ContactRoute: ContactRoute,
   KanbanScrumSimRoute: KanbanScrumSimRoute,

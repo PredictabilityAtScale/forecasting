@@ -128,6 +128,12 @@ export default function Header() {
             Training ↗
           </a>
           <Link
+            to="/articles"
+            className="nav-link rounded-lg px-3 py-2 text-sm font-semibold no-underline"
+          >
+            Articles
+          </Link>
+          <Link
             to="/contact"
             className="nav-link rounded-lg px-3 py-2 text-sm font-semibold no-underline"
           >
@@ -281,6 +287,14 @@ export default function Header() {
           >
             Training ↗
           </a>
+          <Link
+            to="/articles"
+            className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-[var(--sea-ink-soft)] no-underline transition hover:bg-[var(--link-bg-hover)] hover:text-[var(--sea-ink)]"
+            activeProps={{ className: 'block rounded-lg px-3 py-2.5 text-sm font-semibold text-[var(--sea-ink)] no-underline bg-[var(--link-bg-hover)]' }}
+            onClick={() => setMobileOpen(false)}
+          >
+            Articles
+          </Link>
           <Link
             to="/contact"
             className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-[var(--sea-ink-soft)] no-underline transition hover:bg-[var(--link-bg-hover)] hover:text-[var(--sea-ink)]"
