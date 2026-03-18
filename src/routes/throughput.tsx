@@ -1,47 +1,98 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
+import { z } from 'zod'
 import { runThroughputForecaster } from '#/lib/monte-carlo'
 import type { ThroughputForecasterInputs, ThroughputForecasterResults } from '#/lib/monte-carlo'
 import Field from '#/components/Field'
 import NumberInput from '#/components/NumberInput'
 import { Slider } from '#/components/ui/slider'
 
-type ThroughputSearch = {
-  startDate?: string
-  storyLow?: number
-  storyHigh?: number
-  complexity?: number
-  splitLow?: number
-  splitHigh?: number
-  durationDays?: number
-  throughputMode?: 'estimate' | 'data'
-  tpLow?: number
-  tpMostLikely?: number
-  tpHigh?: number
-  samples?: string
-  focus?: number
-  weeksToForecast?: number
-  numTrials?: number
+const riskSearchSchema = z.object({
+  likelihood: z.number(),
+  impactLow: z.number(),
+  impactHigh: z.number(),
+  description: z.string(),
+})
+
+const throughputSearchSchema = z.object({
+  startDate: z.string().optional(),
+  storyLow: z.number().optional(),
+  storyHigh: z.number().optional(),
+  complexity: z.number().int().optional(),
+  splitLow: z.number().optional(),
+  splitHigh: z.number().optional(),
+  durationIdx: z.number().int().optional(),
+  throughputMode: z.enum(['estimate', 'data']).optional(),
+  tpLow: z.number().optional(),
+  tpMostLikely: z.number().nullable().optional(),
+  tpHigh: z.number().optional(),
+  samplesText: z.string().optional(),
+  focusIdx: z.number().int().optional(),
+  weeksToForecast: z.number().int().optional(),
+  numTrials: z.number().int().optional(),
+  risks: z.array(riskSearchSchema).optional(),
+})
+
+function parseSearchNumber(value: unknown): number | undefined {
+  if (typeof value === 'number' && Number.isFinite(value)) return value
+  if (typeof value === 'string' && value.trim() !== '') {
+    const parsed = Number(value)
+    if (Number.isFinite(parsed)) return parsed
+  }
+  return undefined
+}
+
+function parseSearchInteger(value: unknown): number | undefined {
+  const parsed = parseSearchNumber(value)
+  return parsed != null ? Math.trunc(parsed) : undefined
+}
+
+function parseSearchString(value: unknown): string | undefined {
+  return typeof value === 'string' && value.length > 0 ? value : undefined
+}
+
+function parseSearchRisks(value: unknown): Risk[] | undefined {
+  if (!Array.isArray(value)) return undefined
+  const parsed = value
+    .map((entry) => riskSearchSchema.safeParse(entry))
+    .filter((entry) => entry.success)
+    .map((entry) => entry.data)
+
+  return parsed.length > 0 ? parsed : undefined
 }
 
 export const Route = createFileRoute('/throughput')({
-  validateSearch: (search): ThroughputSearch => ({
-    startDate: readDateParam(search.startDate),
-    storyLow: readNumberParam(search.storyLow),
-    storyHigh: readNumberParam(search.storyHigh),
-    complexity: readIntegerParam(search.complexity, 0, 3),
-    splitLow: readNumberParam(search.splitLow),
-    splitHigh: readNumberParam(search.splitHigh),
-    durationDays: readAllowedNumberParam(search.durationDays, [7, 14, 21, 28]),
-    throughputMode: readThroughputModeParam(search.throughputMode),
-    tpLow: readNumberParam(search.tpLow),
-    tpMostLikely: readNumberParam(search.tpMostLikely),
-    tpHigh: readNumberParam(search.tpHigh),
-    samples: readStringParam(search.samples),
-    focus: readAllowedNumberParam(search.focus, [1, 0.75, 0.5, 0.25]),
-    weeksToForecast: readIntegerParam(search.weeksToForecast, 1, 52),
-    numTrials: readIntegerParam(search.numTrials, 1, 1000),
-  }),
+  validateSearch: (search) =>
+    throughputSearchSchema.parse({
+      startDate: parseSearchString(search.startDate),
+      storyLow: parseSearchInteger(search.storyLow),
+      storyHigh: parseSearchInteger(search.storyHigh),
+      complexity: parseSearchInteger(search.complexity),
+      splitLow: parseSearchNumber(search.splitLow),
+      splitHigh: parseSearchNumber(search.splitHigh),
+      durationIdx:
+        parseSearchInteger(search.durationIdx) ??
+        durationIndexFromDays(parseSearchNumber(search.durationDays)),
+      throughputMode:
+        search.throughputMode === 'estimate' || search.throughputMode === 'data'
+          ? search.throughputMode
+          : undefined,
+      tpLow: parseSearchNumber(search.tpLow),
+      tpMostLikely:
+        search.tpMostLikely === null
+          ? null
+          : parseSearchNumber(search.tpMostLikely),
+      tpHigh: parseSearchNumber(search.tpHigh),
+      samplesText:
+        parseSearchString(search.samplesText) ??
+        normalizeSamplesInput(parseSearchString(search.samples)),
+      focusIdx:
+        parseSearchInteger(search.focusIdx) ??
+        focusIndexFromValue(parseSearchNumber(search.focus)),
+      weeksToForecast: parseSearchInteger(search.weeksToForecast),
+      numTrials: parseSearchInteger(search.numTrials),
+      risks: parseSearchRisks(search.risks),
+    }),
   component: ThroughputForecasterPage,
 })
 
@@ -54,13 +105,14 @@ const QUERY_PARAM_DOCS = [
   ['storyLow, storyHigh', 'Remaining story-count range before complexity adjustment.'],
   ['complexity', 'Complexity preset index: 0-3.'],
   ['splitLow, splitHigh', 'Story split-rate range.'],
-  ['durationDays', 'Throughput unit size: 7, 14, 21, or 28 days.'],
+  ['durationIdx', 'Throughput unit index: 0=1 week, 1=2 weeks, 2=3 weeks, 3=4 weeks.'],
   ['throughputMode', 'Use estimate or data.'],
   ['tpLow, tpMostLikely, tpHigh', 'Estimate-mode throughput inputs.'],
-  ['samples', 'Historical throughput samples, comma-separated or URL-encoded newlines.'],
-  ['focus', 'Team focus: 1, 0.75, 0.5, or 0.25.'],
+  ['samplesText', 'Historical throughput samples, separated by commas or new lines.'],
+  ['focusIdx', 'Focus index: 0=100%, 1=75%, 2=50%, 3=25%.'],
   ['weeksToForecast', 'Story-count forecast window, from 1 to 52 intervals.'],
   ['numTrials', 'Simulation trials, from 1 to 1000.'],
+  ['risks', 'Optional array of risk objects with likelihood, impactLow, impactHigh, and description.'],
 ] as const
 
 const QUERY_PARAM_EXAMPLES = [
@@ -68,13 +120,13 @@ const QUERY_PARAM_EXAMPLES = [
     title: 'Estimate mode with a likely throughput value',
     description: 'Prefills the form with a weekly estimate-based scenario and a start date.',
     search:
-      '?startDate=2026-04-01&storyLow=18&storyHigh=26&complexity=1&splitLow=1&splitHigh=1.4&durationDays=7&throughputMode=estimate&tpLow=3&tpMostLikely=5&tpHigh=8&focus=0.75&weeksToForecast=6&numTrials=750',
+      '?startDate=2026-04-01&storyLow=18&storyHigh=26&complexity=1&splitLow=1&splitHigh=1.4&durationIdx=0&throughputMode=estimate&tpLow=3&tpMostLikely=5&tpHigh=8&focusIdx=1&weeksToForecast=6&numTrials=750',
   },
   {
     title: 'Historical-data mode with 2-week throughput samples',
     description: 'Uses historical samples and a 2-week unit to exercise the data-backed path.',
     search:
-      '?startDate=2026-04-14&storyLow=24&storyHigh=32&complexity=2&splitLow=1.1&splitHigh=1.8&durationDays=14&throughputMode=data&samples=2,3,4,5,3,6,4,5&focus=0.5&weeksToForecast=4&numTrials=600',
+      '?startDate=2026-04-14&storyLow=24&storyHigh=32&complexity=2&splitLow=1.1&splitHigh=1.8&durationIdx=1&throughputMode=data&samplesText=2,3,4,5,3,6,4,5&focusIdx=2&weeksToForecast=4&numTrials=600',
   },
 ] as const
 
@@ -117,155 +169,80 @@ const emptyRisk = (): Risk => ({
   description: '',
 })
 
-function readFirstParam(value: unknown): string | undefined {
-  if (typeof value === 'string') {
-    return value
-  }
-  if (Array.isArray(value) && typeof value[0] === 'string') {
-    return value[0]
-  }
-  return undefined
+function makeDefaultRisks(): Risk[] {
+  return [emptyRisk(), emptyRisk(), emptyRisk()]
 }
 
-function readStringParam(value: unknown): string | undefined {
-  const raw = readFirstParam(value)
-  if (!raw) {
-    return undefined
-  }
-  return raw
+const DEFAULT_RISKS = makeDefaultRisks()
+
+function durationIndexFromDays(days: number | undefined): number | undefined {
+  if (days == null) return undefined
+  const match = DURATION_OPTIONS.findIndex((option) => option.days === days)
+  return match >= 0 ? match : undefined
 }
 
-function readNumberParam(value: unknown): number | undefined {
-  const raw = readFirstParam(value)
-  if (!raw) {
-    return undefined
-  }
-  const parsed = Number(raw)
-  return Number.isFinite(parsed) ? parsed : undefined
+function focusIndexFromValue(value: number | undefined): number | undefined {
+  if (value == null) return undefined
+  const match = FOCUS_OPTIONS.findIndex((option) => option.value === value)
+  return match >= 0 ? match : undefined
 }
 
-function readIntegerParam(value: unknown, min: number, max: number): number | undefined {
-  const parsed = readNumberParam(value)
-  if (parsed == null) {
-    return undefined
-  }
-  if (!Number.isInteger(parsed) || parsed < min || parsed > max) {
-    return undefined
-  }
-  return parsed
-}
-
-function readAllowedNumberParam(
-  value: unknown,
-  allowedValues: readonly number[],
-): number | undefined {
-  const parsed = readNumberParam(value)
-  if (parsed == null) {
-    return undefined
-  }
-  return allowedValues.includes(parsed) ? parsed : undefined
-}
-
-function readDateParam(value: unknown): string | undefined {
-  const raw = readFirstParam(value)
-  if (!raw) {
-    return undefined
-  }
-  return /^\d{4}-\d{2}-\d{2}$/.test(raw) ? raw : undefined
-}
-
-function readThroughputModeParam(value: unknown): 'estimate' | 'data' | undefined {
-  const raw = readFirstParam(value)
-  return raw === 'estimate' || raw === 'data' ? raw : undefined
-}
-
-function resolveDurationIndex(durationDays?: number): number {
-  const match = DURATION_OPTIONS.findIndex((option) => option.days === durationDays)
-  return match >= 0 ? match : 0
-}
-
-function resolveFocusIndex(focus?: number): number {
-  const match = FOCUS_OPTIONS.findIndex((option) => option.value === focus)
-  return match >= 0 ? match : 0
-}
-
-function normalizeSamplesText(samples?: string): string {
-  if (!samples) {
-    return DEFAULT_SAMPLES_TEXT
-  }
-  return samples
+function normalizeSamplesInput(value: string | undefined): string | undefined {
+  if (!value) return undefined
+  const normalized = value
     .split(/[\n,]+/)
     .map((sample) => sample.trim())
     .filter(Boolean)
     .join('\n')
+  return normalized || undefined
 }
 
-function resolveQueryState(search: ThroughputSearch) {
-  return {
-    startDate: search.startDate ?? '',
-    storyLow: search.storyLow ?? 20,
-    storyHigh: search.storyHigh ?? 25,
-    complexity: search.complexity ?? 0,
-    splitLow: search.splitLow ?? 1,
-    splitHigh: search.splitHigh ?? 1.5,
-    durationIdx: resolveDurationIndex(search.durationDays),
-    throughputMode: search.throughputMode ?? 'estimate',
-    tpLow: search.tpLow ?? 1,
-    tpMostLikely: search.tpMostLikely ?? '',
-    tpHigh: search.tpHigh ?? 10,
-    samplesText: normalizeSamplesText(search.samples),
-    focusIdx: resolveFocusIndex(search.focus),
-    weeksToForecast: search.weeksToForecast ?? 6,
-    numTrials: search.numTrials ?? 500,
-  }
+function clampIndex(index: number | undefined, max: number): number {
+  if (index == null || Number.isNaN(index)) return 0
+  return Math.min(Math.max(index, 0), max)
+}
+
+function areRisksEqual(left: Risk[], right: Risk[]): boolean {
+  return JSON.stringify(left) === JSON.stringify(right)
 }
 
 /* ── Page ────────────────────────────────────────────────────────────────── */
 
 function ThroughputForecasterPage() {
   const search = Route.useSearch()
-  const initialState = resolveQueryState(search)
-  const {
-    startDate: searchStartDate,
-    storyLow: searchStoryLow,
-    storyHigh: searchStoryHigh,
-    complexity: searchComplexity,
-    splitLow: searchSplitLow,
-    splitHigh: searchSplitHigh,
-    durationDays: searchDurationDays,
-    throughputMode: searchThroughputMode,
-    tpLow: searchTpLow,
-    tpMostLikely: searchTpMostLikely,
-    tpHigh: searchTpHigh,
-    samples: searchSamples,
-    focus: searchFocus,
-    weeksToForecast: searchWeeksToForecast,
-    numTrials: searchNumTrials,
-  } = search
+  const navigate = useNavigate({ from: Route.fullPath })
 
   // --- Input state ---
-  const [startDate, setStartDate] = useState(initialState.startDate)
-  const [storyLow, setStoryLow] = useState(initialState.storyLow)
-  const [storyHigh, setStoryHigh] = useState(initialState.storyHigh)
-  const [complexity, setComplexity] = useState(initialState.complexity)
-  const [splitLow, setSplitLow] = useState(initialState.splitLow)
-  const [splitHigh, setSplitHigh] = useState(initialState.splitHigh)
-  const [durationIdx, setDurationIdx] = useState(initialState.durationIdx)
-  const [throughputMode, setThroughputMode] = useState<'estimate' | 'data'>(
-    initialState.throughputMode,
+  const [startDate, setStartDate] = useState(search.startDate ?? '')
+  const [storyLow, setStoryLow] = useState(search.storyLow ?? 20)
+  const [storyHigh, setStoryHigh] = useState(search.storyHigh ?? 25)
+  const [complexity, setComplexity] = useState(
+    clampIndex(search.complexity, COMPLEXITY_OPTIONS.length - 1),
   )
-  const [tpLow, setTpLow] = useState(initialState.tpLow)
-  const [tpMostLikely, setTpMostLikely] = useState<number | ''>(initialState.tpMostLikely)
-  const [tpHigh, setTpHigh] = useState(initialState.tpHigh)
-  const [samplesText, setSamplesText] = useState(initialState.samplesText)
-  const [focusIdx, setFocusIdx] = useState(initialState.focusIdx)
-  const [risks, setRisks] = useState<Risk[]>([
-    emptyRisk(),
-    emptyRisk(),
-    emptyRisk(),
-  ])
-  const [weeksToForecast, setWeeksToForecast] = useState(initialState.weeksToForecast)
-  const [numTrials, setNumTrials] = useState(initialState.numTrials)
+  const [splitLow, setSplitLow] = useState(search.splitLow ?? 1)
+  const [splitHigh, setSplitHigh] = useState(search.splitHigh ?? 1.5)
+  const [durationIdx, setDurationIdx] = useState(
+    clampIndex(search.durationIdx, DURATION_OPTIONS.length - 1),
+  )
+  const [throughputMode, setThroughputMode] = useState<'estimate' | 'data'>(
+    search.throughputMode ?? 'estimate',
+  )
+  const [tpLow, setTpLow] = useState(search.tpLow ?? 1)
+  const [tpMostLikely, setTpMostLikely] = useState<number | ''>(
+    search.tpMostLikely ?? '',
+  )
+  const [tpHigh, setTpHigh] = useState(search.tpHigh ?? 10)
+  const [samplesText, setSamplesText] = useState(
+    search.samplesText ?? DEFAULT_SAMPLES_TEXT,
+  )
+  const [focusIdx, setFocusIdx] = useState(
+    clampIndex(search.focusIdx, FOCUS_OPTIONS.length - 1),
+  )
+  const [risks, setRisks] = useState<Risk[]>(search.risks ?? makeDefaultRisks())
+  const [weeksToForecast, setWeeksToForecast] = useState(
+    search.weeksToForecast ?? 6,
+  )
+  const [numTrials, setNumTrials] = useState(search.numTrials ?? 500)
 
   // --- Results state ---
   const [results, setResults] = useState<ThroughputForecasterResults | null>(null)
@@ -274,73 +251,114 @@ function ThroughputForecasterPage() {
   const comp = COMPLEXITY_OPTIONS[complexity]
   const dur = DURATION_OPTIONS[durationIdx]
 
+  useEffect(() => {
+    const nextStartDate = search.startDate ?? ''
+    const nextStoryLow = search.storyLow ?? 20
+    const nextStoryHigh = search.storyHigh ?? 25
+    const nextComplexity = clampIndex(search.complexity, COMPLEXITY_OPTIONS.length - 1)
+    const nextSplitLow = search.splitLow ?? 1
+    const nextSplitHigh = search.splitHigh ?? 1.5
+    const nextDurationIdx = clampIndex(search.durationIdx, DURATION_OPTIONS.length - 1)
+    const nextThroughputMode = search.throughputMode ?? 'estimate'
+    const nextTpLow = search.tpLow ?? 1
+    const nextTpMostLikely = search.tpMostLikely ?? ''
+    const nextTpHigh = search.tpHigh ?? 10
+    const nextSamplesText = search.samplesText ?? DEFAULT_SAMPLES_TEXT
+    const nextFocusIdx = clampIndex(search.focusIdx, FOCUS_OPTIONS.length - 1)
+    const nextRisks = search.risks ?? DEFAULT_RISKS
+    const nextWeeksToForecast = search.weeksToForecast ?? 6
+    const nextNumTrials = search.numTrials ?? 500
+
+    if (startDate !== nextStartDate) setStartDate(nextStartDate)
+    if (storyLow !== nextStoryLow) setStoryLow(nextStoryLow)
+    if (storyHigh !== nextStoryHigh) setStoryHigh(nextStoryHigh)
+    if (complexity !== nextComplexity) setComplexity(nextComplexity)
+    if (splitLow !== nextSplitLow) setSplitLow(nextSplitLow)
+    if (splitHigh !== nextSplitHigh) setSplitHigh(nextSplitHigh)
+    if (durationIdx !== nextDurationIdx) setDurationIdx(nextDurationIdx)
+    if (throughputMode !== nextThroughputMode) setThroughputMode(nextThroughputMode)
+    if (tpLow !== nextTpLow) setTpLow(nextTpLow)
+    if (tpMostLikely !== nextTpMostLikely) setTpMostLikely(nextTpMostLikely)
+    if (tpHigh !== nextTpHigh) setTpHigh(nextTpHigh)
+    if (samplesText !== nextSamplesText) setSamplesText(nextSamplesText)
+    if (focusIdx !== nextFocusIdx) setFocusIdx(nextFocusIdx)
+    if (!areRisksEqual(risks, nextRisks)) setRisks(nextRisks)
+    if (weeksToForecast !== nextWeeksToForecast) setWeeksToForecast(nextWeeksToForecast)
+    if (numTrials !== nextNumTrials) setNumTrials(nextNumTrials)
+  }, [
+    complexity,
+    durationIdx,
+    focusIdx,
+    numTrials,
+    risks,
+    samplesText,
+    search,
+    splitHigh,
+    splitLow,
+    startDate,
+    storyHigh,
+    storyLow,
+    throughputMode,
+    tpHigh,
+    tpLow,
+    tpMostLikely,
+    weeksToForecast,
+  ])
+
+  useEffect(() => {
+    const nextSearch = {
+      startDate: startDate || undefined,
+      storyLow,
+      storyHigh,
+      complexity,
+      splitLow,
+      splitHigh,
+      durationIdx,
+      throughputMode,
+      tpLow,
+      tpMostLikely: tpMostLikely === '' ? undefined : tpMostLikely,
+      tpHigh,
+      samplesText,
+      focusIdx,
+      weeksToForecast,
+      numTrials,
+      risks,
+    }
+
+    const searchChanged = JSON.stringify(search) !== JSON.stringify(nextSearch)
+    if (!searchChanged) return
+
+    void navigate({ search: nextSearch, replace: true })
+  }, [
+    complexity,
+    durationIdx,
+    focusIdx,
+    navigate,
+    numTrials,
+    risks,
+    samplesText,
+    search,
+    splitHigh,
+    splitLow,
+    startDate,
+    storyHigh,
+    storyLow,
+    throughputMode,
+    tpHigh,
+    tpLow,
+    tpMostLikely,
+    weeksToForecast,
+  ])
+
   // Validation
-  const storyError =
-    storyLow > storyHigh
-      ? 'Low guess must be ≤ high guess.'
-      : ''
-  const splitError =
-    splitLow > splitHigh
-      ? 'Low split must be ≤ high split.'
-      : ''
+  const storyError = storyLow > storyHigh ? 'Low guess must be ≤ high guess.' : ''
+  const splitError = splitLow > splitHigh ? 'Low split must be ≤ high split.' : ''
   const tpError =
     throughputMode === 'estimate' && tpLow > tpHigh
       ? 'Low throughput must be ≤ high throughput.'
       : ''
 
   const canRun = !storyError && !splitError && !tpError
-
-  useEffect(() => {
-    const nextState = resolveQueryState({
-      startDate: searchStartDate,
-      storyLow: searchStoryLow,
-      storyHigh: searchStoryHigh,
-      complexity: searchComplexity,
-      splitLow: searchSplitLow,
-      splitHigh: searchSplitHigh,
-      durationDays: searchDurationDays,
-      throughputMode: searchThroughputMode,
-      tpLow: searchTpLow,
-      tpMostLikely: searchTpMostLikely,
-      tpHigh: searchTpHigh,
-      samples: searchSamples,
-      focus: searchFocus,
-      weeksToForecast: searchWeeksToForecast,
-      numTrials: searchNumTrials,
-    })
-    setStartDate(nextState.startDate)
-    setStoryLow(nextState.storyLow)
-    setStoryHigh(nextState.storyHigh)
-    setComplexity(nextState.complexity)
-    setSplitLow(nextState.splitLow)
-    setSplitHigh(nextState.splitHigh)
-    setDurationIdx(nextState.durationIdx)
-    setThroughputMode(nextState.throughputMode)
-    setTpLow(nextState.tpLow)
-    setTpMostLikely(nextState.tpMostLikely)
-    setTpHigh(nextState.tpHigh)
-    setSamplesText(nextState.samplesText)
-    setFocusIdx(nextState.focusIdx)
-    setWeeksToForecast(nextState.weeksToForecast)
-    setNumTrials(nextState.numTrials)
-    setRisks([emptyRisk(), emptyRisk(), emptyRisk()])
-  }, [
-    searchComplexity,
-    searchDurationDays,
-    searchFocus,
-    searchNumTrials,
-    searchSamples,
-    searchSplitHigh,
-    searchSplitLow,
-    searchStartDate,
-    searchStoryHigh,
-    searchStoryLow,
-    searchThroughputMode,
-    searchTpHigh,
-    searchTpLow,
-    searchTpMostLikely,
-    searchWeeksToForecast,
-  ])
 
   /* ── Auto-run simulation on input change ───────────────────── */
   useEffect(() => {
@@ -350,9 +368,9 @@ function ThroughputForecasterPage() {
     }
     setRunning(true)
     const timer = setTimeout(() => {
-      const comp = COMPLEXITY_OPTIONS[complexity]
+      const selectedComplexity = COMPLEXITY_OPTIONS[complexity]
       const focus = FOCUS_OPTIONS[focusIdx]
-      const dur = DURATION_OPTIONS[durationIdx]
+      const selectedDuration = DURATION_OPTIONS[durationIdx]
 
       // Parse samples
       const samples = samplesText
@@ -364,8 +382,8 @@ function ThroughputForecasterPage() {
         startDate: startDate || undefined,
         storyCountLow: storyLow,
         storyCountHigh: storyHigh,
-        complexityLowMultiplier: comp.lowMult,
-        complexityHighMultiplier: comp.highMult,
+        complexityLowMultiplier: selectedComplexity.lowMult,
+        complexityHighMultiplier: selectedComplexity.highMult,
         splitRateLow: splitLow,
         splitRateHigh: splitHigh,
         throughputMode,
@@ -374,7 +392,7 @@ function ThroughputForecasterPage() {
         throughputMostLikely: tpMostLikely === '' ? null : tpMostLikely,
         samples,
         focusPercentage: focus.value,
-        daysPerUnit: dur.days,
+        daysPerUnit: selectedDuration.days,
         risks: risks.filter((r) => r.likelihood > 0),
         numTrials,
         maxPeriods: 104,
@@ -388,7 +406,6 @@ function ThroughputForecasterPage() {
       })
     }, 300)
     return () => clearTimeout(timer)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     canRun,
     startDate,
@@ -561,6 +578,10 @@ function ThroughputForecasterPage() {
                 </Field>
               )}
               {tpError && <p className="text-xs text-red-600">{tpError}</p>}
+              <p className="text-xs text-[var(--sea-ink-soft)]">
+                Share this forecast by copying the page URL — the current inputs,
+                including historical throughput samples, are stored in the query string.
+              </p>
             </fieldset>
 
             {/* Focus */}
