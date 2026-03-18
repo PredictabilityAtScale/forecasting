@@ -7,6 +7,7 @@ import type {
   StoryCountInputs,
   StoryCountResults,
 } from '#/lib/monte-carlo'
+import CopyLinkButton from '#/components/CopyLinkButton'
 
 const featureEstimateSearchSchema = z.object({
   id: z.string(),
@@ -248,6 +249,9 @@ function StoryCountForecasterPage() {
   const [results, setResults] = useState<StoryCountResults | null>(null)
   const [running, setRunning] = useState(false)
 
+  // Sync URL → State only when the URL search params change (e.g. external
+  // navigation, back/forward).  Functional setState avoids reading stale state
+  // and keeps the dep array limited to `search`.
   useEffect(() => {
     const nextTotalFeatureCount = search.totalFeatureCount ?? DEFAULT_TOTAL_FEATURE_COUNT
     const nextSplitLow = search.splitLow ?? DEFAULT_SPLIT_LOW
@@ -255,12 +259,13 @@ function StoryCountForecasterPage() {
     const nextNumTrials = search.numTrials ?? DEFAULT_NUM_TRIALS
     const nextFeatures = parseFeatureEstimates(search.featuresText) ?? DEFAULT_FEATURES
 
-    if (totalFeatureCount !== nextTotalFeatureCount) setTotalFeatureCount(nextTotalFeatureCount)
-    if (splitLow !== nextSplitLow) setSplitLow(nextSplitLow)
-    if (splitHigh !== nextSplitHigh) setSplitHigh(nextSplitHigh)
-    if (numTrials !== nextNumTrials) setNumTrials(nextNumTrials)
-    if (!areFeaturesEqual(features, nextFeatures)) setFeatures(nextFeatures)
-  }, [features, numTrials, search, splitHigh, splitLow, totalFeatureCount])
+    setTotalFeatureCount(prev => prev === nextTotalFeatureCount ? prev : nextTotalFeatureCount)
+    setSplitLow(prev => prev === nextSplitLow ? prev : nextSplitLow)
+    setSplitHigh(prev => prev === nextSplitHigh ? prev : nextSplitHigh)
+    setNumTrials(prev => prev === nextNumTrials ? prev : nextNumTrials)
+    setFeatures(prev => areFeaturesEqual(prev, nextFeatures) ? prev : nextFeatures)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search])
 
   useEffect(() => {
     const nextSearch = {
@@ -579,10 +584,12 @@ function StoryCountForecasterPage() {
           Work often splits into smaller pieces when started. 1 = no change, 2 = every item
           might become two, 3 = every item might become three, etc.
         </p>
-        <p className="mt-2 text-xs text-[var(--sea-ink-soft)]">
-          Share this forecast by copying the page URL. The sampled feature rows
-          and forecast settings are stored in the query string.
-        </p>
+        <div className="mt-2 flex items-center gap-3">
+          <CopyLinkButton />
+          <span className="text-xs text-[var(--sea-ink-soft)]">
+            The current inputs are stored in the URL for sharing.
+          </span>
+        </div>
       </section>
 
       {/* ── Status ─────────────────────────────────────────────────────── */}

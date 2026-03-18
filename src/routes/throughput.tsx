@@ -1,11 +1,12 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { z } from 'zod'
 import { runThroughputForecaster } from '#/lib/monte-carlo'
 import type { ThroughputForecasterInputs, ThroughputForecasterResults } from '#/lib/monte-carlo'
 import Field from '#/components/Field'
 import NumberInput from '#/components/NumberInput'
 import { Slider } from '#/components/ui/slider'
+import CopyLinkButton from '#/components/CopyLinkButton'
 
 const riskSearchSchema = z.object({
   likelihood: z.number(),
@@ -251,6 +252,9 @@ function ThroughputForecasterPage() {
   const comp = COMPLEXITY_OPTIONS[complexity]
   const dur = DURATION_OPTIONS[durationIdx]
 
+  // Sync URL → State only when the URL search params change (e.g. external
+  // navigation, back/forward).  Functional setState avoids reading stale state
+  // and keeps the dep array limited to `search`.
   useEffect(() => {
     const nextStartDate = search.startDate ?? ''
     const nextStoryLow = search.storyLow ?? 20
@@ -269,41 +273,24 @@ function ThroughputForecasterPage() {
     const nextWeeksToForecast = search.weeksToForecast ?? 6
     const nextNumTrials = search.numTrials ?? 500
 
-    if (startDate !== nextStartDate) setStartDate(nextStartDate)
-    if (storyLow !== nextStoryLow) setStoryLow(nextStoryLow)
-    if (storyHigh !== nextStoryHigh) setStoryHigh(nextStoryHigh)
-    if (complexity !== nextComplexity) setComplexity(nextComplexity)
-    if (splitLow !== nextSplitLow) setSplitLow(nextSplitLow)
-    if (splitHigh !== nextSplitHigh) setSplitHigh(nextSplitHigh)
-    if (durationIdx !== nextDurationIdx) setDurationIdx(nextDurationIdx)
-    if (throughputMode !== nextThroughputMode) setThroughputMode(nextThroughputMode)
-    if (tpLow !== nextTpLow) setTpLow(nextTpLow)
-    if (tpMostLikely !== nextTpMostLikely) setTpMostLikely(nextTpMostLikely)
-    if (tpHigh !== nextTpHigh) setTpHigh(nextTpHigh)
-    if (samplesText !== nextSamplesText) setSamplesText(nextSamplesText)
-    if (focusIdx !== nextFocusIdx) setFocusIdx(nextFocusIdx)
-    if (!areRisksEqual(risks, nextRisks)) setRisks(nextRisks)
-    if (weeksToForecast !== nextWeeksToForecast) setWeeksToForecast(nextWeeksToForecast)
-    if (numTrials !== nextNumTrials) setNumTrials(nextNumTrials)
-  }, [
-    complexity,
-    durationIdx,
-    focusIdx,
-    numTrials,
-    risks,
-    samplesText,
-    search,
-    splitHigh,
-    splitLow,
-    startDate,
-    storyHigh,
-    storyLow,
-    throughputMode,
-    tpHigh,
-    tpLow,
-    tpMostLikely,
-    weeksToForecast,
-  ])
+    setStartDate(prev => prev === nextStartDate ? prev : nextStartDate)
+    setStoryLow(prev => prev === nextStoryLow ? prev : nextStoryLow)
+    setStoryHigh(prev => prev === nextStoryHigh ? prev : nextStoryHigh)
+    setComplexity(prev => prev === nextComplexity ? prev : nextComplexity)
+    setSplitLow(prev => prev === nextSplitLow ? prev : nextSplitLow)
+    setSplitHigh(prev => prev === nextSplitHigh ? prev : nextSplitHigh)
+    setDurationIdx(prev => prev === nextDurationIdx ? prev : nextDurationIdx)
+    setThroughputMode(prev => prev === nextThroughputMode ? prev : nextThroughputMode)
+    setTpLow(prev => prev === nextTpLow ? prev : nextTpLow)
+    setTpMostLikely(prev => prev === nextTpMostLikely ? prev : nextTpMostLikely)
+    setTpHigh(prev => prev === nextTpHigh ? prev : nextTpHigh)
+    setSamplesText(prev => prev === nextSamplesText ? prev : nextSamplesText)
+    setFocusIdx(prev => prev === nextFocusIdx ? prev : nextFocusIdx)
+    setRisks(prev => areRisksEqual(prev, nextRisks) ? prev : nextRisks)
+    setWeeksToForecast(prev => prev === nextWeeksToForecast ? prev : nextWeeksToForecast)
+    setNumTrials(prev => prev === nextNumTrials ? prev : nextNumTrials)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search])
 
   useEffect(() => {
     const nextSearch = {
@@ -578,10 +565,12 @@ function ThroughputForecasterPage() {
                 </Field>
               )}
               {tpError && <p className="text-xs text-red-600">{tpError}</p>}
-              <p className="text-xs text-[var(--sea-ink-soft)]">
-                Share this forecast by copying the page URL — the current inputs,
-                including historical throughput samples, are stored in the query string.
-              </p>
+              <div className="flex items-center gap-3">
+                <CopyLinkButton />
+                <span className="text-xs text-[var(--sea-ink-soft)]">
+                  The current inputs are stored in the URL for sharing.
+                </span>
+              </div>
             </fieldset>
 
             {/* Focus */}

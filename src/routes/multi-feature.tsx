@@ -5,6 +5,7 @@ import { runMultiFeatureForecaster } from '#/lib/monte-carlo'
 import type { MultiFeatureInputs, MultiFeatureResults, Feature } from '#/lib/monte-carlo'
 import Field from '#/components/Field'
 import NumberInput from '#/components/NumberInput'
+import CopyLinkButton from '#/components/CopyLinkButton'
 
 const featureSearchSchema = z.object({
   name: z.string(),
@@ -407,6 +408,9 @@ function MultiFeatureForecasterPage() {
 
   const dur = DURATION_OPTIONS[durationIdx]
 
+  // Sync URL → State only when the URL search params change (e.g. external
+  // navigation, back/forward).  Functional setState avoids reading stale state
+  // and keeps the dep array limited to `search`.
   useEffect(() => {
     const nextStartDate = search.startDate ?? '2025-03-01'
     const nextTargetDate = search.targetDate ?? '2025-06-01'
@@ -424,39 +428,22 @@ function MultiFeatureForecasterPage() {
     const nextFeatures = parseSearchFeatures(search.featuresText) ?? DEFAULT_FEATURES
     const nextNumTrials = search.numTrials ?? 500
 
-    if (startDate !== nextStartDate) setStartDate(nextStartDate)
-    if (targetDate !== nextTargetDate) setTargetDate(nextTargetDate)
-    if (targetLikelihood !== nextTargetLikelihood) setTargetLikelihood(nextTargetLikelihood)
-    if (splitLow !== nextSplitLow) setSplitLow(nextSplitLow)
-    if (splitHigh !== nextSplitHigh) setSplitHigh(nextSplitHigh)
-    if (durationIdx !== nextDurationIdx) setDurationIdx(nextDurationIdx)
-    if (throughputMode !== nextThroughputMode) setThroughputMode(nextThroughputMode)
-    if (tpLow !== nextTpLow) setTpLow(nextTpLow)
-    if (tpHigh !== nextTpHigh) setTpHigh(nextTpHigh)
-    if (samplesText !== nextSamplesText) setSamplesText(nextSamplesText)
-    if (focusIdx !== nextFocusIdx) setFocusIdx(nextFocusIdx)
-    if (!areNumberArraysEqual(monthMultipliers, nextMonthMultipliers)) {
-      setMonthMultipliers(nextMonthMultipliers)
-    }
-    if (!areFeaturesEqual(features, nextFeatures)) setFeatures(nextFeatures)
-    if (numTrials !== nextNumTrials) setNumTrials(nextNumTrials)
-  }, [
-    durationIdx,
-    features,
-    focusIdx,
-    monthMultipliers,
-    numTrials,
-    samplesText,
-    search,
-    splitHigh,
-    splitLow,
-    startDate,
-    targetDate,
-    targetLikelihood,
-    throughputMode,
-    tpHigh,
-    tpLow,
-  ])
+    setStartDate(prev => prev === nextStartDate ? prev : nextStartDate)
+    setTargetDate(prev => prev === nextTargetDate ? prev : nextTargetDate)
+    setTargetLikelihood(prev => prev === nextTargetLikelihood ? prev : nextTargetLikelihood)
+    setSplitLow(prev => prev === nextSplitLow ? prev : nextSplitLow)
+    setSplitHigh(prev => prev === nextSplitHigh ? prev : nextSplitHigh)
+    setDurationIdx(prev => prev === nextDurationIdx ? prev : nextDurationIdx)
+    setThroughputMode(prev => prev === nextThroughputMode ? prev : nextThroughputMode)
+    setTpLow(prev => prev === nextTpLow ? prev : nextTpLow)
+    setTpHigh(prev => prev === nextTpHigh ? prev : nextTpHigh)
+    setSamplesText(prev => prev === nextSamplesText ? prev : nextSamplesText)
+    setFocusIdx(prev => prev === nextFocusIdx ? prev : nextFocusIdx)
+    setMonthMultipliers(prev => areNumberArraysEqual(prev, nextMonthMultipliers) ? prev : nextMonthMultipliers)
+    setFeatures(prev => areFeaturesEqual(prev, nextFeatures) ? prev : nextFeatures)
+    setNumTrials(prev => prev === nextNumTrials ? prev : nextNumTrials)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search])
 
   useEffect(() => {
     const currentSearch = {
@@ -749,11 +736,12 @@ function MultiFeatureForecasterPage() {
                 </Field>
               )}
               {tpError && <p className="text-xs text-red-600">{tpError}</p>}
-              <p className="text-xs text-[var(--sea-ink-soft)]">
-                Share this forecast by copying the page URL. Feature rows,
-                monthly adjustments, and throughput inputs are stored in the
-                query string.
-              </p>
+              <div className="flex items-center gap-3">
+                <CopyLinkButton />
+                <span className="text-xs text-[var(--sea-ink-soft)]">
+                  The current inputs are stored in the URL for sharing.
+                </span>
+              </div>
             </fieldset>
 
             <Field label="Team focus">
