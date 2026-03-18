@@ -6,11 +6,77 @@ import Field from '#/components/Field'
 import NumberInput from '#/components/NumberInput'
 import { Slider } from '#/components/ui/slider'
 
+type ThroughputSearch = {
+  startDate?: string
+  storyLow?: number
+  storyHigh?: number
+  complexity?: number
+  splitLow?: number
+  splitHigh?: number
+  durationDays?: number
+  throughputMode?: 'estimate' | 'data'
+  tpLow?: number
+  tpMostLikely?: number
+  tpHigh?: number
+  samples?: string
+  focus?: number
+  weeksToForecast?: number
+  numTrials?: number
+}
+
 export const Route = createFileRoute('/throughput')({
+  validateSearch: (search): ThroughputSearch => ({
+    startDate: readDateParam(search.startDate),
+    storyLow: readNumberParam(search.storyLow),
+    storyHigh: readNumberParam(search.storyHigh),
+    complexity: readIntegerParam(search.complexity, 0, 3),
+    splitLow: readNumberParam(search.splitLow),
+    splitHigh: readNumberParam(search.splitHigh),
+    durationDays: readAllowedNumberParam(search.durationDays, [7, 14, 21, 28]),
+    throughputMode: readThroughputModeParam(search.throughputMode),
+    tpLow: readNumberParam(search.tpLow),
+    tpMostLikely: readNumberParam(search.tpMostLikely),
+    tpHigh: readNumberParam(search.tpHigh),
+    samples: readStringParam(search.samples),
+    focus: readAllowedNumberParam(search.focus, [1, 0.75, 0.5, 0.25]),
+    weeksToForecast: readIntegerParam(search.weeksToForecast, 1, 52),
+    numTrials: readIntegerParam(search.numTrials, 1, 1000),
+  }),
   component: ThroughputForecasterPage,
 })
 
 /* ── Setting tables (mirrored from spreadsheet Settings tab) ────────────── */
+
+const DEFAULT_SAMPLES_TEXT = '1\n3\n5\n3\n7\n8'
+
+const QUERY_PARAM_DOCS = [
+  ['startDate', 'Optional start date in YYYY-MM-DD format.'],
+  ['storyLow, storyHigh', 'Remaining story-count range before complexity adjustment.'],
+  ['complexity', 'Complexity preset index: 0-3.'],
+  ['splitLow, splitHigh', 'Story split-rate range.'],
+  ['durationDays', 'Throughput unit size: 7, 14, 21, or 28 days.'],
+  ['throughputMode', 'Use estimate or data.'],
+  ['tpLow, tpMostLikely, tpHigh', 'Estimate-mode throughput inputs.'],
+  ['samples', 'Historical throughput samples, comma-separated or URL-encoded newlines.'],
+  ['focus', 'Team focus: 1, 0.75, 0.5, or 0.25.'],
+  ['weeksToForecast', 'Story-count forecast window, from 1 to 52 intervals.'],
+  ['numTrials', 'Simulation trials, from 1 to 1000.'],
+] as const
+
+const QUERY_PARAM_EXAMPLES = [
+  {
+    title: 'Estimate mode with a likely throughput value',
+    description: 'Prefills the form with a weekly estimate-based scenario and a start date.',
+    search:
+      '?startDate=2026-04-01&storyLow=18&storyHigh=26&complexity=1&splitLow=1&splitHigh=1.4&durationDays=7&throughputMode=estimate&tpLow=3&tpMostLikely=5&tpHigh=8&focus=0.75&weeksToForecast=6&numTrials=750',
+  },
+  {
+    title: 'Historical-data mode with 2-week throughput samples',
+    description: 'Uses historical samples and a 2-week unit to exercise the data-backed path.',
+    search:
+      '?startDate=2026-04-14&storyLow=24&storyHigh=32&complexity=2&splitLow=1.1&splitHigh=1.8&durationDays=14&throughputMode=data&samples=2,3,4,5,3,6,4,5&focus=0.5&weeksToForecast=4&numTrials=600',
+  },
+] as const
 
 const DURATION_OPTIONS = [
   { label: '1 week', days: 7 },
@@ -51,32 +117,155 @@ const emptyRisk = (): Risk => ({
   description: '',
 })
 
+function readFirstParam(value: unknown): string | undefined {
+  if (typeof value === 'string') {
+    return value
+  }
+  if (Array.isArray(value) && typeof value[0] === 'string') {
+    return value[0]
+  }
+  return undefined
+}
+
+function readStringParam(value: unknown): string | undefined {
+  const raw = readFirstParam(value)
+  if (!raw) {
+    return undefined
+  }
+  return raw
+}
+
+function readNumberParam(value: unknown): number | undefined {
+  const raw = readFirstParam(value)
+  if (!raw) {
+    return undefined
+  }
+  const parsed = Number(raw)
+  return Number.isFinite(parsed) ? parsed : undefined
+}
+
+function readIntegerParam(value: unknown, min: number, max: number): number | undefined {
+  const parsed = readNumberParam(value)
+  if (parsed == null) {
+    return undefined
+  }
+  if (!Number.isInteger(parsed) || parsed < min || parsed > max) {
+    return undefined
+  }
+  return parsed
+}
+
+function readAllowedNumberParam(
+  value: unknown,
+  allowedValues: readonly number[],
+): number | undefined {
+  const parsed = readNumberParam(value)
+  if (parsed == null) {
+    return undefined
+  }
+  return allowedValues.includes(parsed) ? parsed : undefined
+}
+
+function readDateParam(value: unknown): string | undefined {
+  const raw = readFirstParam(value)
+  if (!raw) {
+    return undefined
+  }
+  return /^\d{4}-\d{2}-\d{2}$/.test(raw) ? raw : undefined
+}
+
+function readThroughputModeParam(value: unknown): 'estimate' | 'data' | undefined {
+  const raw = readFirstParam(value)
+  return raw === 'estimate' || raw === 'data' ? raw : undefined
+}
+
+function resolveDurationIndex(durationDays?: number): number {
+  const match = DURATION_OPTIONS.findIndex((option) => option.days === durationDays)
+  return match >= 0 ? match : 0
+}
+
+function resolveFocusIndex(focus?: number): number {
+  const match = FOCUS_OPTIONS.findIndex((option) => option.value === focus)
+  return match >= 0 ? match : 0
+}
+
+function normalizeSamplesText(samples?: string): string {
+  if (!samples) {
+    return DEFAULT_SAMPLES_TEXT
+  }
+  return samples
+    .split(/[\n,]+/)
+    .map((sample) => sample.trim())
+    .filter(Boolean)
+    .join('\n')
+}
+
+function resolveQueryState(search: ThroughputSearch) {
+  return {
+    startDate: search.startDate ?? '',
+    storyLow: search.storyLow ?? 20,
+    storyHigh: search.storyHigh ?? 25,
+    complexity: search.complexity ?? 0,
+    splitLow: search.splitLow ?? 1,
+    splitHigh: search.splitHigh ?? 1.5,
+    durationIdx: resolveDurationIndex(search.durationDays),
+    throughputMode: search.throughputMode ?? 'estimate',
+    tpLow: search.tpLow ?? 1,
+    tpMostLikely: search.tpMostLikely ?? '',
+    tpHigh: search.tpHigh ?? 10,
+    samplesText: normalizeSamplesText(search.samples),
+    focusIdx: resolveFocusIndex(search.focus),
+    weeksToForecast: search.weeksToForecast ?? 6,
+    numTrials: search.numTrials ?? 500,
+  }
+}
+
 /* ── Page ────────────────────────────────────────────────────────────────── */
 
 function ThroughputForecasterPage() {
+  const search = Route.useSearch()
+  const initialState = resolveQueryState(search)
+  const {
+    startDate: searchStartDate,
+    storyLow: searchStoryLow,
+    storyHigh: searchStoryHigh,
+    complexity: searchComplexity,
+    splitLow: searchSplitLow,
+    splitHigh: searchSplitHigh,
+    durationDays: searchDurationDays,
+    throughputMode: searchThroughputMode,
+    tpLow: searchTpLow,
+    tpMostLikely: searchTpMostLikely,
+    tpHigh: searchTpHigh,
+    samples: searchSamples,
+    focus: searchFocus,
+    weeksToForecast: searchWeeksToForecast,
+    numTrials: searchNumTrials,
+  } = search
+
   // --- Input state ---
-  const [startDate, setStartDate] = useState('')
-  const [storyLow, setStoryLow] = useState(20)
-  const [storyHigh, setStoryHigh] = useState(25)
-  const [complexity, setComplexity] = useState(0)
-  const [splitLow, setSplitLow] = useState(1)
-  const [splitHigh, setSplitHigh] = useState(1.5)
-  const [durationIdx, setDurationIdx] = useState(0)
+  const [startDate, setStartDate] = useState(initialState.startDate)
+  const [storyLow, setStoryLow] = useState(initialState.storyLow)
+  const [storyHigh, setStoryHigh] = useState(initialState.storyHigh)
+  const [complexity, setComplexity] = useState(initialState.complexity)
+  const [splitLow, setSplitLow] = useState(initialState.splitLow)
+  const [splitHigh, setSplitHigh] = useState(initialState.splitHigh)
+  const [durationIdx, setDurationIdx] = useState(initialState.durationIdx)
   const [throughputMode, setThroughputMode] = useState<'estimate' | 'data'>(
-    'estimate',
+    initialState.throughputMode,
   )
-  const [tpLow, setTpLow] = useState(1)
-  const [tpMostLikely, setTpMostLikely] = useState<number | ''>('')
-  const [tpHigh, setTpHigh] = useState(10)
-  const [samplesText, setSamplesText] = useState('1\n3\n5\n3\n7\n8')
-  const [focusIdx, setFocusIdx] = useState(0)
+  const [tpLow, setTpLow] = useState(initialState.tpLow)
+  const [tpMostLikely, setTpMostLikely] = useState<number | ''>(initialState.tpMostLikely)
+  const [tpHigh, setTpHigh] = useState(initialState.tpHigh)
+  const [samplesText, setSamplesText] = useState(initialState.samplesText)
+  const [focusIdx, setFocusIdx] = useState(initialState.focusIdx)
   const [risks, setRisks] = useState<Risk[]>([
     emptyRisk(),
     emptyRisk(),
     emptyRisk(),
   ])
-  const [weeksToForecast, setWeeksToForecast] = useState(6)
-  const [numTrials, setNumTrials] = useState(500)
+  const [weeksToForecast, setWeeksToForecast] = useState(initialState.weeksToForecast)
+  const [numTrials, setNumTrials] = useState(initialState.numTrials)
 
   // --- Results state ---
   const [results, setResults] = useState<ThroughputForecasterResults | null>(null)
@@ -100,6 +289,58 @@ function ThroughputForecasterPage() {
       : ''
 
   const canRun = !storyError && !splitError && !tpError
+
+  useEffect(() => {
+    const nextState = resolveQueryState({
+      startDate: searchStartDate,
+      storyLow: searchStoryLow,
+      storyHigh: searchStoryHigh,
+      complexity: searchComplexity,
+      splitLow: searchSplitLow,
+      splitHigh: searchSplitHigh,
+      durationDays: searchDurationDays,
+      throughputMode: searchThroughputMode,
+      tpLow: searchTpLow,
+      tpMostLikely: searchTpMostLikely,
+      tpHigh: searchTpHigh,
+      samples: searchSamples,
+      focus: searchFocus,
+      weeksToForecast: searchWeeksToForecast,
+      numTrials: searchNumTrials,
+    })
+    setStartDate(nextState.startDate)
+    setStoryLow(nextState.storyLow)
+    setStoryHigh(nextState.storyHigh)
+    setComplexity(nextState.complexity)
+    setSplitLow(nextState.splitLow)
+    setSplitHigh(nextState.splitHigh)
+    setDurationIdx(nextState.durationIdx)
+    setThroughputMode(nextState.throughputMode)
+    setTpLow(nextState.tpLow)
+    setTpMostLikely(nextState.tpMostLikely)
+    setTpHigh(nextState.tpHigh)
+    setSamplesText(nextState.samplesText)
+    setFocusIdx(nextState.focusIdx)
+    setWeeksToForecast(nextState.weeksToForecast)
+    setNumTrials(nextState.numTrials)
+    setRisks([emptyRisk(), emptyRisk(), emptyRisk()])
+  }, [
+    searchComplexity,
+    searchDurationDays,
+    searchFocus,
+    searchNumTrials,
+    searchSamples,
+    searchSplitHigh,
+    searchSplitLow,
+    searchStartDate,
+    searchStoryHigh,
+    searchStoryLow,
+    searchThroughputMode,
+    searchTpHigh,
+    searchTpLow,
+    searchTpMostLikely,
+    searchWeeksToForecast,
+  ])
 
   /* ── Auto-run simulation on input change ───────────────────── */
   useEffect(() => {
@@ -588,6 +829,71 @@ function ThroughputForecasterPage() {
               </div>
             )}
           </div>
+        </div>
+
+        <div className="mt-10 border-t border-[var(--line)] pt-6">
+          <details className="space-y-4">
+            <summary className="field-legend cursor-pointer text-sm">
+              URL Parameters (advanced)
+            </summary>
+            <p className="max-w-3xl text-xs text-[var(--sea-ink-soft)]">
+              Append query parameters to prefill the form for testing or shared
+              scenarios. This supports the main forecasting inputs. Risk rows are
+              not currently populated from the URL.
+            </p>
+
+            <div className="rounded-2xl border border-[var(--line)] overflow-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="border-b border-[var(--line)] bg-[var(--header-bg)]">
+                    <th className="px-3 py-2 text-left font-semibold">Parameter</th>
+                    <th className="px-3 py-2 text-left font-semibold">Meaning</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {QUERY_PARAM_DOCS.map(([name, description]) => (
+                    <tr key={name} className="border-b border-[var(--line)] last:border-0">
+                      <td className="px-3 py-2 font-mono text-[var(--sea-ink)]">
+                        {name}
+                      </td>
+                      <td className="px-3 py-2 text-[var(--sea-ink-soft)]">
+                        {description}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="grid gap-4 lg:grid-cols-2">
+              {QUERY_PARAM_EXAMPLES.map((example) => (
+                <div
+                  key={example.title}
+                  className="rounded-2xl border border-[var(--line)] bg-[var(--surface-strong)] p-4"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <h2 className="text-sm font-semibold text-[var(--sea-ink)]">
+                        {example.title}
+                      </h2>
+                      <p className="mt-1 text-xs text-[var(--sea-ink-soft)]">
+                        {example.description}
+                      </p>
+                    </div>
+                    <a
+                      href={`/throughput${example.search}`}
+                      className="rounded-full border border-[var(--line)] px-3 py-1 text-xs font-semibold text-[var(--lagoon-deep)] transition hover:border-[var(--lagoon)] hover:text-[var(--sea-ink)]"
+                    >
+                      Open example
+                    </a>
+                  </div>
+                  <p className="mt-3 break-all rounded-xl bg-[var(--header-bg)] px-3 py-2 font-mono text-[11px] text-[var(--sea-ink-soft)]">
+                    /throughput{example.search}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </details>
         </div>
       </section>
     </main>
