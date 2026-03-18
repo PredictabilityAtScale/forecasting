@@ -424,9 +424,12 @@ function ThroughputForecasterPage() {
   return (
     <main className="mx-auto max-w-7xl px-4 pb-12 pt-8 sm:px-6 lg:px-8">
       <section className="island-shell rise-in rounded-[2rem] px-6 py-10 sm:px-10 sm:py-14">
-        <h1 className="display-title mb-2 text-3xl font-bold tracking-tight text-[var(--sea-ink)] sm:text-4xl">
-          Throughput Forecaster
-        </h1>
+        <div className="mb-2 flex items-start justify-between gap-4">
+          <h1 className="display-title text-3xl font-bold tracking-tight text-[var(--sea-ink)] sm:text-4xl">
+            Throughput Forecaster
+          </h1>
+          <CopyLinkButton />
+        </div>
         <p className="mb-8 max-w-2xl text-sm text-[var(--sea-ink-soft)]">
           Monte Carlo simulation for a single body of work. Estimates when work
           will complete and how many stories can be finished in a given time.
@@ -565,12 +568,9 @@ function ThroughputForecasterPage() {
                 </Field>
               )}
               {tpError && <p className="text-xs text-red-600">{tpError}</p>}
-              <div className="flex items-center gap-3">
-                <CopyLinkButton />
-                <span className="text-xs text-[var(--sea-ink-soft)]">
-                  The current inputs are stored in the URL for sharing.
-                </span>
-              </div>
+              <p className="text-xs text-[var(--sea-ink-soft)]">
+                The current inputs are stored in the URL for sharing.
+              </p>
             </fieldset>
 
             {/* Focus */}

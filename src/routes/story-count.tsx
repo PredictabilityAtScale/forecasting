@@ -372,9 +372,12 @@ function StoryCountForecasterPage() {
   return (
     <main className="mx-auto max-w-7xl px-4 pb-12 pt-8 sm:px-6 lg:px-8">
       <section className="rise-in mb-10">
-        <h1 className="display-title text-3xl font-bold tracking-tight text-[var(--sea-ink)] sm:text-4xl">
-          Story Count Forecaster
-        </h1>
+        <div className="flex items-start justify-between gap-4">
+          <h1 className="display-title text-3xl font-bold tracking-tight text-[var(--sea-ink)] sm:text-4xl">
+            Story Count Forecaster
+          </h1>
+          <CopyLinkButton />
+        </div>
         <p className="mt-2 max-w-2xl text-[var(--sea-ink-soft)]">
           Enter estimates for previously sized features or epics.
           The Monte Carlo simulation resamples from your data to project total
@@ -584,12 +587,9 @@ function StoryCountForecasterPage() {
           Work often splits into smaller pieces when started. 1 = no change, 2 = every item
           might become two, 3 = every item might become three, etc.
         </p>
-        <div className="mt-2 flex items-center gap-3">
-          <CopyLinkButton />
-          <span className="text-xs text-[var(--sea-ink-soft)]">
-            The current inputs are stored in the URL for sharing.
-          </span>
-        </div>
+        <p className="mt-2 text-xs text-[var(--sea-ink-soft)]">
+          The current inputs are stored in the URL for sharing.
+        </p>
       </section>
 
       {/* ── Status ─────────────────────────────────────────────────────── */}
