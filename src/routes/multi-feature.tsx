@@ -1,11 +1,64 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
+import { z } from 'zod'
 import { runMultiFeatureForecaster } from '#/lib/monte-carlo'
 import type { MultiFeatureInputs, MultiFeatureResults, Feature } from '#/lib/monte-carlo'
 import Field from '#/components/Field'
 import NumberInput from '#/components/NumberInput'
 
+const featureSearchSchema = z.object({
+  name: z.string(),
+  storyLow: z.number(),
+  storyHigh: z.number(),
+  complexityIdx: z.number().int(),
+})
+
+const multiFeatureSearchSchema = z.object({
+  startDate: z.string().optional(),
+  targetDate: z.string().optional(),
+  targetLikelihood: z.number().optional(),
+  splitLow: z.number().optional(),
+  splitHigh: z.number().optional(),
+  durationIdx: z.number().int().optional(),
+  throughputMode: z.enum(['estimate', 'data']).optional(),
+  tpLow: z.number().optional(),
+  tpHigh: z.number().optional(),
+  samplesText: z.string().optional(),
+  focusIdx: z.number().int().optional(),
+  monthDeltas: z.string().optional(),
+  featuresText: z.string().optional(),
+  numTrials: z.number().int().optional(),
+})
+
 export const Route = createFileRoute('/multi-feature')({
+  validateSearch: (search) =>
+    multiFeatureSearchSchema.parse({
+      startDate: parseSearchString(search.startDate),
+      targetDate: parseSearchString(search.targetDate),
+      targetLikelihood: parseSearchNumber(search.targetLikelihood),
+      splitLow: parseSearchNumber(search.splitLow),
+      splitHigh: parseSearchNumber(search.splitHigh),
+      durationIdx: parseSearchInteger(search.durationIdx),
+      throughputMode:
+        search.throughputMode === 'estimate' || search.throughputMode === 'data'
+          ? search.throughputMode
+          : undefined,
+      tpLow: parseSearchNumber(search.tpLow),
+      tpHigh: parseSearchNumber(search.tpHigh),
+      samplesText:
+        parseSearchString(search.samplesText) ??
+        normalizeSamplesInput(parseSearchString(search.samples)),
+      focusIdx:
+        parseSearchInteger(search.focusIdx) ??
+        focusIndexFromValue(parseSearchNumber(search.focus)),
+      monthDeltas: encodeMonthDeltas(
+        parseSearchMonthMultipliers(search.monthDeltas ?? search.monthMultipliers),
+      ),
+      featuresText: encodeFeatureRows(
+        parseSearchFeatures(search.featuresText ?? search.features),
+      ),
+      numTrials: parseSearchInteger(search.numTrials),
+    }),
   component: MultiFeatureForecasterPage,
 })
 
@@ -51,6 +104,250 @@ const MONTHS = [
   'December',
 ]
 
+const DEFAULT_SAMPLES_TEXT = '1\n3\n5\n3\n7\n8'
+const DEFAULT_MONTH_MULTIPLIERS = Array(12).fill(1)
+
+function makeDefaultFeatures(): FeatureRow[] {
+  return [
+    { name: 'Feature 1', storyLow: 5, storyHigh: 10, complexityIdx: 0 },
+    { name: 'Feature 2', storyLow: 8, storyHigh: 15, complexityIdx: 0 },
+    { name: 'Feature 3', storyLow: 15, storyHigh: 25, complexityIdx: 0 },
+    { name: 'Feature 4', storyLow: 20, storyHigh: 30, complexityIdx: 0 },
+    { name: 'Feature 5', storyLow: 10, storyHigh: 40, complexityIdx: 0 },
+  ]
+}
+
+const DEFAULT_FEATURES = makeDefaultFeatures()
+
+function buildExampleSearch(params: Record<string, string>): string {
+  const search = new URLSearchParams(params)
+  return `?${search.toString()}`
+}
+
+const QUERY_PARAM_DOCS = [
+  ['startDate, targetDate', 'Forecast window in YYYY-MM-DD format.'],
+  ['targetLikelihood', 'Confidence level as a decimal, such as 0.85 for 85%.'],
+  ['splitLow, splitHigh', 'Story split-rate range applied before simulation.'],
+  ['durationIdx', 'Throughput unit index: 0=week, 1=2 weeks, 2=3 weeks, 3=4 weeks.'],
+  ['throughputMode', 'Use estimate or data.'],
+  ['tpLow, tpHigh', 'Estimate-mode throughput inputs.'],
+  ['samplesText', 'Historical throughput samples, separated by commas or new lines.'],
+  ['focusIdx', 'Focus index: 0=100%, 1=75%, 2=50%, 3=25%.'],
+  ['monthDeltas', 'Compact month:value pairs for non-default months, such as 7:0.8,8:0.8,12:0.7.'],
+  ['featuresText', 'Compact feature rows in the form name~storyLow~storyHigh~complexityIdx, separated by |.'],
+  ['numTrials', 'Simulation trials, typically 100-10000.'],
+] as const
+
+const QUERY_PARAM_EXAMPLES = [
+  {
+    title: 'Estimate mode with a prioritized five-feature backlog',
+    description:
+      'Prefills an estimate-based scenario with five feature rows and seasonal throughput adjustments.',
+    search: buildExampleSearch({
+      startDate: '2026-04-07',
+      targetDate: '2026-07-14',
+      targetLikelihood: '0.85',
+      splitLow: '1',
+      splitHigh: '1.7',
+      durationIdx: '0',
+      throughputMode: 'estimate',
+      tpLow: '4',
+      tpHigh: '7',
+      focusIdx: '1',
+      monthDeltas: '7:0.8,8:0.8,12:0.7',
+      featuresText: encodeFeatureRows([
+        { name: 'Authentication', storyLow: 5, storyHigh: 9, complexityIdx: 0 },
+        { name: 'Billing', storyLow: 8, storyHigh: 13, complexityIdx: 1 },
+        { name: 'Reporting', storyLow: 13, storyHigh: 21, complexityIdx: 1 },
+        { name: 'Audit Trail', storyLow: 8, storyHigh: 18, complexityIdx: 2 },
+        { name: 'Admin Console', storyLow: 21, storyHigh: 34, complexityIdx: 2 },
+      ]) ?? '',
+      numTrials: '800',
+    }),
+  },
+  {
+    title: 'Historical-data mode with three higher-uncertainty features',
+    description:
+      'Uses throughput samples and feature rows encoded directly in the URL for a shared scenario.',
+    search: buildExampleSearch({
+      startDate: '2026-05-01',
+      targetDate: '2026-08-28',
+      targetLikelihood: '0.7',
+      splitLow: '1.1',
+      splitHigh: '2',
+      durationIdx: '1',
+      throughputMode: 'data',
+      samplesText: '3,4,5,6,4,7,5,6',
+      focusIdx: '2',
+      monthDeltas: '',
+      featuresText: encodeFeatureRows([
+        { name: 'API Migration', storyLow: 12, storyHigh: 20, complexityIdx: 1 },
+        { name: 'Workflow Rules', storyLow: 15, storyHigh: 28, complexityIdx: 2 },
+        { name: 'Partner Integrations', storyLow: 20, storyHigh: 36, complexityIdx: 3 },
+      ]) ?? '',
+      numTrials: '600',
+    }),
+  },
+] as const
+
+function parseSearchMaybeJson(value: unknown): unknown {
+  if (typeof value !== 'string') return value
+  try {
+    return JSON.parse(value)
+  } catch {
+    return value
+  }
+}
+
+function parseSearchNumber(value: unknown): number | undefined {
+  if (typeof value === 'number' && Number.isFinite(value)) return value
+  if (typeof value === 'string' && value.trim() !== '') {
+    const parsed = Number(value)
+    if (Number.isFinite(parsed)) return parsed
+  }
+  return undefined
+}
+
+function parseSearchInteger(value: unknown): number | undefined {
+  const parsed = parseSearchNumber(value)
+  return parsed != null ? Math.trunc(parsed) : undefined
+}
+
+function parseSearchString(value: unknown): string | undefined {
+  return typeof value === 'string' && value.length > 0 ? value : undefined
+}
+
+function decodeSearchToken(value: string): string {
+  try {
+    return decodeURIComponent(value)
+  } catch {
+    return value
+  }
+}
+
+function encodeSearchToken(value: string): string {
+  return encodeURIComponent(value)
+}
+
+function parseSearchMonthMultipliers(value: unknown): number[] | undefined {
+  const parsed = parseSearchMaybeJson(value)
+  if (Array.isArray(parsed)) {
+    return Array.from({ length: 12 }, (_, index) => parseSearchNumber(parsed[index]) ?? 1)
+  }
+
+  if (typeof parsed !== 'string') return undefined
+
+  const monthMultipliers = [...DEFAULT_MONTH_MULTIPLIERS]
+  if (parsed.trim() === '') return monthMultipliers
+
+  for (const entry of parsed.split(',').map((part) => part.trim()).filter(Boolean)) {
+    const [monthToken, valueToken] = entry.split(':')
+    const month = parseSearchInteger(monthToken)
+    const multiplier = parseSearchNumber(valueToken)
+    if (month == null || multiplier == null || month < 1 || month > 12) continue
+    monthMultipliers[month - 1] = multiplier
+  }
+
+  return monthMultipliers
+}
+
+function encodeMonthDeltas(values: number[] | undefined): string | undefined {
+  if (!values || values.length === 0) return undefined
+
+  const encoded = values
+    .map((value, index) => (value === 1 ? null : `${index + 1}:${value}`))
+    .filter((value): value is string => value != null)
+    .join(',')
+
+  return encoded || undefined
+}
+
+function parseSearchFeatures(value: unknown): FeatureRow[] | undefined {
+  const parsed = parseSearchMaybeJson(value)
+  if (Array.isArray(parsed)) {
+    const features = parsed
+      .map((entry) => {
+        const candidate = parseSearchMaybeJson(entry)
+        if (!candidate || typeof candidate !== 'object') return null
+
+        const feature = candidate as Record<string, unknown>
+        const result = featureSearchSchema.safeParse({
+          name: typeof feature.name === 'string' ? feature.name : undefined,
+          storyLow: parseSearchInteger(feature.storyLow),
+          storyHigh: parseSearchInteger(feature.storyHigh),
+          complexityIdx: parseSearchInteger(feature.complexityIdx),
+        })
+
+        return result.success ? result.data : null
+      })
+      .filter((feature): feature is FeatureRow => feature != null)
+
+    return features.length > 0 ? features : undefined
+  }
+
+  if (typeof parsed !== 'string' || parsed.trim() === '') return undefined
+
+  const features = parsed
+    .split('|')
+    .map((row) => row.trim())
+    .filter(Boolean)
+    .map((row) => {
+      const [nameToken = '', storyLowToken = '', storyHighToken = '', complexityToken = ''] = row.split('~')
+      const result = featureSearchSchema.safeParse({
+        name: decodeSearchToken(nameToken),
+        storyLow: parseSearchInteger(storyLowToken),
+        storyHigh: parseSearchInteger(storyHighToken),
+        complexityIdx: parseSearchInteger(complexityToken),
+      })
+
+      return result.success ? result.data : null
+    })
+    .filter((feature): feature is FeatureRow => feature != null)
+
+  return features.length > 0 ? features : undefined
+}
+
+function encodeFeatureRows(features: FeatureRow[] | undefined): string | undefined {
+  if (!features || features.length === 0) return undefined
+  return features
+    .map((feature) => [
+      encodeSearchToken(feature.name),
+      String(feature.storyLow),
+      String(feature.storyHigh),
+      String(feature.complexityIdx),
+    ].join('~'))
+    .join('|')
+}
+
+function focusIndexFromValue(value: number | undefined): number | undefined {
+  if (value == null) return undefined
+  const match = FOCUS_OPTIONS.findIndex((option) => option.value === value)
+  return match >= 0 ? match : undefined
+}
+
+function normalizeSamplesInput(value: string | undefined): string | undefined {
+  if (!value) return undefined
+  const normalized = value
+    .split(/[\n,]+/)
+    .map((sample) => sample.trim())
+    .filter(Boolean)
+    .join('\n')
+  return normalized || undefined
+}
+
+function clampIndex(index: number | undefined, max: number): number {
+  if (index == null || Number.isNaN(index)) return 0
+  return Math.min(Math.max(index, 0), max)
+}
+
+function areNumberArraysEqual(left: number[], right: number[]): boolean {
+  return JSON.stringify(left) === JSON.stringify(right)
+}
+
+function areFeaturesEqual(left: FeatureRow[], right: FeatureRow[]): boolean {
+  return JSON.stringify(left) === JSON.stringify(right)
+}
+
 /* ── Feature row type ────────────────────────────────────────────────────── */
 
 interface FeatureRow {
@@ -70,37 +367,154 @@ const emptyFeature = (i: number): FeatureRow => ({
 /* ── Page ────────────────────────────────────────────────────────────────── */
 
 function MultiFeatureForecasterPage() {
+  const search = Route.useSearch()
+  const navigate = useNavigate({ from: Route.fullPath })
+  const parsedMonthMultipliers =
+    parseSearchMonthMultipliers(search.monthDeltas) ?? DEFAULT_MONTH_MULTIPLIERS
+  const parsedFeatures = parseSearchFeatures(search.featuresText) ?? DEFAULT_FEATURES
+
   // Inputs
-  const [startDate, setStartDate] = useState('2025-03-01')
-  const [targetDate, setTargetDate] = useState('2025-06-01')
-  const [targetLikelihood, setTargetLikelihood] = useState(0.85)
-  const [splitLow, setSplitLow] = useState(1)
-  const [splitHigh, setSplitHigh] = useState(2)
-  const [durationIdx, setDurationIdx] = useState(0)
+  const [startDate, setStartDate] = useState(search.startDate ?? '2025-03-01')
+  const [targetDate, setTargetDate] = useState(search.targetDate ?? '2025-06-01')
+  const [targetLikelihood, setTargetLikelihood] = useState(
+    search.targetLikelihood ?? 0.85,
+  )
+  const [splitLow, setSplitLow] = useState(search.splitLow ?? 1)
+  const [splitHigh, setSplitHigh] = useState(search.splitHigh ?? 2)
+  const [durationIdx, setDurationIdx] = useState(
+    clampIndex(search.durationIdx, DURATION_OPTIONS.length - 1),
+  )
   const [throughputMode, setThroughputMode] = useState<'estimate' | 'data'>(
-    'estimate',
+    search.throughputMode ?? 'estimate',
   )
-  const [tpLow, setTpLow] = useState(5)
-  const [tpHigh, setTpHigh] = useState(8)
-  const [samplesText, setSamplesText] = useState('1\n3\n5\n3\n7\n8')
-  const [focusIdx, setFocusIdx] = useState(0)
+  const [tpLow, setTpLow] = useState(search.tpLow ?? 5)
+  const [tpHigh, setTpHigh] = useState(search.tpHigh ?? 8)
+  const [samplesText, setSamplesText] = useState(
+    search.samplesText ?? DEFAULT_SAMPLES_TEXT,
+  )
+  const [focusIdx, setFocusIdx] = useState(
+    clampIndex(search.focusIdx, FOCUS_OPTIONS.length - 1),
+  )
   const [monthMultipliers, setMonthMultipliers] = useState<number[]>(
-    Array(12).fill(1),
+    parsedMonthMultipliers,
   )
-  const [features, setFeatures] = useState<FeatureRow[]>([
-    { name: 'Feature 1', storyLow: 5, storyHigh: 10, complexityIdx: 0 },
-    { name: 'Feature 2', storyLow: 8, storyHigh: 15, complexityIdx: 0 },
-    { name: 'Feature 3', storyLow: 15, storyHigh: 25, complexityIdx: 0 },
-    { name: 'Feature 4', storyLow: 20, storyHigh: 30, complexityIdx: 0 },
-    { name: 'Feature 5', storyLow: 10, storyHigh: 40, complexityIdx: 0 },
-  ])
-  const [numTrials, setNumTrials] = useState(500)
+  const [features, setFeatures] = useState<FeatureRow[]>(parsedFeatures)
+  const [numTrials, setNumTrials] = useState(search.numTrials ?? 500)
 
   // Results
   const [results, setResults] = useState<MultiFeatureResults | null>(null)
   const [running, setRunning] = useState(false)
 
   const dur = DURATION_OPTIONS[durationIdx]
+
+  useEffect(() => {
+    const nextStartDate = search.startDate ?? '2025-03-01'
+    const nextTargetDate = search.targetDate ?? '2025-06-01'
+    const nextTargetLikelihood = search.targetLikelihood ?? 0.85
+    const nextSplitLow = search.splitLow ?? 1
+    const nextSplitHigh = search.splitHigh ?? 2
+    const nextDurationIdx = clampIndex(search.durationIdx, DURATION_OPTIONS.length - 1)
+    const nextThroughputMode = search.throughputMode ?? 'estimate'
+    const nextTpLow = search.tpLow ?? 5
+    const nextTpHigh = search.tpHigh ?? 8
+    const nextSamplesText = search.samplesText ?? DEFAULT_SAMPLES_TEXT
+    const nextFocusIdx = clampIndex(search.focusIdx, FOCUS_OPTIONS.length - 1)
+    const nextMonthMultipliers =
+      parseSearchMonthMultipliers(search.monthDeltas) ?? DEFAULT_MONTH_MULTIPLIERS
+    const nextFeatures = parseSearchFeatures(search.featuresText) ?? DEFAULT_FEATURES
+    const nextNumTrials = search.numTrials ?? 500
+
+    if (startDate !== nextStartDate) setStartDate(nextStartDate)
+    if (targetDate !== nextTargetDate) setTargetDate(nextTargetDate)
+    if (targetLikelihood !== nextTargetLikelihood) setTargetLikelihood(nextTargetLikelihood)
+    if (splitLow !== nextSplitLow) setSplitLow(nextSplitLow)
+    if (splitHigh !== nextSplitHigh) setSplitHigh(nextSplitHigh)
+    if (durationIdx !== nextDurationIdx) setDurationIdx(nextDurationIdx)
+    if (throughputMode !== nextThroughputMode) setThroughputMode(nextThroughputMode)
+    if (tpLow !== nextTpLow) setTpLow(nextTpLow)
+    if (tpHigh !== nextTpHigh) setTpHigh(nextTpHigh)
+    if (samplesText !== nextSamplesText) setSamplesText(nextSamplesText)
+    if (focusIdx !== nextFocusIdx) setFocusIdx(nextFocusIdx)
+    if (!areNumberArraysEqual(monthMultipliers, nextMonthMultipliers)) {
+      setMonthMultipliers(nextMonthMultipliers)
+    }
+    if (!areFeaturesEqual(features, nextFeatures)) setFeatures(nextFeatures)
+    if (numTrials !== nextNumTrials) setNumTrials(nextNumTrials)
+  }, [
+    durationIdx,
+    features,
+    focusIdx,
+    monthMultipliers,
+    numTrials,
+    samplesText,
+    search,
+    splitHigh,
+    splitLow,
+    startDate,
+    targetDate,
+    targetLikelihood,
+    throughputMode,
+    tpHigh,
+    tpLow,
+  ])
+
+  useEffect(() => {
+    const currentSearch = {
+      startDate: search.startDate,
+      targetDate: search.targetDate,
+      targetLikelihood: search.targetLikelihood,
+      splitLow: search.splitLow,
+      splitHigh: search.splitHigh,
+      durationIdx: search.durationIdx,
+      throughputMode: search.throughputMode,
+      tpLow: search.tpLow,
+      tpHigh: search.tpHigh,
+      samplesText: search.samplesText,
+      focusIdx: search.focusIdx,
+      monthDeltas: search.monthDeltas,
+      featuresText: search.featuresText,
+      numTrials: search.numTrials,
+    }
+
+    const nextSearch = {
+      startDate: startDate || undefined,
+      targetDate: targetDate || undefined,
+      targetLikelihood,
+      splitLow,
+      splitHigh,
+      durationIdx,
+      throughputMode,
+      tpLow,
+      tpHigh,
+      samplesText,
+      focusIdx,
+      monthDeltas: encodeMonthDeltas(monthMultipliers),
+      featuresText: encodeFeatureRows(features),
+      numTrials,
+    }
+
+    const searchChanged = JSON.stringify(currentSearch) !== JSON.stringify(nextSearch)
+    if (!searchChanged) return
+
+    void navigate({ search: nextSearch, replace: true })
+  }, [
+    durationIdx,
+    features,
+    focusIdx,
+    monthMultipliers,
+    navigate,
+    numTrials,
+    samplesText,
+    search,
+    splitHigh,
+    splitLow,
+    startDate,
+    targetDate,
+    targetLikelihood,
+    throughputMode,
+    tpHigh,
+    tpLow,
+  ])
 
   const splitError =
     splitLow > splitHigh ? 'Low split must be ≤ high split.' : ''
@@ -335,6 +749,11 @@ function MultiFeatureForecasterPage() {
                 </Field>
               )}
               {tpError && <p className="text-xs text-red-600">{tpError}</p>}
+              <p className="text-xs text-[var(--sea-ink-soft)]">
+                Share this forecast by copying the page URL. Feature rows,
+                monthly adjustments, and throughput inputs are stored in the
+                query string.
+              </p>
             </fieldset>
 
             <Field label="Team focus">
@@ -588,6 +1007,72 @@ function MultiFeatureForecasterPage() {
               </div>
             </div>
           )}
+
+          <div className="border-t border-[var(--line)] pt-6">
+            <details className="space-y-4">
+              <summary className="field-legend cursor-pointer text-sm">
+                URL Parameters (advanced)
+              </summary>
+              <p className="max-w-3xl text-xs text-[var(--sea-ink-soft)]">
+                Append query parameters to prefill the form for testing or shared
+                scenarios. Complex values such as feature rows and monthly
+                adjustments are stored in compact encoded strings instead of raw
+                JSON.
+              </p>
+
+              <div className="rounded-2xl border border-[var(--line)] overflow-auto">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="border-b border-[var(--line)] bg-[var(--header-bg)]">
+                      <th className="px-3 py-2 text-left font-semibold">Parameter</th>
+                      <th className="px-3 py-2 text-left font-semibold">Meaning</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {QUERY_PARAM_DOCS.map(([name, description]) => (
+                      <tr key={name} className="border-b border-[var(--line)] last:border-0">
+                        <td className="px-3 py-2 font-mono text-[var(--sea-ink)]">
+                          {name}
+                        </td>
+                        <td className="px-3 py-2 text-[var(--sea-ink-soft)]">
+                          {description}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="grid gap-4 lg:grid-cols-2">
+                {QUERY_PARAM_EXAMPLES.map((example) => (
+                  <div
+                    key={example.title}
+                    className="rounded-2xl border border-[var(--line)] bg-[var(--surface-strong)] p-4"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h2 className="text-sm font-semibold text-[var(--sea-ink)]">
+                          {example.title}
+                        </h2>
+                        <p className="mt-1 text-xs text-[var(--sea-ink-soft)]">
+                          {example.description}
+                        </p>
+                      </div>
+                      <a
+                        href={`/multi-feature${example.search}`}
+                        className="rounded-full border border-[var(--line)] px-3 py-1 text-xs font-semibold text-[var(--lagoon-deep)] transition hover:border-[var(--lagoon)] hover:text-[var(--sea-ink)]"
+                      >
+                        Open example
+                      </a>
+                    </div>
+                    <p className="mt-3 break-all rounded-xl bg-[var(--header-bg)] px-3 py-2 font-mono text-[11px] text-[var(--sea-ink-soft)]">
+                      /multi-feature{example.search}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </details>
+          </div>
         </div>
       </section>
     </main>

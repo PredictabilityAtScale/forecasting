@@ -39,6 +39,19 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         href: '/fo.jpg',
         type: 'image/jpeg',
       },
+      {
+        rel: 'preconnect',
+        href: 'https://fonts.googleapis.com',
+      },
+      {
+        rel: 'preconnect',
+        href: 'https://fonts.gstatic.com',
+        crossOrigin: 'anonymous',
+      },
+      {
+        rel: 'stylesheet',
+        href: 'https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap',
+      },
     ],
   }),
   shellComponent: RootDocument,
@@ -51,7 +64,14 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <HeadContent />
       </head>
-      <body className="font-sans antialiased [overflow-wrap:anywhere] selection:bg-[rgba(79,184,178,0.24)]">
+      <body
+        className="font-sans antialiased [overflow-wrap:anywhere] selection:bg-[rgba(79,184,178,0.24)]"
+        style={{
+          backgroundColor: 'var(--bg-base, #e7f3ec)',
+          color: 'var(--sea-ink, #173a40)',
+          fontFamily: "'Manrope', ui-sans-serif, system-ui, sans-serif",
+        }}
+      >
         <div className="flex min-h-screen flex-col">
           <Header />
           <div className="flex-1">{children}</div>
