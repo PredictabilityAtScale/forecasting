@@ -1,19 +1,91 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { useState, useCallback, useMemo } from 'react'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useState, useCallback, useMemo, useEffect } from 'react'
+import { z } from 'zod'
 import {
   computeCapabilityMatrix,
   SKILL_LEVELS,
   FUTURE_NEED_LEVELS,
-  type SkillMeta,
-  type FutureNeed,
-  type CapabilityResult,
   riskColor,
   levelColor,
 } from '#/lib/capability-matrix'
+import type {
+  CapabilityResult,
+  FutureNeed,
+  SkillMeta,
+} from '#/lib/capability-matrix'
+import CopyLinkButton from '#/components/CopyLinkButton'
 
 export const Route = createFileRoute('/capability-matrix')({
+  validateSearch: (search) =>
+    capabilitySearchSchema.parse({
+      people: parseSearchPeople(search.people),
+      skills: parseSearchSkills(search.skills),
+      matrix: parseSearchMatrix(search.matrix),
+    }),
   component: CapabilityMatrixPage,
 })
+
+const skillSearchSchema = z.object({
+  name: z.string(),
+  futureNeed: z.enum(FUTURE_NEED_LEVELS),
+  trainingLeadMonths: z.number(),
+})
+
+const capabilitySearchSchema = z.object({
+  people: z.array(z.string()).optional(),
+  skills: z.array(skillSearchSchema).optional(),
+  matrix: z
+    .array(
+      z.array(
+        z
+          .number()
+          .int()
+          .min(0)
+          .max(SKILL_LEVELS.length - 1),
+      ),
+    )
+    .optional(),
+})
+
+function parseSearchPeople(value: unknown): string[] | undefined {
+  if (!Array.isArray(value)) return undefined
+  const people = value.filter(
+    (entry): entry is string => typeof entry === 'string',
+  )
+  return people.length > 0 ? people : undefined
+}
+
+function parseSearchSkills(value: unknown): SkillMeta[] | undefined {
+  if (!Array.isArray(value)) return undefined
+  const parsed = value
+    .map((entry) => skillSearchSchema.safeParse(entry))
+    .filter((entry) => entry.success)
+    .map((entry) => entry.data)
+  return parsed.length > 0 ? parsed : undefined
+}
+
+function parseSearchMatrix(value: unknown): number[][] | undefined {
+  if (!Array.isArray(value)) return undefined
+  const parsedRows = value
+    .filter((row): row is unknown[] => Array.isArray(row))
+    .map((row) =>
+      row
+        .map((cell) =>
+          typeof cell === 'number'
+            ? cell
+            : typeof cell === 'string'
+              ? Number(cell)
+              : NaN,
+        )
+        .filter(
+          (cell) =>
+            Number.isInteger(cell) && cell >= 0 && cell < SKILL_LEVELS.length,
+        ),
+    )
+    .filter((row) => row.length > 0)
+
+  return parsedRows.length > 0 ? parsedRows : undefined
+}
 
 /* ── Sample data (matches spreadsheet) ───────────────────────────────── */
 
@@ -40,12 +112,80 @@ const INITIAL_MATRIX: number[][] = [
   [1, 2, 3], // DB:  Person1=Run, Person2=Tweak, Team1=Create
 ]
 
+function normalizeMatrix(
+  matrix: number[][] | undefined,
+  skillCount: number,
+  peopleCount: number,
+): number[][] | undefined {
+  if (skillCount <= 0 || peopleCount <= 0) return undefined
+  const safeMatrix = matrix ?? []
+  return Array.from({ length: skillCount }, (_row, skillIdx) =>
+    Array.from({ length: peopleCount }, (_column, personIdx) => {
+      const level = safeMatrix[skillIdx]?.[personIdx]
+      return Number.isInteger(level) &&
+        level >= 0 &&
+        level < SKILL_LEVELS.length
+        ? level
+        : 0
+    }),
+  )
+}
+
+function areStringArraysEqual(left: string[], right: string[]): boolean {
+  return JSON.stringify(left) === JSON.stringify(right)
+}
+
+function areSkillsEqual(left: SkillMeta[], right: SkillMeta[]): boolean {
+  return JSON.stringify(left) === JSON.stringify(right)
+}
+
+function areMatrixEqual(left: number[][], right: number[][]): boolean {
+  return JSON.stringify(left) === JSON.stringify(right)
+}
+
 /* ── Page ────────────────────────────────────────────────────────────── */
 
 function CapabilityMatrixPage() {
-  const [people, setPeople] = useState<string[]>(INITIAL_PEOPLE)
-  const [skills, setSkills] = useState<SkillMeta[]>(INITIAL_SKILLS)
-  const [matrix, setMatrix] = useState<number[][]>(INITIAL_MATRIX)
+  const search = Route.useSearch()
+  const navigate = useNavigate({ from: Route.fullPath })
+  const [people, setPeople] = useState<string[]>(
+    search.people ?? INITIAL_PEOPLE,
+  )
+  const [skills, setSkills] = useState<SkillMeta[]>(
+    search.skills ?? INITIAL_SKILLS,
+  )
+  const [matrix, setMatrix] = useState<number[][]>(
+    normalizeMatrix(
+      search.matrix,
+      search.skills?.length ?? INITIAL_SKILLS.length,
+      search.people?.length ?? INITIAL_PEOPLE.length,
+    ) ?? INITIAL_MATRIX,
+  )
+
+  useEffect(() => {
+    const nextPeople = search.people ?? INITIAL_PEOPLE
+    const nextSkills = search.skills ?? INITIAL_SKILLS
+    const nextMatrix =
+      normalizeMatrix(search.matrix, nextSkills.length, nextPeople.length) ??
+      INITIAL_MATRIX
+
+    setPeople((prev) =>
+      areStringArraysEqual(prev, nextPeople) ? prev : nextPeople,
+    )
+    setSkills((prev) => (areSkillsEqual(prev, nextSkills) ? prev : nextSkills))
+    setMatrix((prev) => (areMatrixEqual(prev, nextMatrix) ? prev : nextMatrix))
+  }, [search])
+
+  useEffect(() => {
+    const nextSearch = {
+      people,
+      skills,
+      matrix: normalizeMatrix(matrix, skills.length, people.length),
+    }
+
+    if (JSON.stringify(search) === JSON.stringify(nextSearch)) return
+    void navigate({ search: nextSearch, replace: true })
+  }, [matrix, navigate, people, search, skills])
 
   /* ── People management ─────────────────────────────────────── */
   const addPerson = useCallback(() => {
@@ -80,12 +220,9 @@ function CapabilityMatrixPage() {
     setMatrix((m) => m.filter((_, i) => i !== idx))
   }, [])
 
-  const updateSkill = useCallback(
-    (idx: number, patch: Partial<SkillMeta>) => {
-      setSkills((s) => s.map((sk, i) => (i === idx ? { ...sk, ...patch } : sk)))
-    },
-    [],
-  )
+  const updateSkill = useCallback((idx: number, patch: Partial<SkillMeta>) => {
+    setSkills((s) => s.map((sk, i) => (i === idx ? { ...sk, ...patch } : sk)))
+  }, [])
 
   /* ── Matrix cell update ────────────────────────────────────── */
   const setLevel = useCallback(
@@ -112,21 +249,25 @@ function CapabilityMatrixPage() {
   return (
     <main className="mx-auto max-w-7xl px-4 pb-12 pt-8 sm:px-6 lg:px-8">
       <section className="island-shell rise-in rounded-[2rem] px-6 py-10 sm:px-10 sm:py-14">
-        <h1 className="display-title mb-2 text-3xl font-bold tracking-tight text-[var(--sea-ink)] sm:text-4xl">
-          Capability Matrix
-        </h1>
+        <div className="mb-2 flex items-start justify-between gap-4">
+          <h1 className="display-title text-3xl font-bold tracking-tight text-[var(--sea-ink)] sm:text-4xl">
+            Capability Matrix
+          </h1>
+          <CopyLinkButton />
+        </div>
         <p className="mb-8 max-w-2xl text-sm text-[var(--sea-ink-soft)]">
           Assess your team's skills to identify capability gaps and risk areas.
-          Add people/teams and skills, then rate each person's proficiency level.
-          The heatmap scorecard highlights where you're strong and where you need
-          to invest.
+          Add people/teams and skills, then rate each person's proficiency
+          level. The heatmap scorecard highlights where you're strong and where
+          you need to invest.
+        </p>
+        <p className="mb-8 max-w-2xl text-xs text-[var(--sea-ink-soft)]">
+          The current inputs are stored in the URL for sharing.
         </p>
 
         {/* ── Setup: People ──────────────────────────────────────── */}
         <div className="mb-6">
-          <h2 className="field-legend mb-2">
-            People / Teams
-          </h2>
+          <h2 className="field-legend mb-2">People / Teams</h2>
           <div className="flex flex-wrap gap-2">
             {people.map((p, i) => (
               <div key={i} className="flex items-center gap-1">
@@ -157,9 +298,7 @@ function CapabilityMatrixPage() {
 
         {/* ── Setup: Skills ──────────────────────────────────────── */}
         <div className="mb-6">
-          <h2 className="field-legend mb-2">
-            Skills / Technology Expertise
-          </h2>
+          <h2 className="field-legend mb-2">Skills / Technology Expertise</h2>
           <div className="space-y-2">
             <div className="hidden items-center gap-2 text-[10px] font-semibold uppercase tracking-wider text-[var(--sea-ink-soft)] sm:flex">
               <span className="flex-[3]">Skill</span>
@@ -234,9 +373,7 @@ function CapabilityMatrixPage() {
 
         {/* ── Assessment matrix ──────────────────────────────────── */}
         <div className="mb-6">
-          <h2 className="field-legend mb-2">
-            Assessment Matrix
-          </h2>
+          <h2 className="field-legend mb-2">Assessment Matrix</h2>
           <div className="overflow-x-auto rounded-xl border border-[var(--line)]">
             <table className="w-full text-xs">
               <thead>
@@ -302,15 +439,27 @@ function CapabilityMatrixPage() {
           <ResultsSection result={result} />
         ) : (
           <div className="flex items-center gap-3 rounded-2xl border-2 border-dashed border-amber-400/50 bg-amber-50/60 p-6 dark:border-amber-500/30 dark:bg-amber-950/30">
-            <svg className="h-6 w-6 flex-shrink-0 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              className="h-6 w-6 flex-shrink-0 text-amber-500"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
               <line x1="12" y1="9" x2="12" y2="13" />
               <line x1="12" y1="17" x2="12.01" y2="17" />
             </svg>
             <div>
-              <p className="text-sm font-semibold text-amber-800 dark:text-amber-200">Missing required inputs</p>
+              <p className="text-sm font-semibold text-amber-800 dark:text-amber-200">
+                Missing required inputs
+              </p>
               <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">
-                Add at least <strong>one person/team</strong> and <strong>one skill with a name</strong> to generate the scorecard.
+                Add at least <strong>one person/team</strong> and{' '}
+                <strong>one skill with a name</strong> to generate the
+                scorecard.
               </p>
             </div>
           </div>
@@ -690,10 +839,14 @@ function UrgencyTable({
   ]
 
   const urgencyColor = (v: number) => {
-    if (v >= 8) return 'bg-red-200 text-red-900 dark:bg-red-900/50 dark:text-red-200'
-    if (v >= 6) return 'bg-orange-200 text-orange-900 dark:bg-orange-900/50 dark:text-orange-200'
-    if (v >= 4) return 'bg-yellow-200 text-yellow-900 dark:bg-yellow-900/40 dark:text-yellow-200'
-    if (v >= 2) return 'bg-sky-200 text-sky-900 dark:bg-sky-900/40 dark:text-sky-200'
+    if (v >= 8)
+      return 'bg-red-200 text-red-900 dark:bg-red-900/50 dark:text-red-200'
+    if (v >= 6)
+      return 'bg-orange-200 text-orange-900 dark:bg-orange-900/50 dark:text-orange-200'
+    if (v >= 4)
+      return 'bg-yellow-200 text-yellow-900 dark:bg-yellow-900/40 dark:text-yellow-200'
+    if (v >= 2)
+      return 'bg-sky-200 text-sky-900 dark:bg-sky-900/40 dark:text-sky-200'
     return 'bg-blue-200 text-blue-900 dark:bg-blue-900/40 dark:text-blue-200'
   }
 
