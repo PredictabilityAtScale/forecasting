@@ -6,6 +6,7 @@ import {
 import Footer from '../components/Footer'
 import Header from '../components/Header'
 import { SITE_TITLE, SITE_DESCRIPTION } from '../lib/site'
+import '../styles.css'
 
 import type { QueryClient } from '@tanstack/react-query'
 
@@ -72,9 +73,14 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           fontFamily: "'Manrope', ui-sans-serif, system-ui, sans-serif",
         }}
       >
-        <div className="flex min-h-screen flex-col">
+        <div
+          className="flex min-h-screen flex-col"
+          style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}
+        >
           <Header />
-          <div className="flex-1">{children}</div>
+          <div className="flex-1" style={{ flex: '1 1 0%' }}>
+            {children}
+          </div>
           <Footer />
         </div>
         <Scripts />
