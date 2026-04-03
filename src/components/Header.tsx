@@ -9,6 +9,7 @@ const forecastingLinks = [
   { label: 'Story Count Forecaster', to: '/story-count' },
   { label: 'Latent Defects', to: '/latent-defect' },
   { label: 'KanbanSim', to: '/kanban-scrum-sim' },
+  { label: 'Kanban Learning Lab', to: '/kanban-flow-learning' },
   { label: 'ScrumSim', to: '/kanban-scrum-sim' },
 ]
 
