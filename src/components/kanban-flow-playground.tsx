@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { parseSimMl, runMonteCarlo, runVisualSimulation } from '#/lib/kanban-scrum-sim'
 import type { SimModel, SimPullOrder } from '#/lib/kanban-scrum-sim'
+import { SimBoardView } from '#/components/sim-board'
 import { Slider } from '#/components/ui/slider'
 import {
   Select,
@@ -14,6 +15,8 @@ interface KanbanFlowPlaygroundProps {
   source: string
 }
 
+const LEARNING_LAB_MONTE_CARLO_CYCLES = 25
+
 const PULL_ORDER_OPTIONS: Array<{ value: SimPullOrder; label: string }> = [
   { value: 'FIFO', label: 'FIFO (default Kanban pull)' },
   { value: 'FIFOStrict', label: 'FIFO Strict' },
@@ -21,6 +24,24 @@ const PULL_ORDER_OPTIONS: Array<{ value: SimPullOrder; label: string }> = [
   { value: 'randomAfterOrdering', label: 'Random after ordering' },
   { value: 'random', label: 'Random pull' },
 ]
+
+const SIM_DEBOUNCE_MS = 250
+
+function useDebouncedValue<T>(value: T, delay: number): T {
+  const [debounced, setDebounced] = useState(value)
+  const timer = useRef<ReturnType<typeof setTimeout>>(undefined)
+  useEffect(() => {
+    timer.current = setTimeout(() => setDebounced(value), delay)
+    return () => clearTimeout(timer.current)
+  }, [value, delay])
+  return debounced
+}
+
+function findFirstSnapshotWithDefect(snapshots: ReturnType<typeof runVisualSimulation>['snapshots']) {
+  return snapshots.findIndex((snapshot) =>
+    snapshot.columns.some((column) => column.cards.some((card) => card.kind === 'defect')),
+  )
+}
 
 function getAverageRate(low: number, high: number) {
   return Math.round((low + high) / 2)
@@ -93,6 +114,11 @@ export default function KanbanFlowPlayground({ source }: KanbanFlowPlaygroundPro
     ),
   )
   const [pullOrder, setPullOrder] = useState<SimPullOrder>(parsedModel.execute.pullOrder)
+  const [stepIndex, setStepIndex] = useState(0)
+
+  const debouncedWipLimit = useDebouncedValue(wipLimit, SIM_DEBOUNCE_MS)
+  const debouncedBlockerRate = useDebouncedValue(blockerRate, SIM_DEBOUNCE_MS)
+  const debouncedDefectRate = useDebouncedValue(defectRate, SIM_DEBOUNCE_MS)
 
   useEffect(() => {
     const matchingColumn = selectableColumns.find((column) => column.id === constraintColumnId)
@@ -108,7 +134,7 @@ export default function KanbanFlowPlayground({ source }: KanbanFlowPlaygroundPro
   }, [constraintColumnId, selectableColumns])
 
   const baseline = useMemo(() => {
-    const monteCarlo = runMonteCarlo(parsedModel, 300)
+    const monteCarlo = runMonteCarlo(parsedModel, LEARNING_LAB_MONTE_CARLO_CYCLES)
     const visual = runVisualSimulation(parsedModel)
     return {
       monteCarlo,
@@ -121,20 +147,25 @@ export default function KanbanFlowPlayground({ source }: KanbanFlowPlaygroundPro
     const tunedModel = cloneAndTuneModel({
       baseModel: parsedModel,
       constraintColumnId,
-      wipLimit,
-      blockerRate,
-      defectRate,
+      wipLimit: debouncedWipLimit,
+      blockerRate: debouncedBlockerRate,
+      defectRate: debouncedDefectRate,
       pullOrder,
     })
 
-    const monteCarlo = runMonteCarlo(tunedModel, 300)
+    const monteCarlo = runMonteCarlo(tunedModel, LEARNING_LAB_MONTE_CARLO_CYCLES)
     const visual = runVisualSimulation(tunedModel)
     return {
       monteCarlo,
       visual,
       p85Steps: getEightyFive(monteCarlo),
     }
-  }, [parsedModel, constraintColumnId, wipLimit, blockerRate, defectRate, pullOrder])
+  }, [parsedModel, constraintColumnId, debouncedWipLimit, debouncedBlockerRate, debouncedDefectRate, pullOrder])
+
+  useEffect(() => {
+    const finalIndex = Math.max(0, scenario.visual.snapshots.length - 1)
+    setStepIndex(Math.min(2, finalIndex))
+  }, [scenario.visual.totalSteps, scenario.visual.snapshots.length])
 
   const averageDeltaPercent =
     ((scenario.monteCarlo.averageSteps - baseline.monteCarlo.averageSteps) /
@@ -142,6 +173,9 @@ export default function KanbanFlowPlayground({ source }: KanbanFlowPlaygroundPro
     100
   const p85DeltaPercent =
     ((scenario.p85Steps - baseline.p85Steps) / Math.max(1, baseline.p85Steps)) * 100
+  const selectedSnapshot =
+    scenario.visual.snapshots[Math.min(stepIndex, Math.max(0, scenario.visual.snapshots.length - 1))] ?? null
+  const firstDefectSnapshotIndex = findFirstSnapshotWithDefect(scenario.visual.snapshots)
 
   return (
     <section className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-5 sm:p-6">
@@ -149,6 +183,9 @@ export default function KanbanFlowPlayground({ source }: KanbanFlowPlaygroundPro
       <p className="mt-2 text-sm leading-relaxed text-[var(--sea-ink-soft)]">
         Adjust one flow policy at a time and compare against the baseline model. This uses the same
         KanbanSim engine as the full simulator, but keeps controls embedded directly in article text.
+      </p>
+      <p className="mt-2 text-xs leading-relaxed text-[var(--sea-ink-soft)]">
+        Monte Carlo is capped at {LEARNING_LAB_MONTE_CARLO_CYCLES} cycles on this page so the lesson stays responsive while you experiment.
       </p>
 
       <div className="mt-6 grid gap-4 md:grid-cols-2">
@@ -258,6 +295,50 @@ export default function KanbanFlowPlayground({ source }: KanbanFlowPlaygroundPro
           <p className="m-0 mt-1 text-xs text-[var(--sea-ink-soft)]">Stability under uncertainty</p>
         </article>
       </div>
+
+      {selectedSnapshot ? (
+        <div className="mt-6 rounded-2xl border border-[var(--line)] bg-[color-mix(in_oklab,var(--surface)_90%,white_10%)] p-4 sm:p-5">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <p className="sim-board-kicker">Inline board</p>
+              <h3 className="mt-1 text-lg font-semibold text-[var(--sea-ink)]">{selectedSnapshot.label}</h3>
+              <p className="mt-1 text-sm text-[var(--sea-ink-soft)]">
+                Backlog {selectedSnapshot.backlogCount} · Done {selectedSnapshot.doneCount}
+                {selectedSnapshot.activePhase ? ` · ${selectedSnapshot.activePhase}` : ''}
+              </p>
+            </div>
+            <span className="rounded-full border border-[var(--line)] bg-[var(--surface-strong)] px-3 py-1 text-xs font-semibold text-[var(--sea-ink-soft)]">
+              Step {selectedSnapshot.step} / {scenario.visual.totalSteps}
+            </span>
+          </div>
+
+          {firstDefectSnapshotIndex !== -1 ? (
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button
+                type="button"
+                className="rounded-full border border-[rgba(50,143,151,0.22)] bg-[rgba(79,184,178,0.14)] px-3 py-1 text-xs font-semibold text-[var(--lagoon-deep)] transition hover:bg-[rgba(79,184,178,0.22)]"
+                onClick={() => setStepIndex(firstDefectSnapshotIndex)}
+              >
+                Jump to first defect card
+              </button>
+            </div>
+          ) : null}
+
+          <input
+            className="mt-4 w-full accent-[var(--lagoon-deep)]"
+            type="range"
+            min={0}
+            max={Math.max(0, scenario.visual.snapshots.length - 1)}
+            step={1}
+            value={Math.min(stepIndex, Math.max(0, scenario.visual.snapshots.length - 1))}
+            onChange={(event) => setStepIndex(Number(event.target.value))}
+          />
+
+          <div className="mt-4">
+            <SimBoardView snapshot={selectedSnapshot} compact />
+          </div>
+        </div>
+      ) : null}
 
       <p className="mt-4 text-xs leading-relaxed text-[var(--sea-ink-soft)]">
         Tip: Push blocker and defect rates high, then tune WIP down on the likely bottleneck. You should

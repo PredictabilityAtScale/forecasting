@@ -85,6 +85,14 @@ const metricResourceLinks = [
 const desktopMenuLinkClassName =
   'block rounded-lg px-3 py-2 text-sm font-semibold text-[var(--sea-ink-soft)] no-underline transition hover:bg-[var(--link-bg-hover)] hover:text-[var(--sea-ink)]'
 
+const desktopMenuGroupClassName = 'group relative -mb-2 pb-2'
+
+const desktopDropdownClassName =
+  'invisible absolute left-0 top-[calc(100%-2px)] z-50 min-w-64 rounded-xl border border-[var(--line)] bg-[var(--surface)] p-2 opacity-0 shadow-sm transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100'
+
+const desktopNestedDropdownClassName =
+  'invisible absolute left-[calc(100%-2px)] top-0 z-50 max-h-[26rem] w-80 overflow-y-auto rounded-xl border border-[var(--line)] bg-[var(--surface)] p-2 opacity-0 shadow-sm transition group-hover/submenu:visible group-hover/submenu:opacity-100 group-focus-within/submenu:visible group-focus-within/submenu:opacity-100'
+
 const mobileMenuLinkClassName =
   'block rounded-lg px-3 py-2.5 text-sm font-semibold text-[var(--sea-ink-soft)] no-underline transition hover:bg-[var(--link-bg-hover)] hover:text-[var(--sea-ink)]'
 
@@ -128,7 +136,7 @@ function DesktopResourceSubmenu({
           <path d="M5.97 12.78a.75.75 0 0 1 0-1.06L9.69 8 5.97 4.28a.75.75 0 1 1 1.06-1.06l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0Z" />
         </svg>
       </button>
-      <div className="invisible absolute left-full top-0 z-50 ml-1 max-h-[26rem] w-80 overflow-y-auto rounded-xl border border-[var(--line)] bg-[var(--surface)] p-2 opacity-0 shadow-sm transition group-hover/submenu:visible group-hover/submenu:opacity-100 group-focus-within/submenu:visible group-focus-within/submenu:opacity-100">
+      <div className={desktopNestedDropdownClassName}>
         {links.map((link) => (
           <a
             key={link.label}
@@ -257,7 +265,7 @@ export default function Header() {
 
         {/* Desktop nav */}
         <div className="hidden items-center gap-2 md:flex">
-          <div className="group relative">
+          <div className={desktopMenuGroupClassName}>
             <button
               type="button"
               className="nav-link inline-flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-semibold"
@@ -268,7 +276,7 @@ export default function Header() {
                 <path d="M3.22 5.97a.75.75 0 0 1 1.06 0L8 9.69l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L3.22 7.03a.75.75 0 0 1 0-1.06Z" />
               </svg>
             </button>
-            <div className="invisible absolute left-0 top-full z-50 mt-1 min-w-64 rounded-xl border border-[var(--line)] bg-[var(--surface)] p-2 opacity-0 shadow-sm transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+            <div className={desktopDropdownClassName}>
               <DesktopInternalLinks links={forecastingLinks} />
               <DesktopResourceSubmenu
                 label="Forecasting Spreadsheets & Articles"
@@ -277,7 +285,7 @@ export default function Header() {
             </div>
           </div>
 
-          <div className="group relative">
+          <div className={desktopMenuGroupClassName}>
             <button
               type="button"
               className="nav-link inline-flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-semibold"
@@ -288,7 +296,7 @@ export default function Header() {
                 <path d="M3.22 5.97a.75.75 0 0 1 1.06 0L8 9.69l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L3.22 7.03a.75.75 0 0 1 0-1.06Z" />
               </svg>
             </button>
-            <div className="invisible absolute left-0 top-full z-50 mt-1 min-w-56 rounded-xl border border-[var(--line)] bg-[var(--surface)] p-2 opacity-0 shadow-sm transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+            <div className={`${desktopDropdownClassName} min-w-56`}>
               <DesktopInternalLinks links={metricLinks} />
               <DesktopResourceSubmenu
                 label="Metrics Spreadsheets & Articles"

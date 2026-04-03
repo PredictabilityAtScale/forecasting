@@ -119,6 +119,8 @@ export interface SimDefect {
   startsInColumnId?: number
   occurrenceLowBound: number
   occurrenceHighBound: number
+  occurrenceType: SimOccurrenceType
+  scale: number
   estimateLowBound: number
   estimateHighBound: number
   count: number
@@ -146,6 +148,8 @@ export interface SimAddedScope {
   name: string
   occurrenceLowBound: number
   occurrenceHighBound: number
+  occurrenceType: SimOccurrenceType
+  scale: number
   estimateLowBound: number
   estimateHighBound: number
   count: number
@@ -761,6 +765,8 @@ function parseDefects(setup: Element): SimDefect[] {
     startsInColumnId: readOptionalNumber(node, 'startsInColumnId'),
     occurrenceLowBound: readNumber(node, 'occurrenceLowBound', 5),
     occurrenceHighBound: readNumber(node, 'occurrenceHighBound', 10),
+    occurrenceType: parseOccurrenceType(readAttr(node, 'occurrenceType')),
+    scale: readNumber(node, 'scale', 1),
     estimateLowBound: readNumber(node, 'estimateLowBound', 1),
     estimateHighBound: readNumber(node, 'estimateHighBound', 3),
     count: readNumber(node, 'count', 1),
@@ -802,6 +808,8 @@ function parseAddedScopes(setup: Element): SimAddedScope[] {
     name: readAttr(node, 'name') || node.textContent?.trim() || 'Added scope',
     occurrenceLowBound: readNumber(node, 'occurrenceLowBound', 3),
     occurrenceHighBound: readNumber(node, 'occurrenceHighBound', 8),
+    occurrenceType: parseOccurrenceType(readAttr(node, 'occurrenceType')),
+    scale: readNumber(node, 'scale', 1),
     estimateLowBound: readNumber(node, 'estimateLowBound', 1),
     estimateHighBound: readNumber(node, 'estimateHighBound', 3),
     count: readNumber(node, 'count', 1),
@@ -1130,7 +1138,7 @@ function runKanbanSimulation(model: SimModel): SimulationRunResult {
   const defectProcessors = model.setup.defects.map((d) => ({
     def: d,
     cardsSeen: 0,
-    trigger: Math.round(sampleBetween(d.occurrenceLowBound, d.occurrenceHighBound)),
+    trigger: sampleOccurrenceTrigger(d, 1),
   }))
   const blockingProcessors = model.setup.blockingEvents.map((b) => ({
     def: b,
@@ -1140,7 +1148,7 @@ function runKanbanSimulation(model: SimModel): SimulationRunResult {
   const addedScopeProcessors = model.setup.addedScopes.map((a) => ({
     def: a,
     completedSeen: 0,
-    trigger: Math.round(sampleBetween(a.occurrenceLowBound, a.occurrenceHighBound)),
+    trigger: sampleOccurrenceTrigger(a, 1),
   }))
   const defectBacklog: KanbanItem[] = []
 
@@ -1254,9 +1262,7 @@ function runKanbanSimulation(model: SimModel): SimulationRunResult {
             dp.cardsSeen += 1
             if (dp.cardsSeen >= dp.trigger) {
               dp.cardsSeen = 0
-              dp.trigger = Math.round(
-                sampleBetween(dp.def.occurrenceLowBound, dp.def.occurrenceHighBound) * phaseOccMult(),
-              )
+              dp.trigger = sampleOccurrenceTrigger(dp.def, phaseOccMult())
               for (let c = 0; c < dp.def.count; c += 1) {
                 const defectItem: KanbanItem = {
                   id: `def-${nextItemId++}`,
@@ -1297,9 +1303,7 @@ function runKanbanSimulation(model: SimModel): SimulationRunResult {
             asp.completedSeen += 1
             if (asp.completedSeen >= asp.trigger) {
               asp.completedSeen = 0
-              asp.trigger = Math.round(
-                sampleBetween(asp.def.occurrenceLowBound, asp.def.occurrenceHighBound) * phaseOccMult(),
-              )
+              asp.trigger = sampleOccurrenceTrigger(asp.def, phaseOccMult())
               for (let c = 0; c < asp.def.count; c += 1) {
                 items.push({
                   id: `as-${nextItemId++}`,
@@ -1500,7 +1504,7 @@ function runScrumSimulation(model: SimModel): SimulationRunResult {
   const defectProcessors = model.setup.defects.map((d) => ({
     def: d,
     storiesSeen: 0,
-    trigger: Math.round(sampleBetween(d.occurrenceLowBound, d.occurrenceHighBound)),
+    trigger: sampleOccurrenceTrigger(d, 1),
   }))
   const blockingProcessors = model.setup.blockingEvents.map((b) => ({
     def: b,
@@ -1510,7 +1514,7 @@ function runScrumSimulation(model: SimModel): SimulationRunResult {
   const addedScopeProcessors = model.setup.addedScopes.map((a) => ({
     def: a,
     completedSeen: 0,
-    trigger: Math.round(sampleBetween(a.occurrenceLowBound, a.occurrenceHighBound)),
+    trigger: sampleOccurrenceTrigger(a, 1),
   }))
 
   // Resolve initial phase
@@ -2250,7 +2254,10 @@ function normalizeOccurrence(scale: number, value: number) {
   return scale / value
 }
 
-function sampleOccurrenceTrigger(event: SimBlockingEvent, phaseOccurrenceMultiplier: number) {
+function sampleOccurrenceTrigger(
+  event: Pick<SimBlockingEvent, 'occurrenceType' | 'scale' | 'occurrenceLowBound' | 'occurrenceHighBound'>,
+  phaseOccurrenceMultiplier: number,
+) {
   if (event.occurrenceType === 'percentage') {
     const pct = Math.max(0, Math.min(100, sampleBetween(event.occurrenceLowBound, event.occurrenceHighBound)))
     const trigger = normalizeOccurrence(100, pct)
@@ -2411,7 +2418,7 @@ function fireScrumCompletionEvents(
     asp.completedSeen += 1
     if (asp.completedSeen >= asp.trigger) {
       asp.completedSeen = 0
-      asp.trigger = Math.round(sampleBetween(asp.def.occurrenceLowBound, asp.def.occurrenceHighBound))
+      asp.trigger = sampleOccurrenceTrigger(asp.def, 1)
       for (let c = 0; c < asp.def.count; c += 1) {
         backlog.push({
           id: `as-${id++}`,
@@ -2432,7 +2439,7 @@ function fireScrumCompletionEvents(
     dp.storiesSeen += 1
     if (dp.storiesSeen >= dp.trigger) {
       dp.storiesSeen = 0
-      dp.trigger = Math.round(sampleBetween(dp.def.occurrenceLowBound, dp.def.occurrenceHighBound))
+      dp.trigger = sampleOccurrenceTrigger(dp.def, 1)
       for (let c = 0; c < dp.def.count; c += 1) {
         backlog.push({
           id: `def-${id++}`,

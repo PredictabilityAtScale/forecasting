@@ -20,7 +20,7 @@ import {
   runSensitivityAnalysis,
   runVisualSimulation,
 } from '#/lib/kanban-scrum-sim'
-import type { BoardSnapshot } from '#/lib/kanban-scrum-sim'
+import { BoardLegendChip, SimBoardView } from '#/components/sim-board'
 
 export const Route = createFileRoute('/kanban-scrum-sim')({
   component: KanbanScrumSimPage,
@@ -147,6 +147,13 @@ type SimulationResults = {
   visual: ReturnType<typeof runVisualSimulation>
   monteCarlo: ReturnType<typeof runMonteCarlo>
   sensitivity: ReturnType<typeof runSensitivityAnalysis>
+}
+
+function findFirstSnapshotWithCardKind(results: SimulationResults | null, kind: 'defect' | 'addedScope') {
+  if (!results) return null
+  return results.visual.snapshots.findIndex((snapshot) =>
+    snapshot.columns.some((column) => column.cards.some((card) => card.kind === kind)),
+  )
 }
 
 function KanbanScrumSimPage() {
@@ -299,6 +306,8 @@ function KanbanScrumSimPage() {
 
   const snapshot = results?.visual.snapshots[Math.min(stepIndex, (results?.visual.snapshots.length ?? 1) - 1)] ?? null
   const forecastIsStale = simulationMode === 'manual' && hasPendingSimulation && !modelError
+  const firstDefectSnapshotIndex = findFirstSnapshotWithCardKind(results, 'defect')
+  const firstAddedScopeSnapshotIndex = findFirstSnapshotWithCardKind(results, 'addedScope')
 
   return (
     <main className="mx-auto max-w-[1500px] px-4 pb-14 pt-8 sm:px-6 lg:px-8">
@@ -643,11 +652,29 @@ function KanbanScrumSimPage() {
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="flex flex-wrap items-center gap-2">
-                    <LegendChip label="Story" kind="story" />
-                    <LegendChip label="Defect" kind="defect" />
-                    <LegendChip label="Added scope" kind="addedScope" />
+                    <BoardLegendChip label="Story" kind="story" />
+                    <BoardLegendChip label="Defect" kind="defect" />
+                    <BoardLegendChip label="Added scope" kind="addedScope" />
                     <span className="sim-board-legend sim-board-legend-blocked">Blocker</span>
                   </div>
+                  {firstDefectSnapshotIndex !== -1 ? (
+                    <button
+                      type="button"
+                      className="rounded-full border border-[rgba(50,143,151,0.22)] bg-[rgba(79,184,178,0.14)] px-3 py-1 text-xs font-semibold text-[var(--lagoon-deep)] transition hover:bg-[rgba(79,184,178,0.22)]"
+                      onClick={() => setStepIndex(firstDefectSnapshotIndex)}
+                    >
+                      Jump to first defect
+                    </button>
+                  ) : null}
+                  {firstAddedScopeSnapshotIndex !== -1 ? (
+                    <button
+                      type="button"
+                      className="rounded-full border border-[var(--line)] bg-[var(--surface-strong)] px-3 py-1 text-xs font-semibold text-[var(--sea-ink-soft)] transition hover:bg-[var(--link-bg-hover)]"
+                      onClick={() => setStepIndex(firstAddedScopeSnapshotIndex)}
+                    >
+                      Jump to first scope change
+                    </button>
+                  ) : null}
                   <span className="rounded-full border border-[var(--line)] bg-[var(--surface-strong)] px-3 py-1 text-xs font-semibold text-[var(--sea-ink-soft)]">
                     Step {snapshot.step} / {results.visual.totalSteps}
                   </span>
@@ -664,7 +691,7 @@ function KanbanScrumSimPage() {
                 onChange={(event) => setStepIndex(Number(event.target.value))}
               />
 
-              <BoardView snapshot={snapshot} />
+              <SimBoardView snapshot={snapshot} />
             </div>
           ) : (
             <div className="rounded-[1.6rem] border-2 border-dashed border-amber-300/70 bg-amber-50/70 p-6 text-sm text-amber-900">
@@ -808,75 +835,6 @@ function KanbanScrumSimPage() {
   )
 }
 
-function BoardView({ snapshot }: { snapshot: BoardSnapshot }) {
-  return (
-    <div className="overflow-x-auto">
-      <div className="grid min-w-[920px] gap-4" style={{ gridTemplateColumns: `repeat(${snapshot.columns.length}, minmax(200px, 1fr))` }}>
-        {snapshot.columns.map((column) => (
-          <section
-            key={column.id}
-            className="sim-board-column"
-          >
-            <div className="flex items-center justify-between gap-2">
-              <div>
-                <h3 className="text-sm font-semibold tracking-[0.01em] text-[var(--sea-ink)]">{column.label}</h3>
-                <p className="text-[11px] font-medium text-[var(--sea-ink-soft)]">
-                  {column.cards.length} items{column.wipLimit ? ` / WIP ${column.wipLimit}` : ''}
-                </p>
-              </div>
-            </div>
-            <div className="mt-3 min-h-[100px] space-y-2">
-              {column.cards.length > 0 ? (
-                column.cards.slice(0, 18).map((card) => (
-                  <article
-                    key={card.id}
-                    className={`sim-board-card sim-board-card-${card.kind} ${card.status === 'queued' ? 'sim-board-card-queued' : ''} ${card.isBlocked ? 'sim-board-card-blocked' : ''}`}
-                  >
-                    <div className="sim-board-card-pin" />
-                    {card.isBlocked ? (
-                      <div
-                        className="sim-board-card-blocker"
-                        title={card.blockerLabel ? `Blocked by ${card.blockerLabel}` : 'Blocked'}
-                        aria-label={card.blockerLabel ? `Blocked by ${card.blockerLabel}` : 'Blocked'}
-                      >
-                        {card.blockerLabel ? (
-                          <span>{card.blockerLabel}</span>
-                        ) : null}
-                      </div>
-                    ) : null}
-                    <p className="sim-board-card-kind">
-                      {card.kind === 'addedScope'
-                        ? 'Scope'
-                        : card.kind === 'defect'
-                          ? 'Defect'
-                          : 'Story'}
-                    </p>
-                    <p className="sim-board-card-title">{card.label}</p>
-                    {card.deliverable ? (
-                      <p className="sim-board-card-meta">
-                        {card.deliverable}
-                      </p>
-                    ) : null}
-                  </article>
-                ))
-              ) : (
-                <div className="col-span-full rounded-2xl border border-dashed border-[var(--line)] bg-[var(--surface)] px-3 py-10 text-center text-xs font-medium text-[var(--sea-ink-soft)]">
-                  Empty
-                </div>
-              )}
-              {column.cards.length > 18 ? (
-                <p className="col-span-full text-center text-[11px] font-semibold text-[var(--sea-ink-soft)]">
-                  +{column.cards.length - 18} more
-                </p>
-              ) : null}
-            </div>
-          </section>
-        ))}
-      </div>
-    </div>
-  )
-}
-
 function Histogram({ data }: { data: { step: number; count: number }[] }) {
   if (!data.length) {
     return <p className="mt-4 text-sm text-[var(--sea-ink-soft)]">No histogram data.</p>
@@ -911,16 +869,6 @@ function StatCard({ label, value }: { label: string; value: string }) {
       <p className="mt-2 text-lg font-semibold text-[var(--sea-ink)]">{value}</p>
     </div>
   )
-}
-
-function LegendChip({
-  label,
-  kind,
-}: {
-  label: string
-  kind: 'story' | 'defect' | 'addedScope'
-}) {
-  return <span className={`sim-board-legend sim-board-legend-${kind}`}>{label}</span>
 }
 
 function SimulationSpinner({ label }: { label: string }) {
