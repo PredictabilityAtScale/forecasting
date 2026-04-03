@@ -20,6 +20,7 @@ import { Route as SimmlEditorRouteImport } from './routes/simml-editor'
 import { Route as MultiFeatureRouteImport } from './routes/multi-feature'
 import { Route as LatentDefectRouteImport } from './routes/latent-defect'
 import { Route as KanbanScrumSimRouteImport } from './routes/kanban-scrum-sim'
+import { Route as KanbanFlowLearningRouteImport } from './routes/kanban-flow-learning'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CapabilityMatrixRouteImport } from './routes/capability-matrix'
 import { Route as ArticlesRouteImport } from './routes/articles'
@@ -81,6 +82,11 @@ const KanbanScrumSimRoute = KanbanScrumSimRouteImport.update({
   path: '/kanban-scrum-sim',
   getParentRoute: () => rootRouteImport,
 } as any)
+const KanbanFlowLearningRoute = KanbanFlowLearningRouteImport.update({
+  id: '/kanban-flow-learning',
+  path: '/kanban-flow-learning',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
@@ -112,6 +118,7 @@ export interface FileRoutesByFullPath {
   '/articles': typeof ArticlesRouteWithChildren
   '/capability-matrix': typeof CapabilityMatrixRoute
   '/contact': typeof ContactRoute
+  '/kanban-flow-learning': typeof KanbanFlowLearningRoute
   '/kanban-scrum-sim': typeof KanbanScrumSimRoute
   '/latent-defect': typeof LatentDefectRoute
   '/multi-feature': typeof MultiFeatureRoute
@@ -130,6 +137,7 @@ export interface FileRoutesByTo {
   '/articles': typeof ArticlesRouteWithChildren
   '/capability-matrix': typeof CapabilityMatrixRoute
   '/contact': typeof ContactRoute
+  '/kanban-flow-learning': typeof KanbanFlowLearningRoute
   '/kanban-scrum-sim': typeof KanbanScrumSimRoute
   '/latent-defect': typeof LatentDefectRoute
   '/multi-feature': typeof MultiFeatureRoute
@@ -149,6 +157,7 @@ export interface FileRoutesById {
   '/articles': typeof ArticlesRouteWithChildren
   '/capability-matrix': typeof CapabilityMatrixRoute
   '/contact': typeof ContactRoute
+  '/kanban-flow-learning': typeof KanbanFlowLearningRoute
   '/kanban-scrum-sim': typeof KanbanScrumSimRoute
   '/latent-defect': typeof LatentDefectRoute
   '/multi-feature': typeof MultiFeatureRoute
@@ -169,6 +178,7 @@ export interface FileRouteTypes {
     | '/articles'
     | '/capability-matrix'
     | '/contact'
+    | '/kanban-flow-learning'
     | '/kanban-scrum-sim'
     | '/latent-defect'
     | '/multi-feature'
@@ -187,6 +197,7 @@ export interface FileRouteTypes {
     | '/articles'
     | '/capability-matrix'
     | '/contact'
+    | '/kanban-flow-learning'
     | '/kanban-scrum-sim'
     | '/latent-defect'
     | '/multi-feature'
@@ -205,6 +216,7 @@ export interface FileRouteTypes {
     | '/articles'
     | '/capability-matrix'
     | '/contact'
+    | '/kanban-flow-learning'
     | '/kanban-scrum-sim'
     | '/latent-defect'
     | '/multi-feature'
@@ -224,6 +236,7 @@ export interface RootRouteChildren {
   ArticlesRoute: typeof ArticlesRouteWithChildren
   CapabilityMatrixRoute: typeof CapabilityMatrixRoute
   ContactRoute: typeof ContactRoute
+  KanbanFlowLearningRoute: typeof KanbanFlowLearningRoute
   KanbanScrumSimRoute: typeof KanbanScrumSimRoute
   LatentDefectRoute: typeof LatentDefectRoute
   MultiFeatureRoute: typeof MultiFeatureRoute
@@ -316,6 +329,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof KanbanScrumSimRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/kanban-flow-learning': {
+      id: '/kanban-flow-learning'
+      path: '/kanban-flow-learning'
+      fullPath: '/kanban-flow-learning'
+      preLoaderRoute: typeof KanbanFlowLearningRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/contact': {
       id: '/contact'
       path: '/contact'
@@ -371,6 +391,7 @@ const rootRouteChildren: RootRouteChildren = {
   ArticlesRoute: ArticlesRouteWithChildren,
   CapabilityMatrixRoute: CapabilityMatrixRoute,
   ContactRoute: ContactRoute,
+  KanbanFlowLearningRoute: KanbanFlowLearningRoute,
   KanbanScrumSimRoute: KanbanScrumSimRoute,
   LatentDefectRoute: LatentDefectRoute,
   MultiFeatureRoute: MultiFeatureRoute,
