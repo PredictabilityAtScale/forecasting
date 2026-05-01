@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Outlet, useRouterState } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
@@ -56,8 +56,16 @@ const fetchOpenSlots = createServerFn({ method: 'POST' })
   })
 
 export const Route = createFileRoute('/book')({
-  component: BookPage,
+  component: BookRouteShell,
 })
+
+function BookRouteShell() {
+  const pathname = useRouterState({
+    select: (state) => state.location.pathname,
+  })
+
+  return pathname === '/book' ? <BookPage /> : <Outlet />
+}
 
 function BookPage() {
   const [durationMinutes, setDurationMinutes] =

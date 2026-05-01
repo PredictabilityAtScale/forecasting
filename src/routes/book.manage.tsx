@@ -14,8 +14,15 @@ const cancelBooking = createServerFn({ method: 'POST' })
     return { token: value.token }
   })
   .handler(async ({ data }) => {
+    console.info('[booking.manage] cancel requested', {
+      tokenPrefix: data.token.slice(0, 16),
+      tokenLength: data.token.length,
+    })
     const { cancelBookingFromToken } = await import('#/server/booking')
     await cancelBookingFromToken(data.token)
+    console.info('[booking.manage] cancel completed', {
+      tokenPrefix: data.token.slice(0, 16),
+    })
     return { ok: true as const }
   })
 
@@ -38,6 +45,12 @@ const rescheduleBooking = createServerFn({ method: 'POST' })
     }
   })
   .handler(async ({ data }) => {
+    console.info('[booking.manage] reschedule requested', {
+      slotId: data.slotId,
+      durationMinutes: data.durationMinutes,
+      tokenPrefix: data.token.slice(0, 16),
+      tokenLength: data.token.length,
+    })
     const { getBookingAvailability: getCurrentBookingAvailability } =
       await import('#/data/booking-availability')
     const slot = getCurrentBookingAvailability({
@@ -48,6 +61,10 @@ const rescheduleBooking = createServerFn({ method: 'POST' })
     await rescheduleBookingFromToken(data.token, {
       start: slot.start,
       end: slot.end,
+    })
+    console.info('[booking.manage] reschedule completed', {
+      slotId: data.slotId,
+      tokenPrefix: data.token.slice(0, 16),
     })
     return { ok: true as const }
   })
@@ -81,6 +98,13 @@ function ManageBookingPage() {
   const search = Route.useSearch()
   const action = search.action
   const token = search.token ?? ''
+  const debugDetails = {
+    route: '/book/manage',
+    action: action ?? 'missing',
+    hasToken: Boolean(token),
+    tokenLength: token.length,
+    tokenPrefix: token ? token.slice(0, 16) : 'none',
+  }
   const [durationMinutes, setDurationMinutes] =
     useState<BookingDurationMinutes>(30)
   const [slotId, setSlotId] = useState('')
@@ -122,10 +146,12 @@ function ManageBookingPage() {
 
   async function onCancel() {
     try {
+      console.info('[booking.manage] cancel click', debugDetails)
       setIsSubmitting(true)
       await cancelBooking({ data: { token } })
       setStatus('Your meeting has been cancelled and notifications were sent.')
     } catch (error) {
+      console.error('[booking.manage] cancel failed', error)
       setStatus(
         error instanceof Error ? error.message : 'Unable to cancel meeting.',
       )
@@ -136,12 +162,18 @@ function ManageBookingPage() {
 
   async function onReschedule() {
     try {
+      console.info('[booking.manage] reschedule click', {
+        ...debugDetails,
+        slotId,
+        durationMinutes,
+      })
       setIsSubmitting(true)
       await rescheduleBooking({ data: { token, slotId, durationMinutes } })
       setStatus(
         'Your meeting has been rescheduled and updated invites were sent.',
       )
     } catch (error) {
+      console.error('[booking.manage] reschedule failed', error)
       setStatus(
         error instanceof Error
           ? error.message
@@ -249,6 +281,33 @@ function ManageBookingPage() {
         ) : null}
 
         {status ? <p className="mt-4 text-sm">{status}</p> : null}
+        <details className="mt-6 rounded-lg border border-[var(--line)] p-3 text-xs text-[var(--sea-ink-soft)]">
+          <summary className="cursor-pointer font-medium text-[var(--sea-ink)]">
+            Debug details
+          </summary>
+          <dl className="mt-3 grid gap-1">
+            <div className="flex justify-between gap-4">
+              <dt>Route</dt>
+              <dd>{debugDetails.route}</dd>
+            </div>
+            <div className="flex justify-between gap-4">
+              <dt>Action</dt>
+              <dd>{debugDetails.action}</dd>
+            </div>
+            <div className="flex justify-between gap-4">
+              <dt>Token present</dt>
+              <dd>{debugDetails.hasToken ? 'yes' : 'no'}</dd>
+            </div>
+            <div className="flex justify-between gap-4">
+              <dt>Token length</dt>
+              <dd>{debugDetails.tokenLength}</dd>
+            </div>
+            <div className="flex justify-between gap-4">
+              <dt>Token prefix</dt>
+              <dd>{debugDetails.tokenPrefix}</dd>
+            </div>
+          </dl>
+        </details>
       </section>
     </main>
   )

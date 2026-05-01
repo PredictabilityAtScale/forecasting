@@ -289,10 +289,20 @@ export async function createGoogleCalendarInvite({
 
 export async function cancelBookingFromToken(token: string) {
   const payload = parseBookingLinkToken(token)
+  console.info('[booking] cancel token parsed', {
+    email: payload.email,
+    googleEventId: payload.googleEventId,
+    zoomMeetingId: payload.zoomMeetingId,
+    expiresAt: payload.expiresAt,
+  })
   const googleAccessToken = await getGoogleAccessToken()
   const zoomAccessToken = await getZoomAccessToken()
   const calendarId = getEnv('BOOKING_GOOGLE_CALENDAR_ID') ?? 'primary'
 
+  console.info('[booking] deleting Google Calendar event', {
+    calendarId,
+    googleEventId: payload.googleEventId,
+  })
   const deleteEvent = await fetch(
     `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events/${encodeURIComponent(payload.googleEventId)}?sendUpdates=all`,
     {
@@ -300,14 +310,26 @@ export async function cancelBookingFromToken(token: string) {
       headers: { Authorization: `Bearer ${googleAccessToken}` },
     },
   )
+  console.info('[booking] Google Calendar delete response', {
+    status: deleteEvent.status,
+    ok: deleteEvent.ok,
+  })
   if (
     !deleteEvent.ok &&
     deleteEvent.status !== 404 &&
     deleteEvent.status !== 410
   ) {
+    const message = await deleteEvent.text()
+    console.error('[booking] Google Calendar delete failed', {
+      status: deleteEvent.status,
+      message,
+    })
     throw new Error(`Google event cancel failed (${deleteEvent.status}).`)
   }
 
+  console.info('[booking] deleting Zoom meeting', {
+    zoomMeetingId: payload.zoomMeetingId,
+  })
   const deleteZoom = await fetch(
     `https://api.zoom.us/v2/meetings/${encodeURIComponent(payload.zoomMeetingId)}`,
     {
@@ -315,7 +337,16 @@ export async function cancelBookingFromToken(token: string) {
       headers: { Authorization: `Bearer ${zoomAccessToken}` },
     },
   )
+  console.info('[booking] Zoom delete response', {
+    status: deleteZoom.status,
+    ok: deleteZoom.ok,
+  })
   if (!deleteZoom.ok && deleteZoom.status !== 404) {
+    const message = await deleteZoom.text()
+    console.error('[booking] Zoom delete failed', {
+      status: deleteZoom.status,
+      message,
+    })
     throw new Error(`Zoom cancel failed (${deleteZoom.status}).`)
   }
 }
@@ -325,6 +356,13 @@ export async function rescheduleBookingFromToken(
   nextSlot: { start: string; end: string },
 ) {
   const payload = parseBookingLinkToken(token)
+  console.info('[booking] reschedule token parsed', {
+    email: payload.email,
+    googleEventId: payload.googleEventId,
+    zoomMeetingId: payload.zoomMeetingId,
+    expiresAt: payload.expiresAt,
+    nextSlot,
+  })
   const durationMinutes = getSlotDurationMinutes(nextSlot)
   const stillOpen = await getOpenBookingSlotsWithinRange({
     durationMinutes,
@@ -342,6 +380,11 @@ export async function rescheduleBookingFromToken(
   const zoomAccessToken = await getZoomAccessToken()
   const calendarId = getEnv('BOOKING_GOOGLE_CALENDAR_ID') ?? 'primary'
 
+  console.info('[booking] updating Google Calendar event', {
+    calendarId,
+    googleEventId: payload.googleEventId,
+    nextSlot,
+  })
   const updateEvent = await fetch(
     `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events/${encodeURIComponent(payload.googleEventId)}?sendUpdates=all`,
     {
@@ -356,7 +399,16 @@ export async function rescheduleBookingFromToken(
       }),
     },
   )
+  console.info('[booking] Google Calendar update response', {
+    status: updateEvent.status,
+    ok: updateEvent.ok,
+  })
   if (!updateEvent.ok) {
+    const message = await updateEvent.text()
+    console.error('[booking] Google Calendar update failed', {
+      status: updateEvent.status,
+      message,
+    })
     throw new Error(`Google event reschedule failed (${updateEvent.status}).`)
   }
 
@@ -382,7 +434,16 @@ export async function rescheduleBookingFromToken(
       }),
     },
   )
+  console.info('[booking] Zoom update response', {
+    status: updateZoom.status,
+    ok: updateZoom.ok,
+  })
   if (!updateZoom.ok) {
+    const message = await updateZoom.text()
+    console.error('[booking] Zoom update failed', {
+      status: updateZoom.status,
+      message,
+    })
     throw new Error(`Zoom reschedule failed (${updateZoom.status}).`)
   }
 }
