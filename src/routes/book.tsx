@@ -1,13 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { useEffect, useMemo, useState } from 'react'
-import {
-  bookingAvailability,
-  bookingDurationOptions,
-  getBookingAvailability,
-} from '#/data/booking-availability'
+import { bookingDurationOptions } from '#/data/booking-availability'
 import { bookingSchema } from '#/data/booking-schema'
-import type { BookingDurationMinutes } from '#/data/booking-availability'
+import type {
+  BookingDurationMinutes,
+  BookingSlot,
+} from '#/data/booking-availability'
 
 const submitBooking = createServerFn({ method: 'POST' })
   .inputValidator((data: unknown) => bookingSchema.parse(data))
@@ -20,7 +19,8 @@ const submitBooking = createServerFn({ method: 'POST' })
       throw new Error('The selected slot is no longer available.')
     }
 
-    const { createGoogleCalendarInvite, createZoomMeeting } = await import('#/server/booking')
+    const { createGoogleCalendarInvite, createZoomMeeting } =
+      await import('#/server/booking')
 
     const zoomMeeting = await createZoomMeeting({
       topic: data.topic,
@@ -59,38 +59,82 @@ export const Route = createFileRoute('/book')({
 })
 
 function BookPage() {
-  const [durationMinutes, setDurationMinutes] = useState<BookingDurationMinutes>(30)
-  const [slotId, setSlotId] = useState(bookingAvailability[0]?.id ?? '')
+  const [durationMinutes, setDurationMinutes] =
+    useState<BookingDurationMinutes>(30)
+  const [slotId, setSlotId] = useState('')
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [company, setCompany] = useState('')
   const [topic, setTopic] = useState('')
   const [status, setStatus] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [openSlots, setOpenSlots] = useState(bookingAvailability)
+  const [isLoadingSlots, setIsLoadingSlots] = useState(true)
+  const [openSlots, setOpenSlots] = useState<BookingSlot[]>([])
+  const [visibleWeekStart, setVisibleWeekStart] = useState(() =>
+    startOfLocalWeek(new Date()),
+  )
 
-  const timezone = useMemo(() => Intl.DateTimeFormat().resolvedOptions().timeZone, [])
+  const timezone = useMemo(
+    () => Intl.DateTimeFormat().resolvedOptions().timeZone,
+    [],
+  )
 
   useEffect(() => {
-    const fallbackSlots = getBookingAvailability({ durationMinutes })
-    setOpenSlots(fallbackSlots)
-    setSlotId((current) =>
-      fallbackSlots.length > 0 && !fallbackSlots.some((slot) => slot.id === current)
-        ? fallbackSlots[0].id
-        : current,
-    )
+    setIsLoadingSlots(true)
+    setStatus(null)
 
     fetchOpenSlots({ data: { durationMinutes } })
       .then((slots) => {
         setOpenSlots(slots)
         setSlotId((current) =>
-          slots.length > 0 && !slots.some((slot) => slot.id === current) ? slots[0].id : current,
+          slots.length > 0 && !slots.some((slot) => slot.id === current)
+            ? slots[0].id
+            : current,
+        )
+        if (slots.length > 0) {
+          setVisibleWeekStart(startOfLocalWeek(new Date(slots[0].start)))
+        }
+      })
+      .catch((error) => {
+        console.error(error)
+        setOpenSlots([])
+        setSlotId('')
+        setStatus(
+          'Could not refresh live availability. Please contact us to coordinate manually.',
         )
       })
-      .catch(() => {
-        setStatus('Could not refresh live availability. Showing preset times.')
+      .finally(() => {
+        setIsLoadingSlots(false)
       })
   }, [durationMinutes])
+
+  const visibleWeekEnd = useMemo(
+    () => addCalendarDays(visibleWeekStart, 7),
+    [visibleWeekStart],
+  )
+
+  const visibleSlots = useMemo(
+    () =>
+      openSlots.filter((slot) => {
+        const slotStart = new Date(slot.start).getTime()
+        return (
+          slotStart >= visibleWeekStart.getTime() &&
+          slotStart < visibleWeekEnd.getTime()
+        )
+      }),
+    [openSlots, visibleWeekEnd, visibleWeekStart],
+  )
+
+  const visibleWeekLabel = useMemo(() => {
+    const formatter = new Intl.DateTimeFormat([], {
+      month: 'short',
+      day: 'numeric',
+      timeZone: timezone,
+    })
+    const rangeEnd = addCalendarDays(visibleWeekEnd, -1)
+
+    return `${formatter.format(visibleWeekStart)} - ${formatter.format(rangeEnd)}`
+  }, [timezone, visibleWeekEnd, visibleWeekStart])
 
   const groupedSlots = useMemo(() => {
     const formatter = new Intl.DateTimeFormat([], {
@@ -100,7 +144,7 @@ function BookPage() {
       timeZone: timezone,
     })
 
-    return openSlots.reduce(
+    return visibleSlots.reduce(
       (groups, slot) => {
         const dateKey = formatter.format(new Date(slot.start))
         const existingGroup = groups.find((group) => group.dateKey === dateKey)
@@ -113,9 +157,9 @@ function BookPage() {
 
         return groups
       },
-      [] as Array<{ dateKey: string; slots: typeof openSlots }>,
+      [] as Array<{ dateKey: string; slots: typeof visibleSlots }>,
     )
-  }, [openSlots, timezone])
+  }, [timezone, visibleSlots])
 
   const selectedSlot = useMemo(
     () => openSlots.find((slot) => slot.id === slotId),
@@ -129,14 +173,26 @@ function BookPage() {
 
     try {
       await submitBooking({
-        data: { slotId, durationMinutes, name, email, company, topic, timezone },
+        data: {
+          slotId,
+          durationMinutes,
+          name,
+          email,
+          company,
+          topic,
+          timezone,
+        },
       })
       setStatus(
         'Thanks — your meeting is booked. Check the invite for direct cancel/reschedule links and the Zoom join URL.',
       )
       setTopic('')
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : 'Could not submit your booking request.')
+      setStatus(
+        error instanceof Error
+          ? error.message
+          : 'Could not submit your booking request.',
+      )
     } finally {
       setIsSubmitting(false)
     }
@@ -150,15 +206,61 @@ function BookPage() {
           Schedule a Zoom call
         </h1>
         <p className="mb-2 max-w-2xl text-sm leading-relaxed text-[var(--sea-ink-soft)]">
-          Pick a slot from a calendar-style grid and share context. This page creates a Zoom meeting and a Google Calendar invite without adding a database.
+          Share context, then pick a slot from a weekly grid. This page creates
+          a Zoom meeting and a Google Calendar invite without adding a database.
         </p>
         <p className="mb-6 text-xs text-[var(--sea-ink-soft)]">
-          Times are shown in your local timezone: <span className="font-semibold">{timezone}</span>
+          Times are shown in your local timezone:{' '}
+          <span className="font-semibold">{timezone}</span>
         </p>
 
         <form onSubmit={onSubmit} className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <label className="block text-sm font-medium text-[var(--sea-ink)]">
+              Name
+              <input
+                required
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                className="mt-1 w-full rounded-md border border-[var(--line)] bg-[var(--surface)] px-3 py-2"
+              />
+            </label>
+
+            <label className="block text-sm font-medium text-[var(--sea-ink)]">
+              Email
+              <input
+                required
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                className="mt-1 w-full rounded-md border border-[var(--line)] bg-[var(--surface)] px-3 py-2"
+              />
+            </label>
+          </div>
+
+          <label className="block text-sm font-medium text-[var(--sea-ink)]">
+            Company (optional)
+            <input
+              value={company}
+              onChange={(event) => setCompany(event.target.value)}
+              className="mt-1 w-full rounded-md border border-[var(--line)] bg-[var(--surface)] px-3 py-2"
+            />
+          </label>
+
+          <label className="block text-sm font-medium text-[var(--sea-ink)]">
+            What should we cover?
+            <textarea
+              required
+              value={topic}
+              onChange={(event) => setTopic(event.target.value)}
+              className="mt-1 min-h-28 w-full rounded-md border border-[var(--line)] bg-[var(--surface)] px-3 py-2"
+            />
+          </label>
+
           <fieldset>
-            <legend className="mb-2 block text-sm font-medium text-[var(--sea-ink)]">Meeting length</legend>
+            <legend className="mb-2 block text-sm font-medium text-[var(--sea-ink)]">
+              Meeting length
+            </legend>
             <div className="inline-flex rounded-full border border-[var(--line)] bg-[var(--surface)] p-1">
               {bookingDurationOptions.map((option) => {
                 const selected = option === durationMinutes
@@ -181,14 +283,73 @@ function BookPage() {
           </fieldset>
 
           <fieldset>
-            <legend className="mb-2 block text-sm font-medium text-[var(--sea-ink)]">Available times</legend>
+            <legend className="mb-2 block text-sm font-medium text-[var(--sea-ink)]">
+              Available times
+            </legend>
+            <div className="mb-3 flex flex-wrap items-center gap-2">
+              <span className="text-xs font-medium text-[var(--sea-ink-soft)]">
+                {visibleWeekLabel}
+              </span>
+              <button
+                type="button"
+                onClick={() =>
+                  setVisibleWeekStart((current) =>
+                    startOfLocalWeek(addCalendarDays(current, -7)),
+                  )
+                }
+                className="rounded-full border border-[var(--line)] px-3 py-1 text-xs text-[var(--sea-ink-soft)] transition hover:border-[rgba(50,143,151,0.35)] hover:text-[var(--lagoon-deep)]"
+              >
+                Prev week
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setVisibleWeekStart((current) =>
+                    startOfLocalWeek(addCalendarDays(current, 7)),
+                  )
+                }
+                className="rounded-full border border-[var(--line)] px-3 py-1 text-xs text-[var(--sea-ink-soft)] transition hover:border-[rgba(50,143,151,0.35)] hover:text-[var(--lagoon-deep)]"
+              >
+                Next week
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setVisibleWeekStart((current) =>
+                    startOfLocalWeek(addCalendarMonths(current, 1)),
+                  )
+                }
+                className="rounded-full border border-[var(--line)] px-3 py-1 text-xs text-[var(--sea-ink-soft)] transition hover:border-[rgba(50,143,151,0.35)] hover:text-[var(--lagoon-deep)]"
+              >
+                Next month
+              </button>
+            </div>
             <div className="grid gap-3 md:grid-cols-2">
+              {isLoadingSlots ? (
+                <p className="text-sm text-[var(--sea-ink-soft)]">
+                  Loading live availability…
+                </p>
+              ) : null}
+              {!isLoadingSlots && openSlots.length === 0 ? (
+                <p className="text-sm text-[var(--sea-ink-soft)]">
+                  No live availability is currently available.
+                </p>
+              ) : null}
+              {!isLoadingSlots &&
+              openSlots.length > 0 &&
+              visibleSlots.length === 0 ? (
+                <p className="text-sm text-[var(--sea-ink-soft)]">
+                  No open slots in this week.
+                </p>
+              ) : null}
               {groupedSlots.map((group) => (
                 <div
                   key={group.dateKey}
                   className="rounded-xl border border-[var(--line)] bg-[var(--surface)] p-3"
                 >
-                  <p className="mb-2 text-sm font-semibold text-[var(--sea-ink)]">{group.dateKey}</p>
+                  <p className="mb-2 text-sm font-semibold text-[var(--sea-ink)]">
+                    {group.dateKey}
+                  </p>
                   <div className="flex flex-wrap gap-2">
                     {group.slots.map((slot) => {
                       const selected = slot.id === slotId
@@ -220,50 +381,52 @@ function BookPage() {
               {slotId
                 ? selectedSlot?.start
                   ? new Date(selectedSlot.start).toLocaleString([], {
-                    weekday: 'short',
-                    month: 'short',
-                    day: 'numeric',
-                    hour: 'numeric',
-                    minute: '2-digit',
-                    timeZoneName: 'short',
-                    timeZone: timezone,
-                  })
+                      weekday: 'short',
+                      month: 'short',
+                      day: 'numeric',
+                      hour: 'numeric',
+                      minute: '2-digit',
+                      timeZoneName: 'short',
+                      timeZone: timezone,
+                    })
                   : 'Pick a time to continue'
                 : 'Pick a time to continue'}
             </p>
           </fieldset>
 
-          <label className="block text-sm font-medium text-[var(--sea-ink)]">
-            Name
-            <input required value={name} onChange={(event) => setName(event.target.value)} className="mt-1 w-full rounded-md border border-[var(--line)] bg-[var(--surface)] px-3 py-2" />
-          </label>
-
-          <label className="block text-sm font-medium text-[var(--sea-ink)]">
-            Email
-            <input required type="email" value={email} onChange={(event) => setEmail(event.target.value)} className="mt-1 w-full rounded-md border border-[var(--line)] bg-[var(--surface)] px-3 py-2" />
-          </label>
-
-          <label className="block text-sm font-medium text-[var(--sea-ink)]">
-            Company (optional)
-            <input value={company} onChange={(event) => setCompany(event.target.value)} className="mt-1 w-full rounded-md border border-[var(--line)] bg-[var(--surface)] px-3 py-2" />
-          </label>
-
-          <label className="block text-sm font-medium text-[var(--sea-ink)]">
-            What should we cover?
-            <textarea required value={topic} onChange={(event) => setTopic(event.target.value)} className="mt-1 min-h-28 w-full rounded-md border border-[var(--line)] bg-[var(--surface)] px-3 py-2" />
-          </label>
-
           <button
             type="submit"
-            disabled={isSubmitting || !slotId}
+            disabled={isSubmitting || isLoadingSlots || !slotId}
             className="inline-flex items-center rounded-full border border-[rgba(50,143,151,0.3)] bg-[rgba(79,184,178,0.14)] px-4 py-2 text-sm font-semibold text-[var(--lagoon-deep)] transition hover:-translate-y-0.5 hover:bg-[rgba(79,184,178,0.24)] disabled:opacity-50"
           >
             {isSubmitting ? 'Submitting…' : 'Book meeting'}
           </button>
 
-          {status ? <p className="text-sm text-[var(--sea-ink-soft)]">{status}</p> : null}
+          {status ? (
+            <p className="text-sm text-[var(--sea-ink-soft)]">{status}</p>
+          ) : null}
         </form>
       </section>
     </main>
   )
+}
+
+function startOfLocalWeek(date: Date) {
+  const next = new Date(date)
+  next.setHours(0, 0, 0, 0)
+  const day = next.getDay()
+  next.setDate(next.getDate() + (day === 0 ? -6 : 1 - day))
+  return next
+}
+
+function addCalendarDays(date: Date, days: number) {
+  const next = new Date(date)
+  next.setDate(next.getDate() + days)
+  return next
+}
+
+function addCalendarMonths(date: Date, months: number) {
+  const next = new Date(date)
+  next.setMonth(next.getMonth() + months)
+  return next
 }
