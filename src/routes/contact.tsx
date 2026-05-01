@@ -1,8 +1,6 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useRef } from 'react'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import NewsletterSignup from '#/components/NewsletterSignup'
 
-const SCHEDULE_URL = 'https://freebusy.io/data'
 const DIRECT_EMAIL = 'troy.magennis@focusedobjective.com'
 const LINKEDIN_URL = 'https://www.linkedin.com/in/troymagennis/'
 
@@ -11,29 +9,6 @@ export const Route = createFileRoute('/contact')({
 })
 
 function ContactPage() {
-  const freebusyContainerRef = useRef<HTMLDivElement | null>(null)
-
-  useEffect(() => {
-    document
-      .querySelectorAll<HTMLScriptElement>('script[src="https://js.freebusy.io/embed/v1.js"]')
-      .forEach((element) => element.remove())
-
-    const script = document.createElement('script')
-    script.src = 'https://js.freebusy.io/embed/v1.js'
-    script.type = 'text/javascript'
-    script.async = true
-    document.body.appendChild(script)
-
-    return () => {
-      if (script.parentNode) {
-        script.parentNode.removeChild(script)
-      }
-      if (freebusyContainerRef.current) {
-        freebusyContainerRef.current.innerHTML = ''
-      }
-    }
-  }, [])
-
   return (
     <main className="mx-auto max-w-7xl px-4 pb-16 pt-10 sm:px-6 lg:px-8">
       <section className="island-shell rounded-2xl p-6 sm:p-8">
@@ -79,27 +54,16 @@ function ContactPage() {
         <h1 className="display-title mb-3 text-3xl leading-tight font-semibold tracking-tight text-[var(--sea-ink)] sm:text-4xl">
           Schedule a meeting
         </h1>
-        <div className="mt-5 overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-3 sm:p-4">
-          <div
-            ref={freebusyContainerRef}
-            className="freebusy-pickatime-widget"
-            data-link={SCHEDULE_URL}
-            data-embedType="inline"
-            data-branding="visible"
-            style={{ minWidth: '320px', minHeight: '640px' }}
-          />
-        </div>
-        <a
-          href={SCHEDULE_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[var(--lagoon-deep)]"
+        <p className="m-0 max-w-xl text-sm leading-relaxed text-[var(--sea-ink-soft)]">
+          Pick a live availability slot and receive a calendar invite with Zoom
+          details.
+        </p>
+        <Link
+          to="/book"
+          className="mt-5 inline-flex items-center justify-center rounded-full border border-[var(--lagoon)] bg-[rgba(79,184,178,0.16)] px-5 py-2.5 text-sm font-semibold text-[var(--lagoon-deep)] no-underline transition hover:-translate-y-0.5 hover:bg-[var(--lagoon)] hover:text-[var(--surface)]"
         >
-          Open scheduler in a new tab
-          <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="currentColor">
-            <path d="M4.5 2a.5.5 0 0 0 0 1h6.793L2.146 12.146a.5.5 0 0 0 .708.708L12 3.707V10.5a.5.5 0 0 0 1 0v-9a.5.5 0 0 0-.5-.5h-8Z" />
-          </svg>
-        </a>
+          Open booking page
+        </Link>
       </section>
     </main>
   )

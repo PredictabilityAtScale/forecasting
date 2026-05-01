@@ -270,12 +270,12 @@ function App() {
             </div>
 
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:flex-wrap">
-              <a
-                href="mailto:troy.magennis@focusedobjective.com?subject=Schedule%20a%20Call"
+              <Link
+                to="/book"
                 className="inline-flex items-center justify-center gap-2 rounded-full border border-[rgba(50,143,151,0.3)] bg-[rgba(79,184,178,0.14)] px-6 py-3 text-sm font-semibold text-[var(--lagoon-deep)] no-underline transition hover:-translate-y-0.5 hover:bg-[rgba(79,184,178,0.24)]"
               >
                 Schedule a Call
-              </a>
+              </Link>
               <a
                 href="https://www.linkedin.com/in/troymagennis/"
                 target="_blank"

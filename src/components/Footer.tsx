@@ -46,8 +46,8 @@ export default function Footer() {
           <Link to="/team-dashboard" className="transition hover:text-[var(--sea-ink)]">
             Dashboard
           </Link>
-          <Link to="/contact" className="transition hover:text-[var(--sea-ink)]">
-            Contact
+          <Link to="/book" className="transition hover:text-[var(--sea-ink)]">
+            Book
           </Link>
         </div>
       </div>

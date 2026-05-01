@@ -320,10 +320,10 @@ export default function Header() {
             Articles
           </Link>
           <Link
-            to="/contact"
+            to="/book"
             className="inline-flex items-center rounded-full border border-[rgba(50,143,151,0.3)] bg-[rgba(79,184,178,0.14)] px-4 py-2 text-sm font-semibold text-[var(--lagoon-deep)] no-underline transition hover:-translate-y-0.5 hover:bg-[rgba(79,184,178,0.24)]"
           >
-            Contact me
+            Book time
           </Link>
           <div className="mx-2 h-5 w-px bg-[var(--line)]" />
           <ColorThemePicker />
@@ -409,11 +409,11 @@ export default function Header() {
             Articles
           </Link>
           <Link
-            to="/contact"
+            to="/book"
             className="mt-3 block rounded-full border border-[rgba(50,143,151,0.3)] bg-[rgba(79,184,178,0.14)] px-4 py-2.5 text-center text-sm font-semibold text-[var(--lagoon-deep)] no-underline transition hover:bg-[rgba(79,184,178,0.24)]"
             onClick={closeMobileMenu}
           >
-            Contact me
+            Book time
           </Link>
         </div>
       )}
