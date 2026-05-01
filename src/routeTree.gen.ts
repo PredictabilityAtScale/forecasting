@@ -23,6 +23,7 @@ import { Route as KanbanScrumSimRouteImport } from './routes/kanban-scrum-sim'
 import { Route as KanbanFlowLearningRouteImport } from './routes/kanban-flow-learning'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CapabilityMatrixRouteImport } from './routes/capability-matrix'
+import { Route as BookRouteImport } from './routes/book'
 import { Route as ArticlesRouteImport } from './routes/articles'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ArticlesSlugRouteImport } from './routes/articles.$slug'
@@ -97,6 +98,11 @@ const CapabilityMatrixRoute = CapabilityMatrixRouteImport.update({
   path: '/capability-matrix',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BookRoute = BookRouteImport.update({
+  id: '/book',
+  path: '/book',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ArticlesRoute = ArticlesRouteImport.update({
   id: '/articles',
   path: '/articles',
@@ -116,6 +122,7 @@ const ArticlesSlugRoute = ArticlesSlugRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/articles': typeof ArticlesRouteWithChildren
+  '/book': typeof BookRoute
   '/capability-matrix': typeof CapabilityMatrixRoute
   '/contact': typeof ContactRoute
   '/kanban-flow-learning': typeof KanbanFlowLearningRoute
@@ -135,6 +142,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/articles': typeof ArticlesRouteWithChildren
+  '/book': typeof BookRoute
   '/capability-matrix': typeof CapabilityMatrixRoute
   '/contact': typeof ContactRoute
   '/kanban-flow-learning': typeof KanbanFlowLearningRoute
@@ -155,6 +163,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/articles': typeof ArticlesRouteWithChildren
+  '/book': typeof BookRoute
   '/capability-matrix': typeof CapabilityMatrixRoute
   '/contact': typeof ContactRoute
   '/kanban-flow-learning': typeof KanbanFlowLearningRoute
@@ -176,6 +185,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/articles'
+    | '/book'
     | '/capability-matrix'
     | '/contact'
     | '/kanban-flow-learning'
@@ -195,6 +205,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/articles'
+    | '/book'
     | '/capability-matrix'
     | '/contact'
     | '/kanban-flow-learning'
@@ -214,6 +225,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/articles'
+    | '/book'
     | '/capability-matrix'
     | '/contact'
     | '/kanban-flow-learning'
@@ -234,6 +246,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ArticlesRoute: typeof ArticlesRouteWithChildren
+  BookRoute: typeof BookRoute
   CapabilityMatrixRoute: typeof CapabilityMatrixRoute
   ContactRoute: typeof ContactRoute
   KanbanFlowLearningRoute: typeof KanbanFlowLearningRoute
@@ -350,6 +363,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CapabilityMatrixRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/book': {
+      id: '/book'
+      path: '/book'
+      fullPath: '/book'
+      preLoaderRoute: typeof BookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/articles': {
       id: '/articles'
       path: '/articles'
@@ -389,6 +409,7 @@ const ArticlesRouteWithChildren = ArticlesRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ArticlesRoute: ArticlesRouteWithChildren,
+  BookRoute: BookRoute,
   CapabilityMatrixRoute: CapabilityMatrixRoute,
   ContactRoute: ContactRoute,
   KanbanFlowLearningRoute: KanbanFlowLearningRoute,
