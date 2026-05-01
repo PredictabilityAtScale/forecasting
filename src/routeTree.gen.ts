@@ -26,6 +26,7 @@ import { Route as CapabilityMatrixRouteImport } from './routes/capability-matrix
 import { Route as BookRouteImport } from './routes/book'
 import { Route as ArticlesRouteImport } from './routes/articles'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as BookManageRouteImport } from './routes/book.manage'
 import { Route as ArticlesSlugRouteImport } from './routes/articles.$slug'
 
 const WrongOrderRoute = WrongOrderRouteImport.update({
@@ -113,6 +114,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BookManageRoute = BookManageRouteImport.update({
+  id: '/manage',
+  path: '/manage',
+  getParentRoute: () => BookRoute,
+} as any)
 const ArticlesSlugRoute = ArticlesSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
@@ -122,7 +128,7 @@ const ArticlesSlugRoute = ArticlesSlugRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/articles': typeof ArticlesRouteWithChildren
-  '/book': typeof BookRoute
+  '/book': typeof BookRouteWithChildren
   '/capability-matrix': typeof CapabilityMatrixRoute
   '/contact': typeof ContactRoute
   '/kanban-flow-learning': typeof KanbanFlowLearningRoute
@@ -138,11 +144,12 @@ export interface FileRoutesByFullPath {
   '/voting': typeof VotingRoute
   '/wrong-order': typeof WrongOrderRoute
   '/articles/$slug': typeof ArticlesSlugRoute
+  '/book/manage': typeof BookManageRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/articles': typeof ArticlesRouteWithChildren
-  '/book': typeof BookRoute
+  '/book': typeof BookRouteWithChildren
   '/capability-matrix': typeof CapabilityMatrixRoute
   '/contact': typeof ContactRoute
   '/kanban-flow-learning': typeof KanbanFlowLearningRoute
@@ -158,12 +165,13 @@ export interface FileRoutesByTo {
   '/voting': typeof VotingRoute
   '/wrong-order': typeof WrongOrderRoute
   '/articles/$slug': typeof ArticlesSlugRoute
+  '/book/manage': typeof BookManageRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/articles': typeof ArticlesRouteWithChildren
-  '/book': typeof BookRoute
+  '/book': typeof BookRouteWithChildren
   '/capability-matrix': typeof CapabilityMatrixRoute
   '/contact': typeof ContactRoute
   '/kanban-flow-learning': typeof KanbanFlowLearningRoute
@@ -179,6 +187,7 @@ export interface FileRoutesById {
   '/voting': typeof VotingRoute
   '/wrong-order': typeof WrongOrderRoute
   '/articles/$slug': typeof ArticlesSlugRoute
+  '/book/manage': typeof BookManageRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -201,6 +210,7 @@ export interface FileRouteTypes {
     | '/voting'
     | '/wrong-order'
     | '/articles/$slug'
+    | '/book/manage'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -221,6 +231,7 @@ export interface FileRouteTypes {
     | '/voting'
     | '/wrong-order'
     | '/articles/$slug'
+    | '/book/manage'
   id:
     | '__root__'
     | '/'
@@ -241,12 +252,13 @@ export interface FileRouteTypes {
     | '/voting'
     | '/wrong-order'
     | '/articles/$slug'
+    | '/book/manage'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ArticlesRoute: typeof ArticlesRouteWithChildren
-  BookRoute: typeof BookRoute
+  BookRoute: typeof BookRouteWithChildren
   CapabilityMatrixRoute: typeof CapabilityMatrixRoute
   ContactRoute: typeof ContactRoute
   KanbanFlowLearningRoute: typeof KanbanFlowLearningRoute
@@ -384,6 +396,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/book/manage': {
+      id: '/book/manage'
+      path: '/manage'
+      fullPath: '/book/manage'
+      preLoaderRoute: typeof BookManageRouteImport
+      parentRoute: typeof BookRoute
+    }
     '/articles/$slug': {
       id: '/articles/$slug'
       path: '/$slug'
@@ -406,10 +425,20 @@ const ArticlesRouteWithChildren = ArticlesRoute._addFileChildren(
   ArticlesRouteChildren,
 )
 
+interface BookRouteChildren {
+  BookManageRoute: typeof BookManageRoute
+}
+
+const BookRouteChildren: BookRouteChildren = {
+  BookManageRoute: BookManageRoute,
+}
+
+const BookRouteWithChildren = BookRoute._addFileChildren(BookRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ArticlesRoute: ArticlesRouteWithChildren,
-  BookRoute: BookRoute,
+  BookRoute: BookRouteWithChildren,
   CapabilityMatrixRoute: CapabilityMatrixRoute,
   ContactRoute: ContactRoute,
   KanbanFlowLearningRoute: KanbanFlowLearningRoute,

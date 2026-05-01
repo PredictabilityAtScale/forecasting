@@ -2,6 +2,7 @@ import { z } from 'zod'
 
 export const bookingSchema = z.object({
   slotId: z.string().min(1),
+  durationMinutes: z.union([z.literal(30), z.literal(60)]),
   name: z.string().min(2).max(120),
   email: z.string().email(),
   company: z.string().max(120).optional(),

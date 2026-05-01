@@ -1,9 +1,78 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { getBookingAvailability } from '#/data/booking-availability'
+import type { BookingDurationMinutes } from '#/data/booking-availability'
 import type { BookingRequest } from '#/data/booking-schema'
+import { createBookingLinkToken, parseBookingLinkToken } from '#/server/booking-links'
 
 let bundledEnvLoaded = false
+const BOOKING_BUFFER_MS = 30 * 60 * 1000
+
+export async function getOpenBookingSlots(durationMinutes: BookingDurationMinutes = 30) {
+  const bookingAvailability = getBookingAvailability({ durationMinutes })
+  const minStart = Math.min(...bookingAvailability.map((slot) => new Date(slot.start).getTime()))
+  const maxEnd = Math.max(...bookingAvailability.map((slot) => new Date(slot.end).getTime()))
+
+  return getOpenBookingSlotsWithinRange({
+    durationMinutes,
+    timeMin: new Date(minStart - BOOKING_BUFFER_MS).toISOString(),
+    timeMax: new Date(maxEnd + BOOKING_BUFFER_MS).toISOString(),
+  })
+}
+
+export async function getOpenBookingSlotsWithinRange({
+  durationMinutes = 30,
+  timeMin,
+  timeMax,
+}: {
+  durationMinutes?: BookingDurationMinutes
+  timeMin: string
+  timeMax: string
+}) {
+  const rangeStart = new Date(timeMin).getTime()
+  const rangeEnd = new Date(timeMax).getTime()
+  const bookingAvailability = getBookingAvailability({ durationMinutes }).filter((slot) => {
+    const slotStart = new Date(slot.start).getTime()
+    const slotEnd = new Date(slot.end).getTime()
+    return slotStart < rangeEnd && rangeStart < slotEnd
+  })
+  const googleAccessToken = await getGoogleAccessToken()
+  const calendarId = getEnv('BOOKING_GOOGLE_CALENDAR_ID') ?? 'primary'
+
+  const response = await fetch('https://www.googleapis.com/calendar/v3/freeBusy', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${googleAccessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      timeMin: new Date(rangeStart - BOOKING_BUFFER_MS).toISOString(),
+      timeMax: new Date(rangeEnd + BOOKING_BUFFER_MS).toISOString(),
+      items: [{ id: calendarId }],
+    }),
+  })
+
+  if (!response.ok) {
+    const message = await response.text()
+    throw new Error(`Google freeBusy failed (${response.status}): ${message}`)
+  }
+
+  const payload = (await response.json()) as {
+    calendars?: Record<string, { busy?: Array<{ start: string; end: string }> }>
+  }
+  const busyRanges = payload.calendars?.[calendarId]?.busy ?? []
+
+  return bookingAvailability.filter((slot) => {
+    const slotStart = new Date(slot.start).getTime()
+    const slotEnd = new Date(slot.end).getTime()
+    return !busyRanges.some((busy) => {
+      const busyStart = new Date(busy.start).getTime() - BOOKING_BUFFER_MS
+      const busyEnd = new Date(busy.end).getTime() + BOOKING_BUFFER_MS
+      return slotStart < busyEnd && busyStart < slotEnd
+    })
+  })
+}
 
 export async function createZoomMeeting({
   topic,
@@ -49,28 +118,30 @@ export async function createZoomMeeting({
     throw new Error(`Zoom meeting creation failed (${response.status}): ${message}`)
   }
 
-  const payload = (await response.json()) as { join_url?: string }
-  if (!payload.join_url) {
-    throw new Error('Zoom API did not return a join URL.')
+  const payload = (await response.json()) as { id?: number; join_url?: string }
+  if (!payload.join_url || !payload.id) {
+    throw new Error('Zoom API did not return meeting identifiers.')
   }
 
-  return payload.join_url
+  return { joinUrl: payload.join_url, meetingId: String(payload.id) }
 }
 
 export async function createGoogleCalendarInvite({
   slot,
   attendee,
   zoomJoinUrl,
+  zoomMeetingId,
 }: {
   slot: { start: string; end: string }
   attendee: BookingRequest
   zoomJoinUrl: string
+  zoomMeetingId: string
 }) {
   const googleAccessToken = await getGoogleAccessToken()
   const calendarId = getEnv('BOOKING_GOOGLE_CALENDAR_ID') ?? 'primary'
   const hostEmail = getEnv('BOOKING_HOST_EMAIL') ?? 'troy.magennis@focusedobjective.com'
 
-  const response = await fetch(
+  const createResponse = await fetch(
     `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events?sendUpdates=all`,
     {
       method: 'POST',
@@ -80,7 +151,7 @@ export async function createGoogleCalendarInvite({
       },
       body: JSON.stringify({
         summary: `Focused Objective meeting: ${attendee.name}`,
-        description: `${attendee.topic}\n\nCompany: ${attendee.company ?? 'N/A'}\nTimezone: ${attendee.timezone}\nZoom: ${zoomJoinUrl}`,
+        description: attendee.topic,
         location: zoomJoinUrl,
         start: { dateTime: slot.start },
         end: { dateTime: slot.end },
@@ -89,10 +160,125 @@ export async function createGoogleCalendarInvite({
     },
   )
 
-  if (!response.ok) {
-    const message = await response.text()
-    throw new Error(`Google Calendar invite failed (${response.status}): ${message}`)
+  if (!createResponse.ok) {
+    const message = await createResponse.text()
+    throw new Error(`Google Calendar invite failed (${createResponse.status}): ${message}`)
   }
+
+  const createdEvent = (await createResponse.json()) as { id?: string }
+  if (!createdEvent.id) {
+    throw new Error('Google Calendar API did not return event id.')
+  }
+
+  const token = createBookingLinkToken({
+    purpose: 'booking-manage-v1',
+    issuedAt: new Date().toISOString(),
+    email: attendee.email,
+    googleEventId: createdEvent.id,
+    zoomMeetingId,
+    expiresAt: slot.end,
+  })
+
+  const patchResponse = await fetch(
+    `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events/${encodeURIComponent(createdEvent.id)}?sendUpdates=all`,
+    {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bearer ${googleAccessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        description: buildMeetingDescription({ slot, attendee, zoomJoinUrl, token }),
+      }),
+    },
+  )
+
+  if (!patchResponse.ok) {
+    const message = await patchResponse.text()
+    throw new Error(`Google Calendar invite update failed (${patchResponse.status}): ${message}`)
+  }
+}
+
+export async function cancelBookingFromToken(token: string) {
+  const payload = parseBookingLinkToken(token)
+  const googleAccessToken = await getGoogleAccessToken()
+  const zoomAccessToken = await getZoomAccessToken()
+  const calendarId = getEnv('BOOKING_GOOGLE_CALENDAR_ID') ?? 'primary'
+
+  const deleteEvent = await fetch(
+    `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events/${encodeURIComponent(payload.googleEventId)}?sendUpdates=all`,
+    {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${googleAccessToken}` },
+    },
+  )
+  if (!deleteEvent.ok && deleteEvent.status !== 404 && deleteEvent.status !== 410) {
+    throw new Error(`Google event cancel failed (${deleteEvent.status}).`)
+  }
+
+  const deleteZoom = await fetch(
+    `https://api.zoom.us/v2/meetings/${encodeURIComponent(payload.zoomMeetingId)}`,
+    {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${zoomAccessToken}` },
+    },
+  )
+  if (!deleteZoom.ok && deleteZoom.status !== 404) {
+    throw new Error(`Zoom cancel failed (${deleteZoom.status}).`)
+  }
+}
+
+export async function rescheduleBookingFromToken(token: string, nextSlot: { start: string; end: string }) {
+  const payload = parseBookingLinkToken(token)
+  const durationMinutes = getSlotDurationMinutes(nextSlot)
+  const stillOpen = await getOpenBookingSlotsWithinRange({
+    durationMinutes,
+    timeMin: nextSlot.start,
+    timeMax: nextSlot.end,
+  })
+  if (!stillOpen.some((slot) => slot.start === nextSlot.start && slot.end === nextSlot.end)) {
+    throw new Error('That slot is no longer available.')
+  }
+  const googleAccessToken = await getGoogleAccessToken()
+  const zoomAccessToken = await getZoomAccessToken()
+  const calendarId = getEnv('BOOKING_GOOGLE_CALENDAR_ID') ?? 'primary'
+
+  const updateEvent = await fetch(
+    `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events/${encodeURIComponent(payload.googleEventId)}?sendUpdates=all`,
+    {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${googleAccessToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ start: { dateTime: nextSlot.start }, end: { dateTime: nextSlot.end } }),
+    },
+  )
+  if (!updateEvent.ok) {
+    throw new Error(`Google event reschedule failed (${updateEvent.status}).`)
+  }
+
+  const duration = Math.max(
+    15,
+    Math.round((new Date(nextSlot.end).getTime() - new Date(nextSlot.start).getTime()) / 60000),
+  )
+  const updateZoom = await fetch(
+    `https://api.zoom.us/v2/meetings/${encodeURIComponent(payload.zoomMeetingId)}`,
+    {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${zoomAccessToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ start_time: nextSlot.start, duration, timezone: 'UTC' }),
+    },
+  )
+  if (!updateZoom.ok) {
+    throw new Error(`Zoom reschedule failed (${updateZoom.status}).`)
+  }
+}
+
+function getSlotDurationMinutes(slot: { start: string; end: string }): BookingDurationMinutes {
+  const duration = Math.round((new Date(slot.end).getTime() - new Date(slot.start).getTime()) / 60000)
+  if (duration !== 30 && duration !== 60) {
+    throw new Error('Bookings must be 30 or 60 minutes.')
+  }
+
+  return duration
 }
 
 async function getZoomAccessToken() {
@@ -231,4 +417,43 @@ function unquoteEnvValue(value: string) {
   }
 
   return value
+}
+
+
+function buildMeetingDescription({
+  slot,
+  attendee,
+  zoomJoinUrl,
+  token,
+}: {
+  slot: { start: string; end: string }
+  attendee: BookingRequest
+  zoomJoinUrl: string
+  token: string
+}) {
+  const startLocal = new Date(slot.start).toLocaleString([], {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZone: attendee.timezone,
+    timeZoneName: 'short',
+  })
+
+  const baseUrl = getEnv('BOOKING_PUBLIC_BASE_URL') ?? 'http://localhost:3000'
+  const cancelLink = `${baseUrl}/book/manage?action=cancel&token=${encodeURIComponent(token)}`
+  const rescheduleLink = `${baseUrl}/book/manage?action=reschedule&token=${encodeURIComponent(token)}`
+
+  return [
+    attendee.topic,
+    '',
+    `Company: ${attendee.company ?? 'N/A'}`,
+    `Attendee timezone: ${attendee.timezone}`,
+    `Meeting starts: ${startLocal}`,
+    `Zoom: ${zoomJoinUrl}`,
+    '',
+    `Cancel: ${cancelLink}`,
+    `Reschedule: ${rescheduleLink}`,
+  ].join('\n')
 }
