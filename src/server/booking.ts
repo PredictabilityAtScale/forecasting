@@ -1,15 +1,9 @@
-import { z } from 'zod'
+import { existsSync, readFileSync } from 'node:fs'
+import { dirname, join, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import type { BookingRequest } from '#/data/booking-schema'
 
-export const bookingSchema = z.object({
-  slotId: z.string().min(1),
-  name: z.string().min(2).max(120),
-  email: z.string().email(),
-  company: z.string().max(120).optional(),
-  topic: z.string().min(5).max(1000),
-  timezone: z.string().min(2).max(80),
-})
-
-export type BookingRequest = z.infer<typeof bookingSchema>
+let bundledEnvLoaded = false
 
 export async function createZoomMeeting({
   topic,
@@ -73,8 +67,8 @@ export async function createGoogleCalendarInvite({
   zoomJoinUrl: string
 }) {
   const googleAccessToken = await getGoogleAccessToken()
-  const calendarId = process.env.BOOKING_GOOGLE_CALENDAR_ID ?? 'primary'
-  const hostEmail = process.env.BOOKING_HOST_EMAIL ?? 'troy.magennis@focusedobjective.com'
+  const calendarId = getEnv('BOOKING_GOOGLE_CALENDAR_ID') ?? 'primary'
+  const hostEmail = getEnv('BOOKING_HOST_EMAIL') ?? 'troy.magennis@focusedobjective.com'
 
   const response = await fetch(
     `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events?sendUpdates=all`,
@@ -102,9 +96,9 @@ export async function createGoogleCalendarInvite({
 }
 
 async function getZoomAccessToken() {
-  const accountId = process.env.ZOOM_ACCOUNT_ID
-  const clientId = process.env.ZOOM_CLIENT_ID
-  const clientSecret = process.env.ZOOM_CLIENT_SECRET
+  const accountId = getEnv('ZOOM_ACCOUNT_ID')
+  const clientId = getEnv('ZOOM_CLIENT_ID')
+  const clientSecret = getEnv('ZOOM_CLIENT_SECRET')
 
   if (!accountId || !clientId || !clientSecret) {
     throw new Error('Zoom integration missing: ZOOM_ACCOUNT_ID, ZOOM_CLIENT_ID, ZOOM_CLIENT_SECRET.')
@@ -135,9 +129,9 @@ async function getZoomAccessToken() {
 }
 
 async function getGoogleAccessToken() {
-  const clientId = process.env.GOOGLE_OAUTH_CLIENT_ID
-  const clientSecret = process.env.GOOGLE_OAUTH_CLIENT_SECRET
-  const refreshToken = process.env.GOOGLE_OAUTH_REFRESH_TOKEN
+  const clientId = getEnv('GOOGLE_OAUTH_CLIENT_ID')
+  const clientSecret = getEnv('GOOGLE_OAUTH_CLIENT_SECRET')
+  const refreshToken = getEnv('GOOGLE_OAUTH_REFRESH_TOKEN')
 
   if (!clientId || !clientSecret || !refreshToken) {
     throw new Error(
@@ -169,4 +163,72 @@ async function getGoogleAccessToken() {
   }
 
   return payload.access_token
+}
+
+function getEnv(name: string) {
+  const directValue = process.env[name]
+  if (directValue) {
+    return directValue
+  }
+
+  loadBundledEnv()
+  return process.env[name]
+}
+
+function loadBundledEnv() {
+  if (bundledEnvLoaded) {
+    return
+  }
+
+  bundledEnvLoaded = true
+
+  const moduleDir = dirname(fileURLToPath(import.meta.url))
+  const candidateFiles = [
+    join(process.cwd(), '.env'),
+    join(process.cwd(), '.env.production'),
+    join(moduleDir, '.env'),
+    join(moduleDir, '.env.production'),
+    join(moduleDir, '..', '.env'),
+    join(moduleDir, '..', '.env.production'),
+    resolve(process.cwd(), '.output/server/.env'),
+    resolve(process.cwd(), '.output/server/.env.production'),
+  ]
+
+  for (const file of candidateFiles) {
+    if (existsSync(file)) {
+      applyEnvFile(file)
+    }
+  }
+}
+
+function applyEnvFile(file: string) {
+  const lines = readFileSync(file, 'utf8').split(/\r?\n/)
+
+  for (const line of lines) {
+    const trimmed = line.trim()
+    if (!trimmed || trimmed.startsWith('#')) {
+      continue
+    }
+
+    const equalsIndex = trimmed.indexOf('=')
+    if (equalsIndex === -1) {
+      continue
+    }
+
+    const key = trimmed.slice(0, equalsIndex).trim()
+    const value = unquoteEnvValue(trimmed.slice(equalsIndex + 1).trim())
+
+    if (key && process.env[key] === undefined) {
+      process.env[key] = value
+    }
+  }
+}
+
+function unquoteEnvValue(value: string) {
+  const quote = value[0]
+  if ((quote === '"' || quote === "'") && value.endsWith(quote)) {
+    return value.slice(1, -1).replace(/\\n/g, '\n')
+  }
+
+  return value
 }

@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { useMemo, useState } from 'react'
 import { bookingAvailability } from '#/data/booking-availability'
-import { bookingSchema, createGoogleCalendarInvite, createZoomMeeting } from '#/server/booking'
+import { bookingSchema } from '#/data/booking-schema'
 
 const submitBooking = createServerFn({ method: 'POST' })
   .inputValidator((data: unknown) => bookingSchema.parse(data))
@@ -12,6 +12,8 @@ const submitBooking = createServerFn({ method: 'POST' })
     if (!selectedSlot) {
       throw new Error('The selected slot is no longer available.')
     }
+
+    const { createGoogleCalendarInvite, createZoomMeeting } = await import('#/server/booking')
 
     const zoomJoinUrl = await createZoomMeeting({
       topic: data.topic,
