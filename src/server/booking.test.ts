@@ -175,7 +175,6 @@ describe('booking invites', () => {
       .fn()
       .mockResolvedValueOnce(jsonResponse({ access_token: 'google-token' }))
       .mockResolvedValueOnce(jsonResponse({ id: 'google-event-id' }))
-      .mockResolvedValueOnce(jsonResponse({ id: 'google-event-id' }))
     vi.stubGlobal('fetch', fetchMock)
 
     await createGoogleCalendarInvite({
@@ -199,16 +198,16 @@ describe('booking invites', () => {
     const createBody = JSON.parse(
       fetchMock.mock.calls[1][1].body as string,
     ) as {
+      description?: string
       location?: string
+      id?: string
       conferenceData?: {
         conferenceSolution?: { key?: { type?: string }; name?: string }
         entryPoints?: Array<{ entryPointType?: string; uri?: string }>
       }
     }
-    const patchBody = JSON.parse(fetchMock.mock.calls[2][1].body as string) as {
-      description?: string
-    }
 
+    expect(createBody.id).toMatch(/^fo[0-9a-f]{32}$/)
     expect(createBody.location).toBeUndefined()
     expect(createBody.conferenceData?.conferenceSolution).toEqual({
       key: { type: 'addOn' },
@@ -221,12 +220,94 @@ describe('booking invites', () => {
         uri: 'https://us02web.zoom.us/j/123?pwd=abc',
       },
     ])
-    expect(patchBody.description).toContain(
+    expect(createBody.description).toContain(
       'Zoom: https://us02web.zoom.us/j/123?pwd=abc',
     )
-    expect(patchBody.description).toContain(
-      'Cancel: https://focusedobjective.com/book/manage?action=cancel&token=',
+    expect(createBody.description).toContain(
+      'Cancel: <a href="https://focusedobjective.com/book/manage?action=cancel&amp;token=',
     )
+    expect(createBody.description).toContain(
+      '">Cancel this meeting</a>',
+    )
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+  })
+
+  it('defaults booking management links to the public site URL', async () => {
+    delete process.env.BOOKING_PUBLIC_BASE_URL
+
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse({ access_token: 'google-token' }))
+      .mockResolvedValueOnce(jsonResponse({ id: 'google-event-id' }))
+    vi.stubGlobal('fetch', fetchMock)
+
+    await createGoogleCalendarInvite({
+      slot: {
+        start: '2026-05-04T22:00:00.000Z',
+        end: '2026-05-04T22:30:00.000Z',
+      },
+      attendee: {
+        name: 'Troy Magennis',
+        email: 'troy@example.com',
+        company: 'Focused Objective',
+        topic: 'Reduce LLM costs',
+        timezone: 'America/Los_Angeles',
+      },
+      zoomJoinUrl: 'https://us02web.zoom.us/j/123?pwd=abc',
+      zoomMeetingId: '123',
+    })
+
+    const createBody = JSON.parse(
+      fetchMock.mock.calls[1][1].body as string,
+    ) as {
+      description?: string
+    }
+
+    expect(createBody.description).toContain(
+      'Cancel: <a href="https://focusedobjective.com/book/manage?action=cancel&amp;token=',
+    )
+    expect(createBody.description).toContain(
+      'Reschedule: <a href="https://focusedobjective.com/book/manage?action=reschedule&amp;token=',
+    )
+    expect(createBody.description).not.toContain('localhost')
+  })
+
+  it('escapes attendee text in the HTML meeting description', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse({ access_token: 'google-token' }))
+      .mockResolvedValueOnce(jsonResponse({ id: 'google-event-id' }))
+    vi.stubGlobal('fetch', fetchMock)
+
+    await createGoogleCalendarInvite({
+      slot: {
+        start: '2026-05-04T22:00:00.000Z',
+        end: '2026-05-04T22:30:00.000Z',
+      },
+      attendee: {
+        name: 'Troy Magennis',
+        email: 'troy@example.com',
+        company: '<script>alert("x")</script>',
+        topic: 'Discuss <b>forecasting</b>',
+        timezone: 'America/Los_Angeles',
+      },
+      zoomJoinUrl: 'https://us02web.zoom.us/j/123?pwd=abc',
+      zoomMeetingId: '123',
+    })
+
+    const createBody = JSON.parse(
+      fetchMock.mock.calls[1][1].body as string,
+    ) as {
+      description?: string
+    }
+
+    expect(createBody.description).toContain(
+      'Discuss &lt;b&gt;forecasting&lt;/b&gt;',
+    )
+    expect(createBody.description).toContain(
+      'Company: &lt;script&gt;alert(&quot;x&quot;)&lt;/script&gt;',
+    )
+    expect(createBody.description).not.toContain('<script>')
   })
 })
 

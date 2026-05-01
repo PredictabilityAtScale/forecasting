@@ -1,9 +1,11 @@
+import { randomBytes } from 'node:crypto'
 import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { getBookingAvailability } from '#/data/booking-availability'
 import type { BookingDurationMinutes } from '#/data/booking-availability'
 import type { BookingRequest } from '#/data/booking-schema'
+import { SITE_URL } from '#/lib/site'
 import {
   createBookingLinkToken,
   parseBookingLinkToken,
@@ -196,11 +198,26 @@ export async function createGoogleCalendarInvite({
   const calendarId = getEnv('BOOKING_GOOGLE_CALENDAR_ID') ?? 'primary'
   const hostEmail =
     getEnv('BOOKING_HOST_EMAIL') ?? 'troy.magennis@focusedobjective.com'
+  const googleEventId = createGoogleCalendarEventId()
+  const token = createBookingLinkToken({
+    purpose: 'booking-manage-v1',
+    issuedAt: new Date().toISOString(),
+    email: attendee.email,
+    googleEventId,
+    zoomMeetingId,
+    expiresAt: slot.end,
+  })
 
   const eventInsertUrl = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events?sendUpdates=all&conferenceDataVersion=1`
   const eventBody = {
+    id: googleEventId,
     summary: `Focused Objective meeting: ${attendee.name}`,
-    description: [attendee.topic, '', `Zoom: ${zoomJoinUrl}`].join('\n'),
+    description: buildMeetingDescription({
+      slot,
+      attendee,
+      zoomJoinUrl,
+      token,
+    }),
     start: { dateTime: slot.start },
     end: { dateTime: slot.end },
     attendees: [
@@ -266,46 +283,6 @@ export async function createGoogleCalendarInvite({
       : createErrorMessage
     throw new Error(
       `Google Calendar invite failed (${createResponse.status}): ${message || createErrorMessage}`,
-    )
-  }
-
-  const createdEvent = (await createResponse.json()) as { id?: string }
-  if (!createdEvent.id) {
-    throw new Error('Google Calendar API did not return event id.')
-  }
-
-  const token = createBookingLinkToken({
-    purpose: 'booking-manage-v1',
-    issuedAt: new Date().toISOString(),
-    email: attendee.email,
-    googleEventId: createdEvent.id,
-    zoomMeetingId,
-    expiresAt: slot.end,
-  })
-
-  const patchResponse = await fetch(
-    `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events/${encodeURIComponent(createdEvent.id)}?sendUpdates=all`,
-    {
-      method: 'PATCH',
-      headers: {
-        Authorization: `Bearer ${googleAccessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        description: buildMeetingDescription({
-          slot,
-          attendee,
-          zoomJoinUrl,
-          token,
-        }),
-      }),
-    },
-  )
-
-  if (!patchResponse.ok) {
-    const message = await patchResponse.text()
-    throw new Error(
-      `Google Calendar invite update failed (${patchResponse.status}): ${message}`,
     )
   }
 }
@@ -429,6 +406,10 @@ function getSlotDurationMinutes(slot: {
   }
 
   return duration
+}
+
+function createGoogleCalendarEventId() {
+  return `fo${randomBytes(16).toString('hex')}`
 }
 
 async function getZoomAccessToken() {
@@ -592,19 +573,41 @@ function buildMeetingDescription({
     timeZoneName: 'short',
   })
 
-  const baseUrl = getEnv('BOOKING_PUBLIC_BASE_URL') ?? 'http://localhost:3000'
+  const baseUrl = (getEnv('BOOKING_PUBLIC_BASE_URL') ?? SITE_URL).replace(
+    /\/$/,
+    '',
+  )
   const cancelLink = `${baseUrl}/book/manage?action=cancel&token=${encodeURIComponent(token)}`
   const rescheduleLink = `${baseUrl}/book/manage?action=reschedule&token=${encodeURIComponent(token)}`
 
   return [
-    attendee.topic,
+    escapeHtml(attendee.topic),
     '',
-    `Company: ${attendee.company ?? 'N/A'}`,
-    `Attendee timezone: ${attendee.timezone}`,
-    `Meeting starts: ${startLocal}`,
-    `Zoom: ${zoomJoinUrl}`,
+    `Company: ${escapeHtml(attendee.company ?? 'N/A')}`,
+    `Attendee timezone: ${escapeHtml(attendee.timezone)}`,
+    `Meeting starts: ${escapeHtml(startLocal)}`,
+    `Zoom: ${escapeHtml(zoomJoinUrl)}`,
     '',
-    `Cancel: ${cancelLink}`,
-    `Reschedule: ${rescheduleLink}`,
-  ].join('\n')
+    `Cancel: <a href="${escapeHtml(cancelLink)}">Cancel this meeting</a>`,
+    `Reschedule: <a href="${escapeHtml(rescheduleLink)}">Reschedule this meeting</a>`,
+  ].join('<br>')
+}
+
+function escapeHtml(value: string) {
+  return value.replace(/[&<>"']/g, (char) => {
+    switch (char) {
+      case '&':
+        return '&amp;'
+      case '<':
+        return '&lt;'
+      case '>':
+        return '&gt;'
+      case '"':
+        return '&quot;'
+      case "'":
+        return '&#39;'
+      default:
+        return char
+    }
+  })
 }
