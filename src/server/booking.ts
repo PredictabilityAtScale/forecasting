@@ -197,32 +197,75 @@ export async function createGoogleCalendarInvite({
   const hostEmail =
     getEnv('BOOKING_HOST_EMAIL') ?? 'troy.magennis@focusedobjective.com'
 
-  const createResponse = await fetch(
-    `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events?sendUpdates=all`,
-    {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${googleAccessToken}`,
-        'Content-Type': 'application/json',
+  const eventInsertUrl = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events?sendUpdates=all&conferenceDataVersion=1`
+  const eventBody = {
+    summary: `Focused Objective meeting: ${attendee.name}`,
+    description: [attendee.topic, '', `Zoom: ${zoomJoinUrl}`].join('\n'),
+    start: { dateTime: slot.start },
+    end: { dateTime: slot.end },
+    attendees: [
+      { email: attendee.email, displayName: attendee.name },
+      { email: hostEmail },
+    ],
+    conferenceData: {
+      conferenceId: zoomMeetingId,
+      conferenceSolution: {
+        key: { type: 'addOn' },
+        name: 'Zoom',
       },
-      body: JSON.stringify({
-        summary: `Focused Objective meeting: ${attendee.name}`,
-        description: attendee.topic,
-        location: zoomJoinUrl,
-        start: { dateTime: slot.start },
-        end: { dateTime: slot.end },
-        attendees: [
-          { email: attendee.email, displayName: attendee.name },
-          { email: hostEmail },
-        ],
-      }),
+      entryPoints: [
+        {
+          entryPointType: 'video',
+          uri: zoomJoinUrl,
+          label: 'Join Zoom meeting',
+        },
+      ],
     },
-  )
+  }
+
+  let createResponse = await fetch(eventInsertUrl, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${googleAccessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(eventBody),
+  })
+  let createErrorMessage = ''
+  let retriedWithoutConferenceData = false
 
   if (!createResponse.ok) {
-    const message = await createResponse.text()
+    createErrorMessage = await createResponse.text()
+    if (
+      shouldRetryWithoutGoogleConferenceData(
+        createResponse.status,
+        createErrorMessage,
+      )
+    ) {
+      const { conferenceData: _conferenceData, ...eventBodyWithoutConference } =
+        eventBody
+      retriedWithoutConferenceData = true
+
+      createResponse = await fetch(
+        `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events?sendUpdates=all`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${googleAccessToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(eventBodyWithoutConference),
+        },
+      )
+    }
+  }
+
+  if (!createResponse.ok) {
+    const message = retriedWithoutConferenceData
+      ? await createResponse.text()
+      : createErrorMessage
     throw new Error(
-      `Google Calendar invite failed (${createResponse.status}): ${message}`,
+      `Google Calendar invite failed (${createResponse.status}): ${message || createErrorMessage}`,
     )
   }
 
@@ -365,6 +408,13 @@ export async function rescheduleBookingFromToken(
   if (!updateZoom.ok) {
     throw new Error(`Zoom reschedule failed (${updateZoom.status}).`)
   }
+}
+
+function shouldRetryWithoutGoogleConferenceData(
+  status: number,
+  message: string,
+) {
+  return status === 400 && /conference/i.test(message)
 }
 
 function getSlotDurationMinutes(slot: {
