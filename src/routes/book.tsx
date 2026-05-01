@@ -5,7 +5,7 @@ import { bookingAvailability } from '#/data/booking-availability'
 import { bookingSchema, createGoogleCalendarInvite, createZoomMeeting } from '#/server/booking'
 
 const submitBooking = createServerFn({ method: 'POST' })
-  .validator((data: unknown) => bookingSchema.parse(data))
+  .inputValidator((data: unknown) => bookingSchema.parse(data))
   .handler(async ({ data }) => {
     const selectedSlot = bookingAvailability.find((slot) => slot.id === data.slotId)
 
