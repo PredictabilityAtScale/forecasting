@@ -35,9 +35,11 @@ export function getBookingAvailability({
   const today = getZonedDate(now, BOOKING_TIME_ZONE)
   const slots: BookingSlot[] = []
 
-  for (let dayOffset = 0; dayOffset < BOOKING_HORIZON_DAYS; dayOffset += 1) {
+  for (let dayOffset = 1; dayOffset <= BOOKING_HORIZON_DAYS; dayOffset += 1) {
     const date = addCalendarDays(today, dayOffset)
-    const weekday = new Date(Date.UTC(date.year, date.month - 1, date.day)).getUTCDay()
+    const weekday = new Date(
+      Date.UTC(date.year, date.month - 1, date.day),
+    ).getUTCDay()
 
     if (!WEEKDAYS.has(weekday)) {
       continue
@@ -80,7 +82,10 @@ function getZonedDate(date: Date, timeZone: string) {
   return { year: parts.year, month: parts.month, day: parts.day }
 }
 
-function addCalendarDays(date: Pick<LocalDateTime, 'year' | 'month' | 'day'>, days: number) {
+function addCalendarDays(
+  date: Pick<LocalDateTime, 'year' | 'month' | 'day'>,
+  days: number,
+) {
   const next = new Date(Date.UTC(date.year, date.month - 1, date.day + days))
   return {
     year: next.getUTCFullYear(),
@@ -90,11 +95,24 @@ function addCalendarDays(date: Pick<LocalDateTime, 'year' | 'month' | 'day'>, da
 }
 
 function zonedTimeToUtc(local: LocalDateTime) {
-  let utc = Date.UTC(local.year, local.month - 1, local.day, local.hour, local.minute)
+  let utc = Date.UTC(
+    local.year,
+    local.month - 1,
+    local.day,
+    local.hour,
+    local.minute,
+  )
 
   for (let index = 0; index < 2; index += 1) {
     const offset = getTimeZoneOffsetMs(new Date(utc), BOOKING_TIME_ZONE)
-    utc = Date.UTC(local.year, local.month - 1, local.day, local.hour, local.minute) - offset
+    utc =
+      Date.UTC(
+        local.year,
+        local.month - 1,
+        local.day,
+        local.hour,
+        local.minute,
+      ) - offset
   }
 
   return new Date(utc)
