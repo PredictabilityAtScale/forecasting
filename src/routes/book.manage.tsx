@@ -253,7 +253,7 @@ function ManageBookingPage() {
                       day: 'numeric',
                       hour: 'numeric',
                       minute: '2-digit',
-                      timeZone,
+                      timeZone: timezone,
                       timeZoneName: 'short',
                     })}
                   </option>
