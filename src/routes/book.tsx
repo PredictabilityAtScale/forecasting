@@ -7,6 +7,19 @@ import type {
   BookingDurationMinutes,
   BookingSlot,
 } from '#/data/booking-availability'
+import type { BookingAvailabilityDiagnostics } from '#/server/booking'
+
+type AvailabilityResponse =
+  | {
+      ok: true
+      slots: BookingSlot[]
+      diagnostics: BookingAvailabilityDiagnostics
+    }
+  | {
+      ok: false
+      slots: []
+      diagnostics: BookingAvailabilityDiagnostics
+    }
 
 const submitBooking = createServerFn({ method: 'POST' })
   .inputValidator((data: unknown) => bookingSchema.parse(data))
@@ -50,8 +63,9 @@ const fetchOpenSlots = createServerFn({ method: 'POST' })
     return { durationMinutes: value.durationMinutes }
   })
   .handler(async ({ data }) => {
-    const { getOpenBookingSlots } = await import('#/server/booking')
-    return getOpenBookingSlots(data.durationMinutes)
+    const { getOpenBookingSlotsWithDiagnostics } =
+      await import('#/server/booking')
+    return getOpenBookingSlotsWithDiagnostics(data.durationMinutes)
   })
 
 export const Route = createFileRoute('/book')({
@@ -70,6 +84,8 @@ function BookPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isLoadingSlots, setIsLoadingSlots] = useState(true)
   const [openSlots, setOpenSlots] = useState<BookingSlot[]>([])
+  const [availabilityDiagnostics, setAvailabilityDiagnostics] =
+    useState<BookingAvailabilityDiagnostics | null>(null)
   const [visibleWeekStart, setVisibleWeekStart] = useState(() =>
     startOfLocalWeek(new Date()),
   )
@@ -84,21 +100,49 @@ function BookPage() {
     setStatus(null)
 
     fetchOpenSlots({ data: { durationMinutes } })
-      .then((slots) => {
-        setOpenSlots(slots)
+      .then((response: AvailabilityResponse) => {
+        setAvailabilityDiagnostics(response.diagnostics)
+        setOpenSlots(response.slots)
         setSlotId((current) =>
-          slots.length > 0 && !slots.some((slot) => slot.id === current)
-            ? slots[0].id
+          response.slots.length > 0 &&
+          !response.slots.some((slot) => slot.id === current)
+            ? response.slots[0].id
             : current,
         )
-        if (slots.length > 0) {
-          setVisibleWeekStart(startOfLocalWeek(new Date(slots[0].start)))
+
+        if (response.slots.length > 0) {
+          setVisibleWeekStart(
+            startOfLocalWeek(new Date(response.slots[0].start)),
+          )
+        }
+
+        if (!response.ok) {
+          setSlotId('')
+          setStatus(
+            response.diagnostics.error ??
+              'Could not refresh live availability.',
+          )
         }
       })
       .catch((error) => {
         console.error(error)
         setOpenSlots([])
         setSlotId('')
+        setAvailabilityDiagnostics({
+          checkedAt: new Date().toISOString(),
+          durationMinutes,
+          candidateSlotCount: 0,
+          openSlotCount: 0,
+          busyCalendarIds: [],
+          inviteCalendarId: 'unknown',
+          googleEnv: {
+            GOOGLE_OAUTH_CLIENT_ID: false,
+            GOOGLE_OAUTH_CLIENT_SECRET: false,
+            GOOGLE_OAUTH_REFRESH_TOKEN: false,
+          },
+          error:
+            error instanceof Error ? error.message : 'Unknown request error.',
+        })
         setStatus(
           'Could not refresh live availability. Please contact us to coordinate manually.',
         )
@@ -205,10 +249,6 @@ function BookPage() {
         <h1 className="display-title mb-3 text-3xl leading-tight font-semibold tracking-tight text-[var(--sea-ink)] sm:text-4xl">
           Schedule a Zoom call
         </h1>
-        <p className="mb-2 max-w-2xl text-sm leading-relaxed text-[var(--sea-ink-soft)]">
-          Share context, then pick a slot from a weekly grid. This page creates
-          a Zoom meeting and a Google Calendar invite without adding a database.
-        </p>
         <p className="mb-6 text-xs text-[var(--sea-ink-soft)]">
           Times are shown in your local timezone:{' '}
           <span className="font-semibold">{timezone}</span>
@@ -392,6 +432,95 @@ function BookPage() {
                   : 'Pick a time to continue'
                 : 'Pick a time to continue'}
             </p>
+            {availabilityDiagnostics ? (
+              <details
+                className="mt-3 rounded-lg border border-[var(--line)] bg-[rgba(255,255,255,0.03)] p-3 text-xs text-[var(--sea-ink-soft)]"
+                open={
+                  Boolean(availabilityDiagnostics.error) ||
+                  openSlots.length === 0
+                }
+              >
+                <summary className="cursor-pointer font-semibold text-[var(--sea-ink)]">
+                  Availability diagnostics
+                </summary>
+                <dl className="mt-2 grid gap-2 sm:grid-cols-2">
+                  <DebugItem
+                    label="Refresh"
+                    value={
+                      availabilityDiagnostics.error ? 'Failed' : 'Succeeded'
+                    }
+                  />
+                  <DebugItem
+                    label="Checked"
+                    value={new Date(
+                      availabilityDiagnostics.checkedAt,
+                    ).toLocaleString([], {
+                      hour: 'numeric',
+                      minute: '2-digit',
+                      second: '2-digit',
+                      timeZoneName: 'short',
+                    })}
+                  />
+                  <DebugItem
+                    label="Duration"
+                    value={`${availabilityDiagnostics.durationMinutes} min`}
+                  />
+                  <DebugItem label="Browser timezone" value={timezone} />
+                  <DebugItem
+                    label="Candidate slots"
+                    value={availabilityDiagnostics.candidateSlotCount}
+                  />
+                  <DebugItem
+                    label="Open slots"
+                    value={availabilityDiagnostics.openSlotCount}
+                  />
+                  <DebugItem
+                    label="Invite calendar"
+                    value={availabilityDiagnostics.inviteCalendarId}
+                  />
+                  <DebugItem
+                    label="Busy calendars"
+                    value={
+                      availabilityDiagnostics.busyCalendarIds.length > 0
+                        ? availabilityDiagnostics.busyCalendarIds.join(', ')
+                        : 'none'
+                    }
+                  />
+                  <DebugItem
+                    label="OAuth client ID"
+                    value={
+                      availabilityDiagnostics.googleEnv.GOOGLE_OAUTH_CLIENT_ID
+                        ? 'set'
+                        : 'missing'
+                    }
+                  />
+                  <DebugItem
+                    label="OAuth secret"
+                    value={
+                      availabilityDiagnostics.googleEnv
+                        .GOOGLE_OAUTH_CLIENT_SECRET
+                        ? 'set'
+                        : 'missing'
+                    }
+                  />
+                  <DebugItem
+                    label="Refresh token"
+                    value={
+                      availabilityDiagnostics.googleEnv
+                        .GOOGLE_OAUTH_REFRESH_TOKEN
+                        ? 'set'
+                        : 'missing'
+                    }
+                  />
+                  <DebugItem label="Visible week" value={visibleWeekLabel} />
+                </dl>
+                {availabilityDiagnostics.error ? (
+                  <p className="mt-3 break-words rounded-md border border-[rgba(244,114,182,0.35)] bg-[rgba(244,114,182,0.08)] p-2 text-[var(--sea-ink)]">
+                    {availabilityDiagnostics.error}
+                  </p>
+                ) : null}
+              </details>
+            ) : null}
           </fieldset>
 
           <button
@@ -408,6 +537,21 @@ function BookPage() {
         </form>
       </section>
     </main>
+  )
+}
+
+function DebugItem({
+  label,
+  value,
+}: {
+  label: string
+  value: string | number
+}) {
+  return (
+    <div className="min-w-0">
+      <dt className="font-semibold text-[var(--sea-ink)]">{label}</dt>
+      <dd className="break-words">{value}</dd>
+    </div>
   )
 }
 

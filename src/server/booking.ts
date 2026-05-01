@@ -18,6 +18,21 @@ type FreeBusyCalendar = {
   errors?: Array<{ reason?: string; domain?: string }>
 }
 
+export type BookingAvailabilityDiagnostics = {
+  checkedAt: string
+  durationMinutes: BookingDurationMinutes
+  candidateSlotCount: number
+  openSlotCount: number
+  busyCalendarIds: string[]
+  inviteCalendarId: string
+  googleEnv: {
+    GOOGLE_OAUTH_CLIENT_ID: boolean
+    GOOGLE_OAUTH_CLIENT_SECRET: boolean
+    GOOGLE_OAUTH_REFRESH_TOKEN: boolean
+  }
+  error?: string
+}
+
 export async function getOpenBookingSlots(
   durationMinutes: BookingDurationMinutes = 30,
 ) {
@@ -34,6 +49,39 @@ export async function getOpenBookingSlots(
     timeMin: new Date(minStart - BOOKING_BUFFER_MS).toISOString(),
     timeMax: new Date(maxEnd + BOOKING_BUFFER_MS).toISOString(),
   })
+}
+
+export async function getOpenBookingSlotsWithDiagnostics(
+  durationMinutes: BookingDurationMinutes = 30,
+) {
+  const candidateSlots = getBookingAvailability({ durationMinutes })
+  const baseDiagnostics = getBookingAvailabilityDiagnostics({
+    candidateSlotCount: candidateSlots.length,
+    durationMinutes,
+    openSlotCount: 0,
+  })
+
+  try {
+    const slots = await getOpenBookingSlots(durationMinutes)
+
+    return {
+      ok: true as const,
+      slots,
+      diagnostics: { ...baseDiagnostics, openSlotCount: slots.length },
+    }
+  } catch (error) {
+    return {
+      ok: false as const,
+      slots: [],
+      diagnostics: {
+        ...baseDiagnostics,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Unknown availability error.',
+      },
+    }
+  }
 }
 
 export async function getOpenBookingSlotsWithinRange({
@@ -125,6 +173,30 @@ function getBusyCalendarIds() {
     .filter(Boolean)
 
   return ids.length > 0 ? ids : ['primary']
+}
+
+function getBookingAvailabilityDiagnostics({
+  candidateSlotCount,
+  durationMinutes,
+  openSlotCount,
+}: {
+  candidateSlotCount: number
+  durationMinutes: BookingDurationMinutes
+  openSlotCount: number
+}): BookingAvailabilityDiagnostics {
+  return {
+    checkedAt: new Date().toISOString(),
+    durationMinutes,
+    candidateSlotCount,
+    openSlotCount,
+    busyCalendarIds: getBusyCalendarIds(),
+    inviteCalendarId: getEnv('BOOKING_GOOGLE_CALENDAR_ID') ?? 'primary',
+    googleEnv: {
+      GOOGLE_OAUTH_CLIENT_ID: Boolean(getEnv('GOOGLE_OAUTH_CLIENT_ID')),
+      GOOGLE_OAUTH_CLIENT_SECRET: Boolean(getEnv('GOOGLE_OAUTH_CLIENT_SECRET')),
+      GOOGLE_OAUTH_REFRESH_TOKEN: Boolean(getEnv('GOOGLE_OAUTH_REFRESH_TOKEN')),
+    },
+  }
 }
 
 export async function createZoomMeeting({
