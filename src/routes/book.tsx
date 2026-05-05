@@ -9,6 +9,9 @@ import type {
   BookingSlot,
 } from '#/data/booking-availability'
 
+const HOST_BOOKING_TIME_ZONE = 'America/Los_Angeles'
+const DEFAULT_SLOT_AFTER_MINUTES = 10 * 60
+
 const submitBooking = createServerFn({ method: 'POST' })
   .inputValidator((data: unknown) => bookingSchema.parse(data))
   .handler(async ({ data }) => {
@@ -97,7 +100,7 @@ function BookPage() {
         setOpenSlots(slots)
         setSlotId((current) =>
           slots.length > 0 && !slots.some((slot) => slot.id === current)
-            ? slots[0].id
+            ? getDefaultBookingSlot(slots).id
             : current,
         )
 
@@ -420,4 +423,30 @@ function addCalendarDays(date: Date, days: number) {
   const next = new Date(date)
   next.setDate(next.getDate() + days)
   return next
+}
+
+function getDefaultBookingSlot(slots: BookingSlot[]) {
+  return (
+    slots.find(
+      (slot) =>
+        getSlotStartMinutes(slot, HOST_BOOKING_TIME_ZONE) >
+        DEFAULT_SLOT_AFTER_MINUTES,
+    ) ?? slots[0]
+  )
+}
+
+function getSlotStartMinutes(slot: BookingSlot, timeZone: string) {
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+    timeZone,
+  })
+  const parts = Object.fromEntries(
+    formatter
+      .formatToParts(new Date(slot.start))
+      .map((part) => [part.type, part.value]),
+  )
+
+  return Number(parts.hour) * 60 + Number(parts.minute)
 }
