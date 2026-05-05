@@ -171,11 +171,6 @@ function BookPage() {
     )
   }, [timezone, visibleSlots])
 
-  const selectedSlot = useMemo(
-    () => openSlots.find((slot) => slot.id === slotId),
-    [openSlots, slotId],
-  )
-
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setStatus(null)
@@ -215,20 +210,6 @@ function BookPage() {
         <h1 className="display-title mb-3 text-3xl leading-tight font-semibold tracking-tight text-[var(--sea-ink)] sm:text-4xl">
           Schedule a Zoom call
         </h1>
-        <p className="mb-6 text-xs text-[var(--sea-ink-soft)]">
-          Times are shown in your local timezone:{' '}
-          <span className="font-semibold">{timezone}</span>
-        </p>
-        <p className="mb-6 text-sm text-[var(--sea-ink-soft)]">
-          Urgent or times don't work for you? Email me directly at{' '}
-          <a
-            href="mailto:troy.magennis@focusedobjective.com"
-            className="font-semibold text-[var(--lagoon-deep)] underline-offset-4 hover:underline"
-          >
-            troy.magennis@focusedobjective.com
-          </a>
-          .
-        </p>
 
         <form onSubmit={onSubmit} className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
@@ -298,10 +279,24 @@ function BookPage() {
             </div>
           </fieldset>
 
+          <button
+            type="submit"
+            disabled={isSubmitting || isLoadingSlots || !slotId}
+            className="inline-flex items-center rounded-full border border-[rgba(50,143,151,0.3)] bg-[rgba(79,184,178,0.14)] px-4 py-2 text-sm font-semibold text-[var(--lagoon-deep)] transition hover:-translate-y-0.5 hover:bg-[rgba(79,184,178,0.24)] disabled:opacity-50"
+          >
+            {isSubmitting
+              ? 'Submitting…'
+              : 'Select a time below and then click here to book'}
+          </button>
+
           <fieldset>
             <legend className="mb-2 block text-sm font-medium text-[var(--sea-ink)]">
               Available times
             </legend>
+            <p className="mb-3 text-xs text-[var(--sea-ink-soft)]">
+              Times are shown in your local timezone:{' '}
+              <span className="font-semibold">{timezone}</span>
+            </p>
             <div className="mb-3 grid grid-cols-[auto_1fr_auto] items-center gap-2">
               <button
                 type="button"
@@ -383,23 +378,18 @@ function BookPage() {
                 </div>
               ))}
             </div>
-            <p className="mt-2 text-xs text-[var(--sea-ink-soft)]">
-              Selected:{' '}
-              {slotId
-                ? selectedSlot?.start
-                  ? new Date(selectedSlot.start).toLocaleString([], {
-                      weekday: 'short',
-                      month: 'short',
-                      day: 'numeric',
-                      hour: 'numeric',
-                      minute: '2-digit',
-                      timeZoneName: 'short',
-                      timeZone: timezone,
-                    })
-                  : 'Pick a time to continue'
-                : 'Pick a time to continue'}
-            </p>
           </fieldset>
+
+          <p className="text-xs text-[var(--sea-ink-soft)]">
+            Urgent or times don't work for you? Email me directly at{' '}
+            <a
+              href="mailto:troy.magennis@focusedobjective.com"
+              className="font-semibold text-[var(--lagoon-deep)] underline-offset-4 hover:underline"
+            >
+              troy.magennis@focusedobjective.com
+            </a>
+            .
+          </p>
 
           <button
             type="submit"
