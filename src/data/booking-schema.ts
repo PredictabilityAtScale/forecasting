@@ -6,7 +6,7 @@ export const bookingSchema = z.object({
   name: z.string().min(2).max(120),
   email: z.string().email(),
   company: z.string().max(120).optional(),
-  topic: z.string().min(5).max(1000),
+  topic: z.string().default(''),
   timezone: z.string().min(2).max(80),
 })
 

@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, useRouterState } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { CheckCircle2, ChevronLeft, ChevronRight, X } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { bookingDurationOptions } from '#/data/booking-availability'
 import { bookingSchema } from '#/data/booking-schema'
@@ -11,6 +11,17 @@ import type {
 
 const HOST_BOOKING_TIME_ZONE = 'America/Los_Angeles'
 const DEFAULT_SLOT_AFTER_MINUTES = 10 * 60
+
+type BookingConfirmation = {
+  start: string
+  end: string
+  durationMinutes: BookingDurationMinutes
+  name: string
+  email: string
+  company: string
+  topic: string
+  timezone: string
+}
 
 const submitBooking = createServerFn({ method: 'POST' })
   .inputValidator((data: unknown) => bookingSchema.parse(data))
@@ -79,6 +90,9 @@ function BookPage() {
   const [company, setCompany] = useState('')
   const [topic, setTopic] = useState('')
   const [status, setStatus] = useState<string | null>(null)
+  const [confirmation, setConfirmation] = useState<BookingConfirmation | null>(
+    null,
+  )
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isLoadingSlots, setIsLoadingSlots] = useState(true)
   const [openSlots, setOpenSlots] = useState<BookingSlot[]>([])
@@ -178,6 +192,7 @@ function BookPage() {
     event.preventDefault()
     setStatus(null)
     setIsSubmitting(true)
+    const selectedSlot = openSlots.find((slot) => slot.id === slotId)
 
     try {
       await submitBooking({
@@ -191,9 +206,21 @@ function BookPage() {
           timezone,
         },
       })
-      setStatus(
-        'Thanks — your meeting is booked. Check the invite for direct cancel/reschedule links and the Zoom join URL.',
-      )
+      if (selectedSlot) {
+        setConfirmation({
+          start: selectedSlot.start,
+          end: selectedSlot.end,
+          durationMinutes,
+          name,
+          email,
+          company,
+          topic,
+          timezone,
+        })
+      }
+      setName('')
+      setEmail('')
+      setCompany('')
       setTopic('')
     } catch (error) {
       setStatus(
@@ -248,9 +275,8 @@ function BookPage() {
           </label>
 
           <label className="block text-sm font-medium text-[var(--sea-ink)]">
-            What should we cover?
+            What should we cover? (optional)
             <textarea
-              required
               value={topic}
               onChange={(event) => setTopic(event.target.value)}
               className="mt-1 min-h-28 w-full rounded-md border border-[var(--line)] bg-[var(--surface)] px-3 py-2"
@@ -407,8 +433,128 @@ function BookPage() {
           ) : null}
         </form>
       </section>
+      {confirmation ? (
+        <BookingConfirmationDialog
+          confirmation={confirmation}
+          onClose={() => setConfirmation(null)}
+        />
+      ) : null}
     </main>
   )
+}
+
+function BookingConfirmationDialog({
+  confirmation,
+  onClose,
+}: {
+  confirmation: BookingConfirmation
+  onClose: () => void
+}) {
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="booking-confirmation-title"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(16,38,39,0.55)] px-4 py-6"
+    >
+      <div className="w-full max-w-lg rounded-2xl border border-[rgba(255,255,255,0.55)] bg-[var(--surface)] p-6 shadow-2xl">
+        <div className="mb-4 flex items-start justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <CheckCircle2
+              className="mt-1 size-7 shrink-0 text-[var(--lagoon-deep)]"
+              aria-hidden="true"
+            />
+            <div>
+              <p className="island-kicker mb-1">Booked</p>
+              <h2
+                id="booking-confirmation-title"
+                className="display-title text-2xl font-semibold text-[var(--sea-ink)]"
+              >
+                Your meeting is confirmed
+              </h2>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close confirmation"
+            className="flex size-9 shrink-0 items-center justify-center rounded-full border border-[var(--line)] text-[var(--sea-ink-soft)] transition hover:border-[rgba(50,143,151,0.35)] hover:text-[var(--lagoon-deep)]"
+          >
+            <X className="size-4" aria-hidden="true" />
+          </button>
+        </div>
+
+        <dl className="space-y-3 text-sm">
+          <div>
+            <dt className="font-semibold text-[var(--sea-ink)]">When</dt>
+            <dd className="text-[var(--sea-ink-soft)]">
+              {formatSlotRange(confirmation)}
+            </dd>
+          </div>
+          <div>
+            <dt className="font-semibold text-[var(--sea-ink)]">
+              Invite sent to
+            </dt>
+            <dd className="break-words text-[var(--sea-ink-soft)]">
+              {confirmation.name} &lt;{confirmation.email}&gt;
+            </dd>
+          </div>
+          {confirmation.company ? (
+            <div>
+              <dt className="font-semibold text-[var(--sea-ink)]">Company</dt>
+              <dd className="text-[var(--sea-ink-soft)]">
+                {confirmation.company}
+              </dd>
+            </div>
+          ) : null}
+          {confirmation.topic.trim() ? (
+            <div>
+              <dt className="font-semibold text-[var(--sea-ink)]">Topic</dt>
+              <dd className="whitespace-pre-wrap text-[var(--sea-ink-soft)]">
+                {confirmation.topic}
+              </dd>
+            </div>
+          ) : null}
+        </dl>
+
+        <p className="mt-5 text-sm text-[var(--sea-ink-soft)]">
+          Check your calendar invite for the Zoom link and the direct cancel or
+          reschedule links.
+        </p>
+
+        <button
+          type="button"
+          onClick={onClose}
+          className="mt-5 inline-flex items-center rounded-full border border-[rgba(50,143,151,0.3)] bg-[rgba(79,184,178,0.18)] px-4 py-2 text-sm font-semibold text-[var(--lagoon-deep)] transition hover:bg-[rgba(79,184,178,0.28)]"
+        >
+          Done
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function formatSlotRange({
+  start,
+  end,
+  timezone,
+  durationMinutes,
+}: BookingConfirmation) {
+  const dateFormatter = new Intl.DateTimeFormat([], {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    timeZone: timezone,
+  })
+  const timeFormatter = new Intl.DateTimeFormat([], {
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZone: timezone,
+  })
+
+  return `${dateFormatter.format(new Date(start))}, ${timeFormatter.format(
+    new Date(start),
+  )} - ${timeFormatter.format(new Date(end))} (${durationMinutes} min, ${timezone})`
 }
 
 function startOfLocalWeek(date: Date) {

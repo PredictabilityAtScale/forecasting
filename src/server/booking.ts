@@ -136,7 +136,7 @@ export async function createZoomMeeting({
   attendeeName,
   attendeeEmail,
 }: {
-  topic: string
+  topic?: string
   start: string
   end: string
   attendeeName: string
@@ -155,7 +155,7 @@ export async function createZoomMeeting({
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      topic: `Focused Objective: ${topic}`,
+      topic: getZoomMeetingTopic(topic),
       type: 2,
       start_time: start,
       duration: durationMinutes,
@@ -647,6 +647,11 @@ function buildMeetingDescription({
     `Cancel: <a href="${escapeHtml(cancelLink)}">Cancel this meeting</a>`,
     `Reschedule: <a href="${escapeHtml(rescheduleLink)}">Reschedule this meeting</a>`,
   ].join('<br>')
+}
+
+function getZoomMeetingTopic(topic?: string) {
+  const trimmed = topic?.trim()
+  return trimmed ? `Focused Objective: ${trimmed}` : 'Focused Objective meeting'
 }
 
 function escapeHtml(value: string) {
