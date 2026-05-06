@@ -1,8 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
+  cancelBookingFromToken,
   createGoogleCalendarInvite,
   getOpenBookingSlotsWithinRange,
 } from './booking'
+import { createBookingLinkToken } from './booking-links'
 
 const ENV_KEYS = [
   'BOOKING_HOST_EMAIL',
@@ -13,6 +15,9 @@ const ENV_KEYS = [
   'GOOGLE_OAUTH_CLIENT_ID',
   'GOOGLE_OAUTH_CLIENT_SECRET',
   'GOOGLE_OAUTH_REFRESH_TOKEN',
+  'ZOOM_ACCOUNT_ID',
+  'ZOOM_CLIENT_ID',
+  'ZOOM_CLIENT_SECRET',
 ] as const
 
 describe('booking availability', () => {
@@ -226,9 +231,7 @@ describe('booking invites', () => {
     expect(createBody.description).toContain(
       'Cancel: <a href="https://focusedobjective.com/book/manage?action=cancel&amp;token=',
     )
-    expect(createBody.description).toContain(
-      '">Cancel this meeting</a>',
-    )
+    expect(createBody.description).toContain('">Cancel this meeting</a>')
     expect(fetchMock).toHaveBeenCalledTimes(2)
   })
 
@@ -311,10 +314,133 @@ describe('booking invites', () => {
   })
 })
 
-function jsonResponse(body: unknown) {
+describe('booking cancellation', () => {
+  const originalEnv = new Map<string, string | undefined>()
+
+  beforeEach(() => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-05-01T12:00:00-07:00'))
+
+    for (const key of ENV_KEYS) {
+      originalEnv.set(key, process.env[key])
+      delete process.env[key]
+    }
+
+    process.env.BOOKING_LINK_SECRET = 'booking-secret'
+    process.env.BOOKING_GOOGLE_CALENDAR_ID = 'primary'
+    process.env.GOOGLE_OAUTH_CLIENT_ID = 'client-id'
+    process.env.GOOGLE_OAUTH_CLIENT_SECRET = 'client-secret'
+    process.env.GOOGLE_OAUTH_REFRESH_TOKEN = 'refresh-token'
+    process.env.ZOOM_ACCOUNT_ID = 'zoom-account'
+    process.env.ZOOM_CLIENT_ID = 'zoom-client'
+    process.env.ZOOM_CLIENT_SECRET = 'zoom-secret'
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+    vi.unstubAllGlobals()
+
+    for (const key of ENV_KEYS) {
+      const value = originalEnv.get(key)
+      if (value === undefined) {
+        delete process.env[key]
+      } else {
+        process.env[key] = value
+      }
+    }
+
+    originalEnv.clear()
+  })
+
+  it('deletes the Zoom meeting before deleting the Google event', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse({ access_token: 'google-token' }))
+      .mockResolvedValueOnce(jsonResponse({ access_token: 'zoom-token' }))
+      .mockResolvedValueOnce(emptyResponse(204))
+      .mockResolvedValueOnce(emptyResponse(204))
+    vi.stubGlobal('fetch', fetchMock)
+
+    await cancelBookingFromToken(createManageToken())
+
+    expect(fetchMock.mock.calls[2][0]).toBe(
+      'https://api.zoom.us/v2/meetings/123456789',
+    )
+    expect(fetchMock.mock.calls[3][0]).toBe(
+      'https://www.googleapis.com/calendar/v3/calendars/primary/events/google-event-id?sendUpdates=all',
+    )
+  })
+
+  it('does not delete the Google event when Zoom cancellation fails', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse({ access_token: 'google-token' }))
+      .mockResolvedValueOnce(jsonResponse({ access_token: 'zoom-token' }))
+      .mockResolvedValueOnce(
+        jsonResponse({ code: 300, message: 'Meeting has started.' }, 400),
+      )
+    vi.stubGlobal('fetch', fetchMock)
+
+    await expect(cancelBookingFromToken(createManageToken())).rejects.toThrow(
+      'Zoom cancel failed (400): {"code":300,"message":"Meeting has started."}.',
+    )
+
+    expect(fetchMock).toHaveBeenCalledTimes(3)
+  })
+
+  it('retries Zoom cancellation with a digits-only meeting ID', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse({ access_token: 'google-token' }))
+      .mockResolvedValueOnce(jsonResponse({ access_token: 'zoom-token' }))
+      .mockResolvedValueOnce(
+        jsonResponse({ code: 300, message: 'Validation failed.' }, 400),
+      )
+      .mockResolvedValueOnce(emptyResponse(204))
+      .mockResolvedValueOnce(emptyResponse(204))
+    vi.stubGlobal('fetch', fetchMock)
+
+    await cancelBookingFromToken(
+      createManageToken({ zoomMeetingId: '123 456 789' }),
+    )
+
+    expect(fetchMock.mock.calls[2][0]).toBe(
+      'https://api.zoom.us/v2/meetings/123%20456%20789',
+    )
+    expect(fetchMock.mock.calls[3][0]).toBe(
+      'https://api.zoom.us/v2/meetings/123456789',
+    )
+  })
+})
+
+function createManageToken({
+  zoomMeetingId = '123456789',
+}: {
+  zoomMeetingId?: string
+} = {}) {
+  return createBookingLinkToken({
+    purpose: 'booking-manage-v1',
+    issuedAt: '2026-05-01T19:00:00.000Z',
+    email: 'customer@example.com',
+    googleEventId: 'google-event-id',
+    zoomMeetingId,
+    expiresAt: '2026-05-04T22:30:00.000Z',
+  })
+}
+
+function jsonResponse(body: unknown, status = 200) {
   return {
-    ok: true,
+    ok: status >= 200 && status < 300,
+    status,
     json: async () => body,
     text: async () => JSON.stringify(body),
+  } as Response
+}
+
+function emptyResponse(status: number) {
+  return {
+    ok: status >= 200 && status < 300,
+    status,
+    text: async () => '',
   } as Response
 }

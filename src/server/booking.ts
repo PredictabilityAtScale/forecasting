@@ -293,6 +293,8 @@ export async function cancelBookingFromToken(token: string) {
   const zoomAccessToken = await getZoomAccessToken()
   const calendarId = getEnv('BOOKING_GOOGLE_CALENDAR_ID') ?? 'primary'
 
+  await deleteZoomMeeting(payload.zoomMeetingId, zoomAccessToken)
+
   const deleteEvent = await fetch(
     `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events/${encodeURIComponent(payload.googleEventId)}?sendUpdates=all`,
     {
@@ -306,17 +308,6 @@ export async function cancelBookingFromToken(token: string) {
     deleteEvent.status !== 410
   ) {
     throw new Error(`Google event cancel failed (${deleteEvent.status}).`)
-  }
-
-  const deleteZoom = await fetch(
-    `https://api.zoom.us/v2/meetings/${encodeURIComponent(payload.zoomMeetingId)}`,
-    {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${zoomAccessToken}` },
-    },
-  )
-  if (!deleteZoom.ok && deleteZoom.status !== 404) {
-    throw new Error(`Zoom cancel failed (${deleteZoom.status}).`)
   }
 }
 
@@ -383,8 +374,73 @@ export async function rescheduleBookingFromToken(
     },
   )
   if (!updateZoom.ok) {
-    throw new Error(`Zoom reschedule failed (${updateZoom.status}).`)
+    const message = await readResponseText(updateZoom)
+    throw new Error(
+      `Zoom reschedule failed (${updateZoom.status})${formatErrorDetail(message)}.`,
+    )
   }
+}
+
+async function deleteZoomMeeting(meetingId: string, accessToken: string) {
+  const meetingIds = getZoomMeetingIdCandidates(meetingId)
+
+  for (const [index, candidate] of meetingIds.entries()) {
+    const deleteZoom = await fetch(
+      `https://api.zoom.us/v2/meetings/${encodeURIComponent(candidate)}`,
+      {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${accessToken}` },
+      },
+    )
+    if (deleteZoom.ok || deleteZoom.status === 404) {
+      return
+    }
+
+    const message = await readResponseText(deleteZoom)
+    if (isZoomMeetingNotFound(deleteZoom.status, message)) {
+      return
+    }
+
+    if (deleteZoom.status === 400 && index < meetingIds.length - 1) {
+      continue
+    }
+
+    throw new Error(
+      `Zoom cancel failed (${deleteZoom.status})${formatErrorDetail(message)}.`,
+    )
+  }
+}
+
+function getZoomMeetingIdCandidates(meetingId: string) {
+  const trimmed = meetingId.trim()
+  const digitsOnly = trimmed.replace(/\D/g, '')
+
+  return [trimmed, digitsOnly].filter(
+    (candidate, index, candidates) =>
+      candidate && candidates.indexOf(candidate) === index,
+  )
+}
+
+function isZoomMeetingNotFound(status: number, message: string) {
+  return (
+    status === 404 ||
+    (status === 400 &&
+      /"code"\s*:\s*(3001|3003)/.test(message) &&
+      /meeting/i.test(message))
+  )
+}
+
+async function readResponseText(response: Response) {
+  try {
+    return await response.text()
+  } catch {
+    return ''
+  }
+}
+
+function formatErrorDetail(message: string) {
+  const trimmed = message.trim()
+  return trimmed ? `: ${trimmed}` : ''
 }
 
 function shouldRetryWithoutGoogleConferenceData(
