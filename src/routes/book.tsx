@@ -21,11 +21,15 @@ type BookingConfirmation = {
   company: string
   topic: string
   timezone: string
+  website: string
 }
 
 const submitBooking = createServerFn({ method: 'POST' })
   .inputValidator((data: unknown) => bookingSchema.parse(data))
   .handler(async ({ data }) => {
+    const { assertBookingRequestAllowed } = await import('#/server/booking-guard')
+    assertBookingRequestAllowed(data)
+
     const { getOpenBookingSlots } = await import('#/server/booking')
     const openSlots = await getOpenBookingSlots(data.durationMinutes)
     const selectedSlot = openSlots.find((slot) => slot.id === data.slotId)
@@ -89,6 +93,7 @@ function BookPage() {
   const [email, setEmail] = useState('')
   const [company, setCompany] = useState('')
   const [topic, setTopic] = useState('')
+  const [website, setWebsite] = useState('')
   const [status, setStatus] = useState<string | null>(null)
   const [confirmation, setConfirmation] = useState<BookingConfirmation | null>(
     null,
@@ -204,6 +209,7 @@ function BookPage() {
           company,
           topic,
           timezone,
+          website,
         },
       })
       if (selectedSlot) {
@@ -216,12 +222,14 @@ function BookPage() {
           company,
           topic,
           timezone,
+          website,
         })
       }
       setName('')
       setEmail('')
       setCompany('')
       setTopic('')
+      setWebsite('')
     } catch (error) {
       setStatus(
         error instanceof Error
@@ -280,6 +288,16 @@ function BookPage() {
               value={topic}
               onChange={(event) => setTopic(event.target.value)}
               className="mt-1 min-h-28 w-full rounded-md border border-[var(--line)] bg-[var(--surface)] px-3 py-2"
+            />
+          </label>
+
+          <label className="sr-only" aria-hidden="true">
+            Website
+            <input
+              tabIndex={-1}
+              autoComplete="off"
+              value={website}
+              onChange={(event) => setWebsite(event.target.value)}
             />
           </label>
 
