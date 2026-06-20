@@ -16,7 +16,6 @@ const FREE_EMAIL_DOMAINS = new Set([
   'mail.com',
   'me.com',
   'msn.com',
-  'outlook.com',
   'pm.me',
   'proton.me',
   'protonmail.com',
