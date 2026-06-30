@@ -86,6 +86,17 @@ describe('booking spam guard', () => {
     ).toThrow('Please email troy.magennis@focusedobjective.com directly.')
   })
 
+  it('allows outlook.com booking email addresses', () => {
+    expect(() =>
+      assertBookingRequestAllowed(
+        bookingSchema.parse({
+          ...baseBooking,
+          email: 'person@outlook.com',
+        }),
+      ),
+    ).not.toThrow()
+  })
+
   it('can disable or override free email blocking', () => {
     process.env.BOOKING_ALLOWED_FREE_EMAIL_DOMAINS = 'yahoo.com'
 
