@@ -231,11 +231,8 @@ function BookPage() {
       setTopic('')
       setWebsite('')
     } catch (error) {
-      setStatus(
-        error instanceof Error
-          ? error.message
-          : 'Could not submit your booking request.',
-      )
+      console.error(error)
+      setStatus(getBookingSubmitErrorMessage(error))
     } finally {
       setIsSubmitting(false)
     }
@@ -459,6 +456,19 @@ function BookPage() {
       ) : null}
     </main>
   )
+}
+
+function getBookingSubmitErrorMessage(error: unknown) {
+  const message = error instanceof Error ? error.message : ''
+  if (
+    message === 'The selected slot is no longer available.' ||
+    message.startsWith('Too many booking attempts.') ||
+    message.startsWith('We could not accept this booking request.')
+  ) {
+    return message
+  }
+
+  return 'Could not book this meeting. Please email troy.magennis@focusedobjective.com directly.'
 }
 
 function BookingConfirmationDialog({

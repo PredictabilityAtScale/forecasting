@@ -14,6 +14,7 @@ import {
 let bundledEnvLoaded = false
 const BOOKING_BUFFER_MS = 30 * 60 * 1000
 const ENV_FILE_NAMES = ['.env.local', '.env', '.env.production'] as const
+const ZOOM_MEETING_TOPIC_MAX_LENGTH = 200
 
 type FreeBusyCalendar = {
   busy?: Array<{ start: string; end: string }>
@@ -160,7 +161,7 @@ export async function createZoomMeeting({
       start_time: start,
       duration: durationMinutes,
       timezone: 'UTC',
-      agenda: `Requested by ${attendeeName} (${attendeeEmail})`,
+      agenda: getZoomMeetingAgenda({ attendeeName, attendeeEmail, topic }),
       settings: {
         join_before_host: false,
         waiting_room: true,
@@ -651,7 +652,39 @@ function buildMeetingDescription({
 
 function getZoomMeetingTopic(topic?: string) {
   const trimmed = topic?.trim()
-  return trimmed ? `Focused Objective: ${trimmed}` : 'Focused Objective meeting'
+  const zoomTopic = trimmed
+    ? `Focused Objective: ${trimmed}`
+    : 'Focused Objective meeting'
+
+  return truncateText(zoomTopic, ZOOM_MEETING_TOPIC_MAX_LENGTH)
+}
+
+function getZoomMeetingAgenda({
+  attendeeName,
+  attendeeEmail,
+  topic,
+}: {
+  attendeeName: string
+  attendeeEmail: string
+  topic?: string
+}) {
+  const lines = [`Requested by ${attendeeName} (${attendeeEmail})`]
+  const trimmedTopic = topic?.trim()
+
+  if (trimmedTopic) {
+    lines.push('', `Topic: ${trimmedTopic}`)
+  }
+
+  return lines.join('\n')
+}
+
+function truncateText(value: string, maxLength: number) {
+  const characters = Array.from(value)
+  if (characters.length <= maxLength) {
+    return value
+  }
+
+  return `${characters.slice(0, maxLength - 3).join('').trimEnd()}...`
 }
 
 function escapeHtml(value: string) {

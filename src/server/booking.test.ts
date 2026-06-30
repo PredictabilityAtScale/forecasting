@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   cancelBookingFromToken,
   createGoogleCalendarInvite,
+  createZoomMeeting,
   getOpenBookingSlotsWithinRange,
 } from './booking'
 import { createBookingLinkToken } from './booking-links'
@@ -173,6 +174,49 @@ describe('booking invites', () => {
     }
 
     originalEnv.clear()
+  })
+
+  it('limits long submitted topics before creating Zoom meetings', async () => {
+    process.env.ZOOM_ACCOUNT_ID = 'zoom-account'
+    process.env.ZOOM_CLIENT_ID = 'zoom-client'
+    process.env.ZOOM_CLIENT_SECRET = 'zoom-secret'
+
+    const longTopic = 'Discuss secure AI connected to legal workflows. '.repeat(
+      10,
+    )
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse({ access_token: 'zoom-token' }))
+      .mockResolvedValueOnce(
+        jsonResponse({
+          id: 123456789,
+          join_url: 'https://us02web.zoom.us/j/123456789?pwd=abc',
+        }),
+      )
+    vi.stubGlobal('fetch', fetchMock)
+
+    await createZoomMeeting({
+      topic: longTopic,
+      start: '2026-05-04T22:00:00.000Z',
+      end: '2026-05-04T23:00:00.000Z',
+      attendeeName: 'Dimitri Ponomareff',
+      attendeeEmail: 'dimitri@example.com',
+    })
+
+    const createBody = JSON.parse(
+      fetchMock.mock.calls[1][1].body as string,
+    ) as {
+      topic?: string
+      agenda?: string
+    }
+
+    expect(createBody.topic).toHaveLength(200)
+    expect(createBody.topic).toMatch(/^Focused Objective: /)
+    expect(createBody.topic).toMatch(/\.\.\.$/)
+    expect(createBody.agenda).toContain(
+      'Requested by Dimitri Ponomareff (dimitri@example.com)',
+    )
+    expect(createBody.agenda).toContain(`Topic: ${longTopic.trim()}`)
   })
 
   it('adds Zoom as conference data instead of a map location', async () => {
