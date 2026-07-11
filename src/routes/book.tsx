@@ -85,7 +85,7 @@ function BookRouteShell() {
   return pathname === '/book' ? <BookPage /> : <Outlet />
 }
 
-function BookPage() {
+export function BookPage({ embedded = false }: { embedded?: boolean }) {
   const [durationMinutes, setDurationMinutes] =
     useState<BookingDurationMinutes>(30)
   const [slotId, setSlotId] = useState('')
@@ -239,8 +239,18 @@ function BookPage() {
   }
 
   return (
-    <main className="mx-auto max-w-4xl px-4 pb-16 pt-10 sm:px-6 lg:px-8">
-      <section className="island-shell rounded-3xl px-6 py-8 sm:px-8 sm:py-10">
+    <main
+      className={
+        embedded
+          ? 'mx-auto max-w-4xl p-3 sm:p-4'
+          : 'mx-auto max-w-4xl px-4 pb-16 pt-10 sm:px-6 lg:px-8'
+      }
+    >
+      <section
+        className={`island-shell px-6 py-8 sm:px-8 sm:py-10 ${
+          embedded ? 'rounded-2xl' : 'rounded-3xl'
+        }`}
+      >
         <p className="island-kicker mb-3">Book time</p>
         <h1 className="display-title mb-3 text-3xl leading-tight font-semibold tracking-tight text-[var(--sea-ink)] sm:text-4xl">
           Schedule a Zoom call

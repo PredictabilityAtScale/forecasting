@@ -2,6 +2,7 @@ import {
   HeadContent,
   Scripts,
   createRootRouteWithContext,
+  useRouterState,
 } from '@tanstack/react-router'
 import Footer from '../components/Footer'
 import Header from '../components/Header'
@@ -59,6 +60,10 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 })
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  const isEmbeddedBooking = useRouterState({
+    select: (state) => state.location.pathname === '/bookembed',
+  })
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -73,16 +78,24 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           fontFamily: "'Manrope', ui-sans-serif, system-ui, sans-serif",
         }}
       >
-        <div
-          className="flex min-h-screen flex-col"
-          style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}
-        >
-          <Header />
-          <div className="flex-1" style={{ flex: '1 1 0%' }}>
-            {children}
+        {isEmbeddedBooking ? (
+          children
+        ) : (
+          <div
+            className="flex min-h-screen flex-col"
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              minHeight: '100vh',
+            }}
+          >
+            <Header />
+            <div className="flex-1" style={{ flex: '1 1 0%' }}>
+              {children}
+            </div>
+            <Footer />
           </div>
-          <Footer />
-        </div>
+        )}
         <Scripts />
       </body>
     </html>
