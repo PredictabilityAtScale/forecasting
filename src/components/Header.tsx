@@ -322,12 +322,14 @@ export default function Header() {
             </div>
           </div>
 
-          <Link
-            to="/courses"
+          <a
+            href="https://learn.focusedobjective.com"
+            target="_blank"
+            rel="noopener noreferrer"
             className="nav-link rounded-lg px-3 py-2 text-sm font-semibold no-underline"
           >
-            Free Training
-          </Link>
+            Training ↗
+          </a>
           <Link
             to="/articles"
             className="nav-link rounded-lg px-3 py-2 text-sm font-semibold no-underline"
@@ -347,13 +349,14 @@ export default function Header() {
 
         {/* Mobile hamburger */}
         <div className="flex items-center gap-2 md:hidden">
-          <Link
-            to="/courses"
+          <a
+            href="https://learn.focusedobjective.com"
+            target="_blank"
+            rel="noopener noreferrer"
             className="mt-2 block rounded-lg px-3 py-2.5 text-sm font-semibold text-[var(--sea-ink-soft)] no-underline transition hover:bg-[var(--link-bg-hover)] hover:text-[var(--sea-ink)]"
-            onClick={closeMobileMenu}
           >
-            Free Training
-          </Link>
+            Training ↗
+          </a>
           <ColorThemePicker />
           <ThemeToggle />
           <button
@@ -427,13 +430,14 @@ export default function Header() {
             onToggle={() => setMobileMetricResourcesOpen((current) => !current)}
             onNavigate={closeMobileMenu}
           />
-          <Link
-            to="/courses"
+          <a
+            href="https://learn.focusedobjective.com"
+            target="_blank"
+            rel="noopener noreferrer"
             className={mobileMenuLinkClassName}
-            onClick={closeMobileMenu}
           >
-            Free Training
-          </Link>
+            Training ↗
+          </a>
           <Link
             to="/articles"
             className={mobileMenuLinkClassName}

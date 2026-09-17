@@ -25,6 +25,7 @@ export const Route = createFileRoute('/courses/$courseSlug/')({
     return {
       meta: [
         { title },
+        { name: 'robots', content: 'noindex, nofollow' },
         { name: 'description', content: course.description },
         { property: 'og:title', content: title },
         { property: 'og:description', content: course.description },

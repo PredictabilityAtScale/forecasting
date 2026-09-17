@@ -1,45 +1,54 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import NewsletterSignup from '#/components/NewsletterSignup'
+import { TRAINING_URL } from '#/lib/site'
 
 const MAIN_COURSES = [
   {
     title: 'Agile Physics - The Math of Flow',
     description:
       'Short explanations of how and why to apply math, probability, and statistics in Agile development.',
-    price: 'Free',
-    href: '/courses/agile-physics',
+    price: '$495',
+    href: 'https://learn.focusedobjective.com/courses/agile-physics-the-math-of-flow',
     image: '/images/iFKveizWTQKaD8If0uAm_Scientific-Formulas.jpg',
   },
   {
     title: 'Dependency Management - capture, fix, and avoid',
     description:
       'A deep-dive workshop teaching practical ways to capture, plan, and eliminate cross-team dependencies.',
-    price: 'Free',
-    href: '/courses/dependency-management',
+    price: '$495',
+    href: 'https://learn.focusedobjective.com/courses/dependency-management',
     image: '/images/71RnNqTuQByHazE9WxXl_gotdependencies_fo.png',
   },
   {
     title: 'Self-paced: Data-Driven Improvement and Outcomes',
     description:
       'Learn to optimize team performance and achieve targeted outcomes with practical, data-driven techniques.',
-    price: 'Free',
-    href: '/courses/data-driven-improvement',
+    price: '$495',
+    href: 'https://learn.focusedobjective.com/courses/data-driven-improvement',
     image: '/images/FtjU4y5eRke8yzY5nxCD_course%20image.jpg',
+  },
+  {
+    title: 'All Power Sessions (current & future)',
+    description:
+      'Access all Power Session courses with actionable lessons to get up and running quickly.',
+    price: '$99',
+    href: 'https://learn.focusedobjective.com/bundles/all-power-sessions',
+    image: '/images/OUiq9cx6RSuMJqhvbZzM_all%20power%20sessions.png',
   },
   {
     title: 'Using the Monte Carlo Forecasting Spreadsheets',
     description:
       'Learn how to use the forecasting spreadsheets to improve planning confidence and delivery predictability.',
-    price: 'Free',
-    href: '/courses/monte-carlo-spreadsheets',
+    price: '$75',
+    href: 'https://learn.focusedobjective.com/courses/using-the-monte-carlo-forecasting-spreadsheets',
     image: '/images/lDj2J2QSqmc4VM8cze9w_six.png',
   },
   {
     title: 'Using the Team Dashboard Spreadsheet',
     description:
       'Use the Team Dashboard spreadsheet to track flow metrics without maintenance overhead.',
-    price: 'Free',
-    href: '/courses/team-dashboard-spreadsheet',
+    price: '$75',
+    href: 'https://learn.focusedobjective.com/courses/using-the-team-dashboard-spreadsheet',
     image: '/images/vyrZfbZSaqpLjLCwN85b_course%20image.png',
   },
 ] as const
@@ -139,12 +148,14 @@ function App() {
           </div>
 
           <div className="mt-8 flex justify-start">
-            <Link
-              to="/courses"
+            <a
+              href="https://learn.focusedobjective.com/collections"
+              target="_blank"
+              rel="noopener noreferrer"
               className="rounded-full border border-[rgba(50,143,151,0.3)] bg-[rgba(79,184,178,0.14)] px-6 py-2.5 text-sm font-semibold text-[var(--lagoon-deep)] no-underline transition hover:-translate-y-0.5 hover:bg-[rgba(79,184,178,0.24)]"
             >
-              Browse all free courses
-            </Link>
+              View more courses
+            </a>
           </div>
         </div>
       </section>
@@ -592,19 +603,21 @@ function App() {
               probabilistic forecasting in your organisation. Workshops and
               coaching from the team behind these tools.
             </p>
-            <Link
-              to="/courses"
+            <a
+              href={TRAINING_URL}
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 rounded-full border border-[rgba(50,143,151,0.3)] bg-[rgba(79,184,178,0.14)] px-6 py-2.5 text-sm font-semibold text-[var(--lagoon-deep)] no-underline transition hover:-translate-y-0.5 hover:bg-[rgba(79,184,178,0.24)]"
             >
-              Browse free courses
+              Visit focusedobjective.com
               <svg
                 className="h-3.5 w-3.5"
                 viewBox="0 0 16 16"
                 fill="currentColor"
               >
-                <path d="M6.22 3.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L9.94 8 6.22 4.28a.75.75 0 0 1 0-1.06Z" />
+                <path d="M4.5 2a.5.5 0 0 0 0 1h6.793L2.146 12.146a.5.5 0 0 0 .708.708L12 3.707V10.5a.5.5 0 0 0 1 0v-9a.5.5 0 0 0-.5-.5h-8Z" />
               </svg>
-            </Link>
+            </a>
           </div>
         </div>
       </section>

@@ -20,6 +20,7 @@ export const Route = createFileRoute('/courses/$courseSlug/$lessonSlug')({
     return {
       meta: [
         { title },
+        { name: 'robots', content: 'noindex, nofollow' },
         { name: 'description', content: lesson.summary },
         { property: 'og:title', content: title },
         { property: 'og:description', content: lesson.summary },
