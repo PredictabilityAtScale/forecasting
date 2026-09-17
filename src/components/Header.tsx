@@ -132,7 +132,12 @@ function DesktopResourceSubmenu({
         aria-haspopup="menu"
       >
         {label}
-        <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+        <svg
+          className="h-3.5 w-3.5"
+          viewBox="0 0 16 16"
+          fill="currentColor"
+          aria-hidden="true"
+        >
           <path d="M5.97 12.78a.75.75 0 0 1 0-1.06L9.69 8 5.97 4.28a.75.75 0 1 1 1.06-1.06l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0Z" />
         </svg>
       </button>
@@ -226,8 +231,10 @@ function MobileResourceSubmenu({
 
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [mobileForecastingResourcesOpen, setMobileForecastingResourcesOpen] = useState(false)
-  const [mobileMetricResourcesOpen, setMobileMetricResourcesOpen] = useState(false)
+  const [mobileForecastingResourcesOpen, setMobileForecastingResourcesOpen] =
+    useState(false)
+  const [mobileMetricResourcesOpen, setMobileMetricResourcesOpen] =
+    useState(false)
 
   function closeMobileMenu() {
     setMobileOpen(false)
@@ -272,7 +279,12 @@ export default function Header() {
               aria-haspopup="menu"
             >
               Forecasting Tools
-              <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+              <svg
+                className="h-3.5 w-3.5"
+                viewBox="0 0 16 16"
+                fill="currentColor"
+                aria-hidden="true"
+              >
                 <path d="M3.22 5.97a.75.75 0 0 1 1.06 0L8 9.69l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L3.22 7.03a.75.75 0 0 1 0-1.06Z" />
               </svg>
             </button>
@@ -292,7 +304,12 @@ export default function Header() {
               aria-haspopup="menu"
             >
               Metric Tools
-              <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+              <svg
+                className="h-3.5 w-3.5"
+                viewBox="0 0 16 16"
+                fill="currentColor"
+                aria-hidden="true"
+              >
                 <path d="M3.22 5.97a.75.75 0 0 1 1.06 0L8 9.69l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L3.22 7.03a.75.75 0 0 1 0-1.06Z" />
               </svg>
             </button>
@@ -305,14 +322,12 @@ export default function Header() {
             </div>
           </div>
 
-          <a
-            href="https://learn.focusedobjective.com"
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            to="/courses"
             className="nav-link rounded-lg px-3 py-2 text-sm font-semibold no-underline"
           >
-            Training ↗
-          </a>
+            Free Training
+          </Link>
           <Link
             to="/articles"
             className="nav-link rounded-lg px-3 py-2 text-sm font-semibold no-underline"
@@ -332,16 +347,13 @@ export default function Header() {
 
         {/* Mobile hamburger */}
         <div className="flex items-center gap-2 md:hidden">
-
-          <a
-            href="https://learn.focusedobjective.com"
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            to="/courses"
             className="mt-2 block rounded-lg px-3 py-2.5 text-sm font-semibold text-[var(--sea-ink-soft)] no-underline transition hover:bg-[var(--link-bg-hover)] hover:text-[var(--sea-ink)]"
             onClick={closeMobileMenu}
           >
-            Training ↗
-          </a>
+            Free Training
+          </Link>
           <ColorThemePicker />
           <ThemeToggle />
           <button
@@ -350,12 +362,28 @@ export default function Header() {
             aria-label="Toggle menu"
           >
             {mobileOpen ? (
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              >
                 <line x1="18" y1="6" x2="6" y2="18" />
                 <line x1="6" y1="6" x2="18" y2="18" />
               </svg>
             ) : (
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              >
                 <line x1="3" y1="6" x2="21" y2="6" />
                 <line x1="3" y1="12" x2="21" y2="12" />
                 <line x1="3" y1="18" x2="21" y2="18" />
@@ -371,19 +399,27 @@ export default function Header() {
           <p className="px-3 pb-1 pt-2 text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--sea-ink-soft)]">
             Forecasting Tools
           </p>
-          <MobileInternalLinks links={forecastingLinks} onNavigate={closeMobileMenu} />
+          <MobileInternalLinks
+            links={forecastingLinks}
+            onNavigate={closeMobileMenu}
+          />
           <MobileResourceSubmenu
             label="Forecasting Spreadsheets & Articles"
             links={forecastingResourceLinks}
             open={mobileForecastingResourcesOpen}
-            onToggle={() => setMobileForecastingResourcesOpen((current) => !current)}
+            onToggle={() =>
+              setMobileForecastingResourcesOpen((current) => !current)
+            }
             onNavigate={closeMobileMenu}
           />
 
           <p className="px-3 pb-1 pt-3 text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--sea-ink-soft)]">
             Metric Tools
           </p>
-          <MobileInternalLinks links={metricLinks} onNavigate={closeMobileMenu} />
+          <MobileInternalLinks
+            links={metricLinks}
+            onNavigate={closeMobileMenu}
+          />
           <MobileResourceSubmenu
             label="Metrics Spreadsheets & Articles"
             links={metricResourceLinks}
@@ -391,15 +427,13 @@ export default function Header() {
             onToggle={() => setMobileMetricResourcesOpen((current) => !current)}
             onNavigate={closeMobileMenu}
           />
-          <a
-            href="https://learn.focusedobjective.com"
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            to="/courses"
             className={mobileMenuLinkClassName}
             onClick={closeMobileMenu}
           >
-            Training ↗
-          </a>
+            Free Training
+          </Link>
           <Link
             to="/articles"
             className={mobileMenuLinkClassName}

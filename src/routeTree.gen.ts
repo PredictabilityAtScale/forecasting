@@ -27,8 +27,11 @@ import { Route as BookembedRouteImport } from './routes/bookembed'
 import { Route as BookRouteImport } from './routes/book'
 import { Route as ArticlesRouteImport } from './routes/articles'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CoursesIndexRouteImport } from './routes/courses.index'
 import { Route as BookManageRouteImport } from './routes/book.manage'
 import { Route as ArticlesSlugRouteImport } from './routes/articles.$slug'
+import { Route as CoursesCourseSlugIndexRouteImport } from './routes/courses.$courseSlug.index'
+import { Route as CoursesCourseSlugLessonSlugRouteImport } from './routes/courses.$courseSlug.$lessonSlug'
 
 const WrongOrderRoute = WrongOrderRouteImport.update({
   id: '/wrong-order',
@@ -120,6 +123,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CoursesIndexRoute = CoursesIndexRouteImport.update({
+  id: '/courses/',
+  path: '/courses/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BookManageRoute = BookManageRouteImport.update({
   id: '/manage',
   path: '/manage',
@@ -130,6 +138,17 @@ const ArticlesSlugRoute = ArticlesSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => ArticlesRoute,
 } as any)
+const CoursesCourseSlugIndexRoute = CoursesCourseSlugIndexRouteImport.update({
+  id: '/courses/$courseSlug/',
+  path: '/courses/$courseSlug/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoursesCourseSlugLessonSlugRoute =
+  CoursesCourseSlugLessonSlugRouteImport.update({
+    id: '/courses/$courseSlug/$lessonSlug',
+    path: '/courses/$courseSlug/$lessonSlug',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -152,6 +171,9 @@ export interface FileRoutesByFullPath {
   '/wrong-order': typeof WrongOrderRoute
   '/articles/$slug': typeof ArticlesSlugRoute
   '/book/manage': typeof BookManageRoute
+  '/courses/': typeof CoursesIndexRoute
+  '/courses/$courseSlug/$lessonSlug': typeof CoursesCourseSlugLessonSlugRoute
+  '/courses/$courseSlug/': typeof CoursesCourseSlugIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -174,6 +196,9 @@ export interface FileRoutesByTo {
   '/wrong-order': typeof WrongOrderRoute
   '/articles/$slug': typeof ArticlesSlugRoute
   '/book/manage': typeof BookManageRoute
+  '/courses': typeof CoursesIndexRoute
+  '/courses/$courseSlug/$lessonSlug': typeof CoursesCourseSlugLessonSlugRoute
+  '/courses/$courseSlug': typeof CoursesCourseSlugIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -197,6 +222,9 @@ export interface FileRoutesById {
   '/wrong-order': typeof WrongOrderRoute
   '/articles/$slug': typeof ArticlesSlugRoute
   '/book/manage': typeof BookManageRoute
+  '/courses/': typeof CoursesIndexRoute
+  '/courses/$courseSlug/$lessonSlug': typeof CoursesCourseSlugLessonSlugRoute
+  '/courses/$courseSlug/': typeof CoursesCourseSlugIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -221,6 +249,9 @@ export interface FileRouteTypes {
     | '/wrong-order'
     | '/articles/$slug'
     | '/book/manage'
+    | '/courses/'
+    | '/courses/$courseSlug/$lessonSlug'
+    | '/courses/$courseSlug/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -243,6 +274,9 @@ export interface FileRouteTypes {
     | '/wrong-order'
     | '/articles/$slug'
     | '/book/manage'
+    | '/courses'
+    | '/courses/$courseSlug/$lessonSlug'
+    | '/courses/$courseSlug'
   id:
     | '__root__'
     | '/'
@@ -265,6 +299,9 @@ export interface FileRouteTypes {
     | '/wrong-order'
     | '/articles/$slug'
     | '/book/manage'
+    | '/courses/'
+    | '/courses/$courseSlug/$lessonSlug'
+    | '/courses/$courseSlug/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -286,6 +323,9 @@ export interface RootRouteChildren {
   ThroughputRoute: typeof ThroughputRoute
   VotingRoute: typeof VotingRoute
   WrongOrderRoute: typeof WrongOrderRoute
+  CoursesIndexRoute: typeof CoursesIndexRoute
+  CoursesCourseSlugLessonSlugRoute: typeof CoursesCourseSlugLessonSlugRoute
+  CoursesCourseSlugIndexRoute: typeof CoursesCourseSlugIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -416,6 +456,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/courses/': {
+      id: '/courses/'
+      path: '/courses'
+      fullPath: '/courses/'
+      preLoaderRoute: typeof CoursesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/book/manage': {
       id: '/book/manage'
       path: '/manage'
@@ -429,6 +476,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/articles/$slug'
       preLoaderRoute: typeof ArticlesSlugRouteImport
       parentRoute: typeof ArticlesRoute
+    }
+    '/courses/$courseSlug/': {
+      id: '/courses/$courseSlug/'
+      path: '/courses/$courseSlug'
+      fullPath: '/courses/$courseSlug/'
+      preLoaderRoute: typeof CoursesCourseSlugIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/courses/$courseSlug/$lessonSlug': {
+      id: '/courses/$courseSlug/$lessonSlug'
+      path: '/courses/$courseSlug/$lessonSlug'
+      fullPath: '/courses/$courseSlug/$lessonSlug'
+      preLoaderRoute: typeof CoursesCourseSlugLessonSlugRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -474,6 +535,9 @@ const rootRouteChildren: RootRouteChildren = {
   ThroughputRoute: ThroughputRoute,
   VotingRoute: VotingRoute,
   WrongOrderRoute: WrongOrderRoute,
+  CoursesIndexRoute: CoursesIndexRoute,
+  CoursesCourseSlugLessonSlugRoute: CoursesCourseSlugLessonSlugRoute,
+  CoursesCourseSlugIndexRoute: CoursesCourseSlugIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
