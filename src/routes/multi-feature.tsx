@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { z } from 'zod'
-import { runMultiFeatureForecaster } from '#/lib/monte-carlo'
+import { parseThroughputSamples, runMultiFeatureForecaster } from '#/lib/monte-carlo'
 import type { MultiFeatureInputs, MultiFeatureResults, Feature } from '#/lib/monte-carlo'
 import Field from '#/components/Field'
 import NumberInput from '#/components/NumberInput'
@@ -522,10 +522,7 @@ function MultiFeatureForecasterPage() {
     const timer = setTimeout(() => {
       const dur = DURATION_OPTIONS[durationIdx]
       const focus = FOCUS_OPTIONS[focusIdx]
-      const samples = samplesText
-        .split(/[\n,]+/)
-        .map((s) => Number(s.trim()))
-        .filter((n) => !isNaN(n) && n > 0)
+      const samples = parseThroughputSamples(samplesText)
 
       const activeFeatures: Feature[] = features
         .filter((f) => f.storyLow > 0 || f.storyHigh > 0)
@@ -861,13 +858,13 @@ function MultiFeatureForecasterPage() {
                         {results && res && (
                           <>
                             <td className="px-2 py-1 text-right font-mono">
-                              {res.intervalsAtLikelihood ?? '—'}
+                              {res.intervalsAtLikelihood ?? '>104'}
                             </td>
                             <td className="px-2 py-1 text-right">
                               <span
                                 className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${statusClasses(res.status)}`}
                               >
-                                {res.forecastDate ?? '—'}
+                                {res.forecastDate ?? 'Beyond forecast horizon'}
                               </span>
                             </td>
                           </>
@@ -977,7 +974,7 @@ function MultiFeatureForecasterPage() {
                       {f.name}
                     </span>
                     <div className="relative flex-1 h-5 rounded bg-[var(--line)]">
-                      <GanttBar
+                      {f.intervalsAtLikelihood != null ? <GanttBar
                         intervals={f.intervalsAtLikelihood ?? 0}
                         maxIntervals={Math.max(
                           ...results.features.map(
@@ -985,10 +982,10 @@ function MultiFeatureForecasterPage() {
                           ),
                         )}
                         status={f.status}
-                      />
+                      /> : <span className="px-2">Beyond 104 intervals</span>}
                     </div>
                     <span className="w-20 text-right text-[var(--sea-ink-soft)]">
-                      {f.forecastDate}
+                      {f.forecastDate ?? 'Beyond horizon'}
                     </span>
                   </div>
                 ))}

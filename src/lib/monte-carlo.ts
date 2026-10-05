@@ -9,6 +9,16 @@
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
+/** Parse historical throughput, retaining zero-delivery periods but not blanks. */
+export function parseThroughputSamples(text: string): number[] {
+  return text
+    .split(/[\n,]+/)
+    .map((sample) => sample.trim())
+    .filter((sample) => sample !== '')
+    .map(Number)
+    .filter((sample) => Number.isFinite(sample) && sample >= 0)
+}
+
 /** Inclusive random integer [low, high]. */
 function randBetween(low: number, high: number): number {
   return Math.floor(Math.random() * (high - low + 1)) + low
@@ -85,6 +95,7 @@ export interface ThroughputForecasterResults {
     likelihood: number
     weeks: number
     date: string | null
+    exceedsHorizon: boolean
   }[]
   /** For the "story count in N weeks" forecast */
   storyCountPercentiles: { likelihood: number; count: number }[]
@@ -94,6 +105,8 @@ export interface ThroughputForecasterResults {
   totalThroughputRaw: number[]
   /** Histogram data for the completion chart */
   completionHistogram: { week: number; count: number }[]
+  unfinishedTrials: number
+  maxPeriods: number
 }
 
 export function runThroughputForecaster(
@@ -124,6 +137,7 @@ export function runThroughputForecaster(
   const adjHigh = Math.round(storyCountHigh * complexityHighMultiplier)
 
   const weeksToZero: number[] = []
+  const completedWeeks: number[] = []
   const totalThroughput: number[] = [] // sum of throughput in weeksToForecast
 
   for (let t = 0; t < numTrials; t++) {
@@ -161,6 +175,7 @@ export function runThroughputForecaster(
       }
     }
     weeksToZero.push(weeksToComplete)
+    if (remaining <= 0) completedWeeks.push(weeksToComplete)
 
     // 3. Throughput total in weeksToForecast periods (for story count mode)
     let sumTp = 0
@@ -175,7 +190,7 @@ export function runThroughputForecaster(
       )
       // Divide by random split rate to get pre-split stories
       const splitDiv = randFloat(splitRateLow, splitRateHigh)
-      sumTp += Math.max(1, tp / splitDiv)
+      sumTp += Math.max(0, tp / splitDiv)
     }
     totalThroughput.push(sumTp)
   }
@@ -189,9 +204,10 @@ export function runThroughputForecaster(
   const startDt = startDate ? new Date(startDate) : null
 
   const completionPercentiles = likelihoods.map((l) => {
+    const exceedsHorizon = l > completedWeeks.length / numTrials
     const weeks = Math.ceil(percentile(weeksToZero, l))
     let date: string | null = null
-    if (startDt) {
+    if (startDt && !exceedsHorizon) {
       const d = new Date(startDt)
       d.setDate(d.getDate() + weeks * daysPerUnit)
       date = d.toLocaleDateString('en-US', {
@@ -200,7 +216,7 @@ export function runThroughputForecaster(
         day: 'numeric',
       })
     }
-    return { likelihood: l, weeks, date }
+    return { likelihood: l, weeks, date, exceedsHorizon }
   })
 
   // Percentiles for story count (inverted – report at 95%, 85%, 5%)
@@ -212,7 +228,7 @@ export function runThroughputForecaster(
 
   // Histogram for completion weeks
   const histMap = new Map<number, number>()
-  for (const w of weeksToZero) {
+  for (const w of completedWeeks) {
     histMap.set(w, (histMap.get(w) ?? 0) + 1)
   }
   const completionHistogram = Array.from(histMap.entries())
@@ -225,6 +241,8 @@ export function runThroughputForecaster(
     weeksToZeroRaw: weeksToZero,
     totalThroughputRaw: totalThroughput,
     completionHistogram,
+    unfinishedTrials: numTrials - completedWeeks.length,
+    maxPeriods,
   }
 }
 
@@ -278,6 +296,7 @@ export interface MultiFeatureInputs {
 
 export interface MultiFeatureResult {
   name: string
+  unfinishedTrials: number
   intervalsAtLikelihood: number | null
   forecastDate: string | null
   /** 1 = on/before target, 2 = within 1 period, 3 = after */
@@ -328,6 +347,7 @@ export function runMultiFeatureForecaster(
 
   // rawResults[featureIdx][trialIdx] = number of intervals to complete
   const rawResults: number[][] = activeFeatures.map(() => [])
+  const unfinishedTrials = activeFeatures.map(() => 0)
 
   for (let t = 0; t < numTrials; t++) {
     // 1. Random split rate for this trial
@@ -367,13 +387,16 @@ export function runMultiFeatureForecaster(
     for (let fi = 0; fi < activeFeatures.length; fi++) {
       const goal = goals[fi]
       let found = maxPeriods
+      let completed = false
       for (let w = 0; w < maxPeriods; w++) {
         if (cumulativeTp[w] >= goal) {
           found = w + 1 // 1-based
+          completed = true
           break
         }
       }
       rawResults[fi].push(found)
+      if (!completed) unfinishedTrials[fi]++
     }
   }
 
@@ -383,7 +406,16 @@ export function runMultiFeatureForecaster(
   }
 
   // Calculate intervals at target likelihood & forecast dates
-  const featureResults: MultiFeatureResult[] = activeFeatures.map((f, fi) => {
+  const featureResults: MultiFeatureResult[] = activeFeatures.map((f, fi): MultiFeatureResult => {
+    if (targetLikelihood > (numTrials - unfinishedTrials[fi]) / numTrials) {
+      return {
+        name: f.name,
+        unfinishedTrials: unfinishedTrials[fi],
+        intervalsAtLikelihood: null,
+        forecastDate: null,
+        status: 3,
+      }
+    }
     const intervals = Math.ceil(
       percentile(rawResults[fi], targetLikelihood),
     )
@@ -410,6 +442,7 @@ export function runMultiFeatureForecaster(
 
     return {
       name: f.name,
+      unfinishedTrials: unfinishedTrials[fi],
       intervalsAtLikelihood: intervals,
       forecastDate,
       status,

@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useEffect, useCallback } from 'react'
 import { z } from 'zod'
-import { runThroughputForecaster } from '#/lib/monte-carlo'
+import { parseThroughputSamples, runThroughputForecaster } from '#/lib/monte-carlo'
 import type { ThroughputForecasterInputs, ThroughputForecasterResults } from '#/lib/monte-carlo'
 import Field from '#/components/Field'
 import NumberInput from '#/components/NumberInput'
@@ -360,10 +360,7 @@ function ThroughputForecasterPage() {
       const selectedDuration = DURATION_OPTIONS[durationIdx]
 
       // Parse samples
-      const samples = samplesText
-        .split(/[\n,]+/)
-        .map((s) => Number(s.trim()))
-        .filter((n) => !isNaN(n) && n > 0)
+      const samples = parseThroughputSamples(samplesText)
 
       const input: ThroughputForecasterInputs = {
         startDate: startDate || undefined,
@@ -697,6 +694,13 @@ function ThroughputForecasterPage() {
                   <h2 className="mb-3 text-base font-semibold text-[var(--sea-ink)]">
                     Completion Forecast
                   </h2>
+                  {results.unfinishedTrials > 0 && (
+                    <p className="mb-3 text-xs text-[var(--sea-ink-soft)]">
+                      {results.unfinishedTrials} of {numTrials} trials did not finish
+                      within {results.maxPeriods} {dur.label} intervals. Confidence
+                      levels beyond that horizon have no forecast date.
+                    </p>
+                  )}
                   <div className="rounded-xl border border-[var(--line)] overflow-auto">
                     <table className="w-full text-xs">
                       <thead>
@@ -720,11 +724,11 @@ function ThroughputForecasterPage() {
                               {(row.likelihood * 100).toFixed(0)}%
                             </td>
                             <td className="px-3 py-1.5 text-right font-mono">
-                              {row.weeks}
+                              {row.exceedsHorizon ? `>${results.maxPeriods}` : row.weeks}
                             </td>
                             {startDate && (
                               <td className="px-3 py-1.5 text-right">
-                                {row.date}
+                                {row.date ?? 'Beyond forecast horizon'}
                               </td>
                             )}
                           </tr>
