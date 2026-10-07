@@ -4,6 +4,7 @@ import {
   createGoogleCalendarInvite,
   createZoomMeeting,
   getOpenBookingSlotsWithinRange,
+  rescheduleBookingFromToken,
 } from './booking'
 import { createBookingLinkToken } from './booking-links'
 
@@ -358,7 +359,7 @@ describe('booking invites', () => {
   })
 })
 
-describe('booking cancellation', () => {
+describe('booking management', () => {
   const originalEnv = new Map<string, string | undefined>()
 
   beforeEach(() => {
@@ -394,6 +395,95 @@ describe('booking cancellation', () => {
     }
 
     originalEnv.clear()
+  })
+
+  const nextSlot = {
+    start: '2026-05-04T22:00:00.000Z',
+    end: '2026-05-04T22:30:00.000Z',
+  }
+
+  function rescheduleFetchMock() {
+    return vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse({ access_token: 'google-token' }))
+      .mockResolvedValueOnce(
+        jsonResponse({ calendars: { primary: { busy: [] } } }),
+      )
+      .mockResolvedValueOnce(jsonResponse({ access_token: 'google-token' }))
+      .mockResolvedValueOnce(jsonResponse({ access_token: 'zoom-token' }))
+  }
+
+  it('updates Zoom before sending the rescheduled Google invite', async () => {
+    const fetchMock = rescheduleFetchMock()
+      .mockResolvedValueOnce(emptyResponse(204))
+      .mockResolvedValueOnce(emptyResponse(200))
+    vi.stubGlobal('fetch', fetchMock)
+
+    await rescheduleBookingFromToken(createManageToken(), nextSlot)
+
+    expect(fetchMock.mock.calls[4][0]).toBe(
+      'https://api.zoom.us/v2/meetings/123456789',
+    )
+    expect(JSON.parse(fetchMock.mock.calls[4][1].body)).toEqual({
+      start_time: nextSlot.start,
+      duration: 30,
+      timezone: 'UTC',
+    })
+    expect(fetchMock.mock.calls[5][0]).toBe(
+      'https://www.googleapis.com/calendar/v3/calendars/primary/events/google-event-id?sendUpdates=all',
+    )
+    expect(JSON.parse(fetchMock.mock.calls[5][1].body)).toEqual({
+      start: { dateTime: nextSlot.start },
+      end: { dateTime: nextSlot.end },
+    })
+  })
+
+  it('leaves the Google invite unchanged and explains missing Zoom scopes', async () => {
+    const fetchMock = rescheduleFetchMock().mockResolvedValueOnce(
+      jsonResponse(
+        {
+          code: 4711,
+          message:
+            'Invalid access token, does not contain scopes:[meeting:update:meeting:admin, meeting:update:meeting].',
+        },
+        400,
+      ),
+    )
+    vi.stubGlobal('fetch', fetchMock)
+
+    await expect(
+      rescheduleBookingFromToken(createManageToken(), nextSlot),
+    ).rejects.toThrow(
+      'Zoom reschedule failed: add meeting:update:meeting:admin to the Zoom Server-to-Server OAuth app scopes, save the change, and retry. The calendar invite has not been changed.',
+    )
+    expect(fetchMock).toHaveBeenCalledTimes(5)
+  })
+
+  it('preserves other Zoom errors without changing the Google invite', async () => {
+    const fetchMock = rescheduleFetchMock().mockResolvedValueOnce(
+      jsonResponse({ code: 300, message: 'Meeting has started.' }, 400),
+    )
+    vi.stubGlobal('fetch', fetchMock)
+
+    await expect(
+      rescheduleBookingFromToken(createManageToken(), nextSlot),
+    ).rejects.toThrow(
+      'Zoom reschedule failed (400): {"code":300,"message":"Meeting has started."}.',
+    )
+    expect(fetchMock).toHaveBeenCalledTimes(5)
+  })
+
+  it('reports the partial update when Google fails after Zoom succeeds', async () => {
+    const fetchMock = rescheduleFetchMock()
+      .mockResolvedValueOnce(emptyResponse(204))
+      .mockResolvedValueOnce(emptyResponse(500))
+    vi.stubGlobal('fetch', fetchMock)
+
+    await expect(
+      rescheduleBookingFromToken(createManageToken(), nextSlot),
+    ).rejects.toThrow(
+      'Google event reschedule failed (500). Zoom has already been rescheduled; the calendar invite still needs to be updated.',
+    )
   })
 
   it('deletes the Zoom meeting before deleting the Google event', async () => {

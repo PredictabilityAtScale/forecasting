@@ -289,6 +289,7 @@ export async function createGoogleCalendarInvite({
 }
 
 export async function cancelBookingFromToken(token: string) {
+  getEnv('BOOKING_LINK_SECRET')
   const payload = parseBookingLinkToken(token)
   const googleAccessToken = await getGoogleAccessToken()
   const zoomAccessToken = await getZoomAccessToken()
@@ -316,6 +317,7 @@ export async function rescheduleBookingFromToken(
   token: string,
   nextSlot: { start: string; end: string },
 ) {
+  getEnv('BOOKING_LINK_SECRET')
   const payload = parseBookingLinkToken(token)
   const durationMinutes = getSlotDurationMinutes(nextSlot)
   const stillOpen = await getOpenBookingSlotsWithinRange({
@@ -333,24 +335,6 @@ export async function rescheduleBookingFromToken(
   const googleAccessToken = await getGoogleAccessToken()
   const zoomAccessToken = await getZoomAccessToken()
   const calendarId = getEnv('BOOKING_GOOGLE_CALENDAR_ID') ?? 'primary'
-
-  const updateEvent = await fetch(
-    `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events/${encodeURIComponent(payload.googleEventId)}?sendUpdates=all`,
-    {
-      method: 'PATCH',
-      headers: {
-        Authorization: `Bearer ${googleAccessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        start: { dateTime: nextSlot.start },
-        end: { dateTime: nextSlot.end },
-      }),
-    },
-  )
-  if (!updateEvent.ok) {
-    throw new Error(`Google event reschedule failed (${updateEvent.status}).`)
-  }
 
   const duration = Math.max(
     15,
@@ -376,8 +360,34 @@ export async function rescheduleBookingFromToken(
   )
   if (!updateZoom.ok) {
     const message = await readResponseText(updateZoom)
+    if (/"code"\s*:\s*4711\b/.test(message)) {
+      throw new Error(
+        'Zoom reschedule failed: add meeting:update:meeting:admin to the Zoom Server-to-Server OAuth app scopes, save the change, and retry. The calendar invite has not been changed.',
+      )
+    }
     throw new Error(
       `Zoom reschedule failed (${updateZoom.status})${formatErrorDetail(message)}.`,
+    )
+  }
+
+  // Only send updated invites after Zoom accepts the new meeting time.
+  const updateEvent = await fetch(
+    `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events/${encodeURIComponent(payload.googleEventId)}?sendUpdates=all`,
+    {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bearer ${googleAccessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        start: { dateTime: nextSlot.start },
+        end: { dateTime: nextSlot.end },
+      }),
+    },
+  )
+  if (!updateEvent.ok) {
+    throw new Error(
+      `Google event reschedule failed (${updateEvent.status}). Zoom has already been rescheduled; the calendar invite still needs to be updated.`,
     )
   }
 }

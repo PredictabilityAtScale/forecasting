@@ -9,6 +9,26 @@ npm install
 npm run dev
 ```
 
+## Zoom booking permissions
+
+The booking integration uses a Zoom Server-to-Server OAuth app configured with
+`ZOOM_ACCOUNT_ID`, `ZOOM_CLIENT_ID`, and `ZOOM_CLIENT_SECRET`. In Zoom App
+Marketplace, open that app's Scopes page and add the permissions used by booking:
+
+- Create a meeting: `meeting:write:meeting:admin`
+- Update a meeting (reschedule): `meeting:update:meeting:admin`
+- Delete a meeting (cancel): `meeting:delete:meeting:admin`
+
+Save the scope changes and ensure the app is active. The server requests a new
+access token for each operation, so retry after saving; no credential change is
+needed when updating scopes on the same app. Zoom error 4711 means the token is
+missing a required scope. See [Zoom's scope reference](https://developers.zoom.us/docs/internal-apps/oauth-scopes-granular/).
+
+Rescheduling updates Zoom before sending updated Google Calendar invites. A Zoom
+failure leaves the calendar invite untouched. If Google fails after Zoom succeeds,
+the error reports the partial update. For failures from older deployments that
+updated Google first, check both meeting times and correct any mismatch.
+
 # Building For Production
 
 To build this application for production:
