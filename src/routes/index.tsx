@@ -7,7 +7,7 @@ const MAIN_COURSES = [
     title: 'Agile Physics - The Math of Flow',
     description:
       'Short explanations of how and why to apply math, probability, and statistics in Agile development.',
-    price: '$495',
+    label: 'Free',
     href: 'https://learn.focusedobjective.com/courses/agile-physics-the-math-of-flow',
     image: '/images/iFKveizWTQKaD8If0uAm_Scientific-Formulas.jpg',
   },
@@ -15,7 +15,7 @@ const MAIN_COURSES = [
     title: 'Dependency Management - capture, fix, and avoid',
     description:
       'A deep-dive workshop teaching practical ways to capture, plan, and eliminate cross-team dependencies.',
-    price: '$495',
+    label: 'View course',
     href: 'https://learn.focusedobjective.com/courses/dependency-management',
     image: '/images/71RnNqTuQByHazE9WxXl_gotdependencies_fo.png',
   },
@@ -23,7 +23,7 @@ const MAIN_COURSES = [
     title: 'Self-paced: Data-Driven Improvement and Outcomes',
     description:
       'Learn to optimize team performance and achieve targeted outcomes with practical, data-driven techniques.',
-    price: '$495',
+    label: 'View course',
     href: 'https://learn.focusedobjective.com/courses/data-driven-improvement',
     image: '/images/FtjU4y5eRke8yzY5nxCD_course%20image.jpg',
   },
@@ -31,7 +31,7 @@ const MAIN_COURSES = [
     title: 'All Power Sessions (current & future)',
     description:
       'Access all Power Session courses with actionable lessons to get up and running quickly.',
-    price: '$99',
+    label: 'View bundle',
     href: 'https://learn.focusedobjective.com/bundles/all-power-sessions',
     image: '/images/OUiq9cx6RSuMJqhvbZzM_all%20power%20sessions.png',
   },
@@ -39,7 +39,7 @@ const MAIN_COURSES = [
     title: 'Using the Monte Carlo Forecasting Spreadsheets',
     description:
       'Learn how to use the forecasting spreadsheets to improve planning confidence and delivery predictability.',
-    price: '$75',
+    label: 'View course',
     href: 'https://learn.focusedobjective.com/courses/using-the-monte-carlo-forecasting-spreadsheets',
     image: '/images/lDj2J2QSqmc4VM8cze9w_six.png',
   },
@@ -47,7 +47,7 @@ const MAIN_COURSES = [
     title: 'Using the Team Dashboard Spreadsheet',
     description:
       'Use the Team Dashboard spreadsheet to track flow metrics without maintenance overhead.',
-    price: '$75',
+    label: 'View course',
     href: 'https://learn.focusedobjective.com/courses/using-the-team-dashboard-spreadsheet',
     image: '/images/vyrZfbZSaqpLjLCwN85b_course%20image.png',
   },
@@ -139,8 +139,8 @@ function App() {
                   <p className="m-0 flex-1 text-sm leading-relaxed text-[var(--sea-ink-soft)]">
                     {course.description}
                   </p>
-                  <p className="mt-4 text-3xl font-semibold text-[var(--sea-ink)]">
-                    {course.price}
+                  <p className={`mt-4 font-semibold text-[var(--sea-ink)] ${course.label === 'Free' ? 'text-3xl' : 'text-base'}`}>
+                    {course.label}
                   </p>
                 </div>
               </a>
