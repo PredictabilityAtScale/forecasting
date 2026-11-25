@@ -1,5 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import { useEffect, useMemo, useState } from 'react'
+import { COURSE_PRICE_LABEL } from '#/data/course-catalog'
 import type {
   CourseDefinition,
   CourseLesson,
@@ -102,6 +103,9 @@ function CoursePlayerContent({
               >
                 Free course library
               </Link>
+              <span className="text-sm font-semibold text-[var(--sea-ink)]">
+                {COURSE_PRICE_LABEL}
+              </span>
               <span className="text-sm font-semibold text-[var(--sea-ink-soft)]">
                 {lessons.length} lessons · {course.chapters.length} topics
               </span>

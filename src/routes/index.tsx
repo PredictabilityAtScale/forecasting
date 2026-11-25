@@ -1,57 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import NewsletterSignup from '#/components/NewsletterSignup'
-import { TRAINING_URL } from '#/lib/site'
-
-const MAIN_COURSES = [
-  {
-    title: 'Agile Physics - The Math of Flow',
-    description:
-      'Short explanations of how and why to apply math, probability, and statistics in Agile development.',
-    label: 'Free',
-    href: 'https://learn.focusedobjective.com/courses/agile-physics-the-math-of-flow',
-    image: '/images/iFKveizWTQKaD8If0uAm_Scientific-Formulas.jpg',
-  },
-  {
-    title: 'Dependency Management - capture, fix, and avoid',
-    description:
-      'A deep-dive workshop teaching practical ways to capture, plan, and eliminate cross-team dependencies.',
-    label: 'View course',
-    href: 'https://learn.focusedobjective.com/courses/dependency-management',
-    image: '/images/71RnNqTuQByHazE9WxXl_gotdependencies_fo.png',
-  },
-  {
-    title: 'Self-paced: Data-Driven Improvement and Outcomes',
-    description:
-      'Learn to optimize team performance and achieve targeted outcomes with practical, data-driven techniques.',
-    label: 'View course',
-    href: 'https://learn.focusedobjective.com/courses/data-driven-improvement',
-    image: '/images/FtjU4y5eRke8yzY5nxCD_course%20image.jpg',
-  },
-  {
-    title: 'All Power Sessions (current & future)',
-    description:
-      'Access all Power Session courses with actionable lessons to get up and running quickly.',
-    label: 'View bundle',
-    href: 'https://learn.focusedobjective.com/bundles/all-power-sessions',
-    image: '/images/OUiq9cx6RSuMJqhvbZzM_all%20power%20sessions.png',
-  },
-  {
-    title: 'Using the Monte Carlo Forecasting Spreadsheets',
-    description:
-      'Learn how to use the forecasting spreadsheets to improve planning confidence and delivery predictability.',
-    label: 'View course',
-    href: 'https://learn.focusedobjective.com/courses/using-the-monte-carlo-forecasting-spreadsheets',
-    image: '/images/lDj2J2QSqmc4VM8cze9w_six.png',
-  },
-  {
-    title: 'Using the Team Dashboard Spreadsheet',
-    description:
-      'Use the Team Dashboard spreadsheet to track flow metrics without maintenance overhead.',
-    label: 'View course',
-    href: 'https://learn.focusedobjective.com/courses/using-the-team-dashboard-spreadsheet',
-    image: '/images/vyrZfbZSaqpLjLCwN85b_course%20image.png',
-  },
-] as const
+import { COURSE_CATALOG, COURSE_PRICE_LABEL } from '#/data/course-catalog'
 
 const PRODUCT_HIGHLIGHTS = [
   {
@@ -109,21 +58,16 @@ function App() {
               Workshops
             </h1>
             <p className="mx-auto max-w-3xl text-base text-[var(--sea-ink-soft)] sm:text-lg">
-              Self-paced and Instructor-led Masterclass Public Online Workshops
+              Self-paced online courses on flow, forecasting, and metrics
             </p>
           </div>
 
           <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {MAIN_COURSES.map((course) => (
-              <a
-                key={course.href}
-                href={course.href}
-                target={course.href.startsWith('http') ? '_blank' : undefined}
-                rel={
-                  course.href.startsWith('http')
-                    ? 'noopener noreferrer'
-                    : undefined
-                }
+            {COURSE_CATALOG.map((course) => (
+              <Link
+                key={course.slug}
+                to="/courses/$courseSlug"
+                params={{ courseSlug: course.slug }}
                 className="feature-card group flex h-full flex-col overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--surface)] no-underline transition hover:-translate-y-0.5"
               >
                 <img
@@ -139,23 +83,27 @@ function App() {
                   <p className="m-0 flex-1 text-sm leading-relaxed text-[var(--sea-ink-soft)]">
                     {course.description}
                   </p>
-                  <p className={`mt-4 font-semibold text-[var(--sea-ink)] ${course.label === 'Free' ? 'text-3xl' : 'text-base'}`}>
-                    {course.label}
+                  <p className="mt-4 text-3xl font-semibold text-[var(--sea-ink)]">
+                    {COURSE_PRICE_LABEL}
                   </p>
                 </div>
-              </a>
+              </Link>
             ))}
           </div>
 
-          <div className="mt-8 flex justify-start">
-            <a
-              href="https://learn.focusedobjective.com/collections"
-              target="_blank"
-              rel="noopener noreferrer"
+          <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-3">
+            <Link
+              to="/courses"
               className="rounded-full border border-[rgba(50,143,151,0.3)] bg-[rgba(79,184,178,0.14)] px-6 py-2.5 text-sm font-semibold text-[var(--lagoon-deep)] no-underline transition hover:-translate-y-0.5 hover:bg-[rgba(79,184,178,0.24)]"
             >
-              View more courses
-            </a>
+              Browse the course library
+            </Link>
+            <Link
+              to="/contact"
+              className="text-sm font-semibold text-[var(--lagoon-deep)] underline underline-offset-2"
+            >
+              Current course subscriber: Contact Troy for details
+            </Link>
           </div>
         </div>
       </section>
@@ -600,24 +548,22 @@ function App() {
             </h2>
             <p className="mb-4 max-w-xl text-sm leading-relaxed text-[var(--sea-ink-soft)]">
               Learn how to apply Monte Carlo simulation, flow metrics, and
-              probabilistic forecasting in your organisation. Workshops and
-              coaching from the team behind these tools.
+              probabilistic forecasting in your organisation with self-paced
+              courses from the team behind these tools.
             </p>
-            <a
-              href={TRAINING_URL}
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              to="/courses"
               className="inline-flex items-center gap-1.5 rounded-full border border-[rgba(50,143,151,0.3)] bg-[rgba(79,184,178,0.14)] px-6 py-2.5 text-sm font-semibold text-[var(--lagoon-deep)] no-underline transition hover:-translate-y-0.5 hover:bg-[rgba(79,184,178,0.24)]"
             >
-              Visit focusedobjective.com
+              Browse free courses
               <svg
                 className="h-3.5 w-3.5"
                 viewBox="0 0 16 16"
                 fill="currentColor"
               >
-                <path d="M4.5 2a.5.5 0 0 0 0 1h6.793L2.146 12.146a.5.5 0 0 0 .708.708L12 3.707V10.5a.5.5 0 0 0 1 0v-9a.5.5 0 0 0-.5-.5h-8Z" />
+                <path d="M6.22 3.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 1 1-1.06-1.06L9.94 8 6.22 4.28a.75.75 0 0 1 0-1.06Z" />
               </svg>
-            </a>
+            </Link>
           </div>
         </div>
       </section>

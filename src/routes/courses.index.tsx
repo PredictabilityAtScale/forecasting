@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { COURSE_CATALOG } from '#/data/course-catalog'
+import { COURSE_CATALOG, COURSE_PRICE_LABEL } from '#/data/course-catalog'
 import { flattenCourseLessons } from '#/data/course-types'
 import { SITE_URL } from '#/lib/site'
 
@@ -13,7 +13,6 @@ export const Route = createFileRoute('/courses/')({
     return {
       meta: [
         { title },
-        { name: 'robots', content: 'noindex, nofollow' },
         { name: 'description', content: description },
         { property: 'og:title', content: title },
         { property: 'og:description', content: description },
@@ -42,6 +41,12 @@ function CourseLibraryPage() {
             your own pace. No account is required, and lesson progress stays
             privately in your browser.
           </p>
+          <Link
+            to="/contact"
+            className="mt-4 inline-block text-sm font-semibold text-[var(--lagoon-deep)] underline underline-offset-2"
+          >
+            Current course subscriber: Contact Troy for details
+          </Link>
         </div>
       </section>
 
@@ -67,7 +72,7 @@ function CourseLibraryPage() {
                   loading="lazy"
                 />
                 <span className="absolute left-4 top-4 rounded-full bg-[rgba(10,35,40,0.82)] px-3 py-1 text-xs font-bold uppercase tracking-wider text-white backdrop-blur-sm">
-                  Free
+                  {COURSE_PRICE_LABEL}
                 </span>
               </div>
               <div className="flex flex-1 flex-col p-5">

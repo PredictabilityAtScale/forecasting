@@ -7,6 +7,8 @@ import { COURSE_VIDEO_MAPPINGS } from './course-video-mappings'
 import { flattenCourseLessons } from './course-types'
 import type { CourseDefinition } from './course-types'
 
+export const COURSE_PRICE_LABEL = '$0'
+
 const youtubeIdsByLessonArchiveId = new Map(
   COURSE_VIDEO_MAPPINGS.map(({ lessonArchiveId, youtubeId }) => [
     lessonArchiveId,
